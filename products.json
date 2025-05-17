@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Goku Super Saiyajin",
+    "price": 59.99,
+    "description": "Figura de 20cm de altura...",
+    "imageUrl": "https://...",
+    "category": "Dragon Ball",
+    "brand": "Bandai",
+    "stock": 50
+  }
+]
