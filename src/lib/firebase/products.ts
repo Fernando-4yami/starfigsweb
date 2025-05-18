@@ -11,7 +11,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 
-import { db } from './firebase';  // Ya no importamos storage aquí
+import { db } from './firebase';
 
 export interface Product {
   id?: string;
@@ -94,9 +94,6 @@ export async function getProductsByBrand(brandSlug: string): Promise<Product[]> 
   return querySnapshot.docs.map(doc => mapToProduct(doc.id, doc.data()));
 }
 
-/**
- * Llama a la API interna /api/upload para subir la imagen
- */
 export async function uploadImage(file: File): Promise<string> {
   if (!file) throw new Error("No se proporcionó archivo");
 
@@ -113,12 +110,19 @@ export async function uploadImage(file: File): Promise<string> {
   }
 
   const data = await res.json();
-  return data.url as string; // Asegúrate que tu API devuelve { url: string }
+  return data.url as string;
 }
 
 export async function addProduct(product: Omit<Product, 'id'>): Promise<string> {
-  if (!product.name || product.price <= 0) {
-    throw new Error("Nombre y precio son requeridos");
+  // Validación previa
+  if (!product.name || product.name.trim() === '') {
+    throw new Error("El nombre es requerido");
+  }
+  if (typeof product.price !== 'number' || isNaN(product.price) || product.price <= 0) {
+    throw new Error("El precio debe ser un número mayor a cero");
+  }
+  if (typeof product.stock !== 'number' || isNaN(product.stock) || product.stock < 0) {
+    throw new Error("El stock debe ser un número igual o mayor a cero");
   }
 
   const productToAdd: FirestoreProduct = {
@@ -128,8 +132,23 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<string> 
     updatedAt: Timestamp.now()
   };
 
-  const docRef = await addDoc(collection(db, 'products'), productToAdd);
-  return docRef.id;
+  try {
+    const docRef = await addDoc(collection(db, 'products'), productToAdd);
+    return docRef.id;
+  } catch (err: any) {
+    // Imprime el objeto completo (incluye props no enumerables)
+    console.error(
+      'Error firebase al agregar producto (objeto completo):',
+      JSON.stringify(err, Object.getOwnPropertyNames(err), 2)
+    );
+    // Lanza un error con el JSON completo para verlo en frontend
+    throw new Error(
+      `Firebase Error completo: ${JSON.stringify(
+        err,
+        Object.getOwnPropertyNames(err)
+      )}`
+    );
+  }
 }
 
 export const productsService = {

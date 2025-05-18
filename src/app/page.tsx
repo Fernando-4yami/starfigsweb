@@ -1,16 +1,41 @@
-// src/app/page.tsx
 'use client';
-import { useContext } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useCart } from 'app/context/CartContext';
+import type { Product } from '@/lib/firebase/products';
+import productsService from '@/lib/firebase/products';
+import ProductCard from '@/components/ProductCard';
 
 export default function Home() {
-  const { cart } = useCart(); // Usa el hook useCart directamente
+  const { cart } = useCart();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    productsService
+      .getProducts()
+      .then(setProducts)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div>
-      <h1>Bienvenido a Starfigs</h1>
-      <p>Productos en el carrito: {cart.length}</p>
-      {/* Aquí puedes seguir construyendo tu página */}
-    </div>
+    
+    <main className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Bienvenido a Starfigs</h1>
+      <p className="mb-6">Productos en el carrito: {cart.length}</p>
+
+      {loading ? (
+        <p>Cargando productos...</p>
+      ) : products.length === 0 ? (
+        <p>No hay productos para mostrar.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {products.map((p, idx) => (
+            <ProductCard key={p.id ?? idx} product={p} />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

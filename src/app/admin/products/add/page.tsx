@@ -1,104 +1,40 @@
+// src/app/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { productsService } from '@/lib/firebase/products';
+import React, { useEffect, useState } from 'react';
+import { useCart } from 'app/context/CartContext';
+import type { Product } from '@/lib/firebase/products';
+import productsService from '@/lib/firebase/products';
+import ProductCard from '@/components/ProductCard';
 
-export default function AddProductPage() {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [brand, setBrand] = useState('');
-  const [stock, setStock] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+export default function Home() {
+  const { cart } = useCart();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!imageFile) {
-      alert('Por favor selecciona una imagen');
-      return;
-    }
-
-    try {
-      const imageUrl = await productsService.uploadImage(imageFile);
-      await productsService.addProduct({
-        name,
-        price: Number(price),
-        description,
-        category,
-        brand,
-        stock: Number(stock),
-        imageUrl,
-      });
-
-      alert('Producto agregado con éxito');
-      // Limpiar formulario
-      setName('');
-      setPrice('');
-      setDescription('');
-      setCategory('');
-      setBrand('');
-      setStock('');
-      setImageFile(null);
-    } catch (error) {
-      console.error(error);
-      alert('Error al agregar producto');
-    }
-  };
+  useEffect(() => {
+    productsService.getProducts()
+      .then(setProducts)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 400, margin: 'auto' }}>
-      <input
-        type="text"
-        placeholder="Nombre"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Precio"
-        value={price}
-        onChange={e => setPrice(e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Descripción"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Categoría"
-        value={category}
-        onChange={e => setCategory(e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Marca"
-        value={brand}
-        onChange={e => setBrand(e.target.value)}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Stock"
-        value={stock}
-        onChange={e => setStock(e.target.value)}
-        required
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={e => {
-          if (e.target.files) setImageFile(e.target.files[0]);
-        }}
-        required
-      />
-      <button type="submit">Agregar Producto</button>
-    </form>
+    <main className="p-8 max-w-[1400px] mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Bienvenido a Starfigs</h1>
+      <p className="mb-6">Productos en el carrito: {cart.length}</p>
+
+      {loading ? (
+        <p>Cargando productos...</p>
+      ) : products.length === 0 ? (
+        <p>No hay productos para mostrar.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {products.map(p => (
+            <ProductCard key={p.id!} product={p} />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

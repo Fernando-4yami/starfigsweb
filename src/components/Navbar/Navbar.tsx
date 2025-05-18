@@ -1,9 +1,9 @@
 'use client';
-import { useCart } from '@/app/context/CartContext'; // Cambia esta importación
+import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
 
 export default function Navbar() {
-  const { cart } = useCart(); // Usa el hook directamente
+  const { cart } = useCart();
   
   const manufacturers = [
     { id: '1', name: 'Bandai Spirits', slug: 'bandai' },
@@ -44,9 +44,18 @@ export default function Navbar() {
         </div>
       </div>
 
-      <Link href="/carrito" className="text-lg hover:text-blue-600">
-        🛒 ({cart.length})
-      </Link>
+      <div className="flex items-center gap-4">
+        <Link href="/carrito" className="text-lg hover:text-blue-600">
+          🛒 ({cart.length})
+        </Link>
+        {/* Enlace al formulario de agregar producto */}
+        <Link
+          href="/admin/products/add"
+          className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 transition"
+        >
+          Agregar Producto
+        </Link>
+      </div>
     </nav>
-  );
+);
 }
