@@ -1,6 +1,5 @@
-// src/lib/firebase/config.ts
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, Timestamp } from 'firebase/firestore'; // <- Importar Timestamp
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -12,6 +11,8 @@ const firebaseConfig = {
   appId: "1:937714963213:web:279ede7394fc5677811644"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export { Timestamp };  // <- Exportar Timestamp para usar en otros archivos

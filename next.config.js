@@ -7,8 +7,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
         port: '',
-        // Permitimos cualquier ruta tras /o/
-        pathname: '/v0/b/starfigs-29d31.firebasestorage.app/o/**',
+        pathname: '/v0/b/starfigs-29d31.firebasestorage.app/o/*', // Solo un asterisco
       },
     ],
   },

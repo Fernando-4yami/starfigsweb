@@ -1,11 +1,20 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}"
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
+  ],
+  safelist: [
+    'bg-amber-500',
+    'hover:bg-amber-600',
+    'text-red-600',
+    'bg-blue-100',
+    'text-blue-800',
+    'disabled:opacity-60',
   ],
   theme: {
     extend: {},
   },
-  plugins: [],
-};
+  plugins: [
+    require('@tailwindcss/aspect-ratio')
+  ]
+}

@@ -1,67 +1,76 @@
-'use client';
-
-import Image from 'next/image';
 import Link from 'next/link';
-import type { Product } from '@/lib/firebase/products';
+import Image from 'next/image';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Timestamp } from 'firebase/firestore';
+
+interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  imageUrls: string[];
+  price: number;
+  heightCm?: number;
+  createdAt?: Timestamp | null;
+  isNewRelease?: boolean;
+}
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const handleAddToCart = () => {
-    if (onAddToCart) onAddToCart(product);
-  };
+export default function ProductCard({ product }: ProductCardProps) {
+  const now = new Date();
+  const createdAtDate = product.createdAt?.toDate();
+
+  // Mostrar la etiqueta si el producto se lanza en el mes actual o más adelante
+  const showReleaseTag =
+    !!createdAtDate &&
+    (createdAtDate.getFullYear() > now.getFullYear() ||
+      (createdAtDate.getFullYear() === now.getFullYear() &&
+        createdAtDate.getMonth() >= now.getMonth())); // >= incluye el mes actual
+
+  const releaseMonthYear = createdAtDate
+    ? format(createdAtDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
+    : '';
 
   return (
-    <div className="flex flex-col w-full max-w-sm min-w-0 bg-white border border-gray-300 rounded-lg overflow-hidden shadow hover:shadow-md transition">
-      {/* contenedor cuadrado para la imagen */}
-      <Link
-        href={`/products/${product.id}`}
-        className="relative w-full aspect-square"
-      >
-        <Image
-          src={product.imageUrl}
-          alt={product.name}
-          fill
-          className="object-cover"
-          priority
-        />
-      </Link>
-
-      <div className="p-4 flex flex-col flex-grow">
-        <Link href={`/products/${product.id}`}>
-          <h3 className="font-semibold text-lg mb-1 line-clamp-1 hover:underline">
-            {product.name}
-          </h3>
-        </Link>
-
-        {product.description && (
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2 flex-grow">
-            {product.description}
-          </p>
-        )}
-
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-red-600">
-            ${product.price.toFixed(2)}
-          </span>
-          {product.brand && (
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-              {product.brand}
+    <Link
+      href={`/products/${product.slug}`}
+      className="group block text-inherit no-underline"
+    >
+      <div className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
+        <div className="relative w-full" style={{ paddingTop: '100%' }}>
+          {showReleaseTag && (
+            <span className="absolute top-2 left-2 bg-amber-600 text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10">
+              {releaseMonthYear}
             </span>
           )}
+          <Image
+            src={product.imageUrls?.[0] || '/placeholder.png'}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         </div>
 
-        <button
-          onClick={handleAddToCart}
-          className="mt-auto w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded"
-          type="button"
-        >
-          Añadir al carrito
-        </button>
+        <div className="p-4 flex flex-col gap-1">
+          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-2">
+            {product.name}
+          </h3>
+
+          {product.heightCm && (
+            <span className="text-sm text-gray-500">
+              Altura: <strong>{product.heightCm} cm</strong>
+            </span>
+          )}
+
+          <span className="text-red-600 font-bold text-lg">
+            S/. {product.price.toFixed(2)}
+          </span>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

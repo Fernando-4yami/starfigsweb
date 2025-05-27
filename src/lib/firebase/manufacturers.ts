@@ -1,63 +1,42 @@
 import { db } from "./firebase";
 import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 
-interface Manufacturer {
+export interface Manufacturer {
   id: string;
   name: string;
-  slug: string; // Ej: 'bandai-spirits'
+  slug: string;
   logo: string;
-  description?: string; // Campo opcional
+  description?: string;
 }
 
-// Obtener TODOS los fabricantes (para el listado)
 export async function getManufacturers(): Promise<Manufacturer[]> {
   try {
-    const q = query(
-      collection(db, "manufacturers"),
-      orderBy("name") // Orden alfabético
-    );
-    
+    const q = query(collection(db, "manufacturers"), orderBy("name"));
     const snapshot = await getDocs(q);
-    
+
     return snapshot.docs.map(doc => ({
       id: doc.id,
-      name: doc.data().name,
-      slug: doc.data().slug,
-      logo: doc.data().logo,
-      description: doc.data().description
-    }));
-    
+      ...doc.data()
+    })) as Manufacturer[];
+
   } catch (error) {
     console.error("Error fetching manufacturers:", error);
     return [];
   }
 }
 
-// Obtener UN fabricante por su slug (para páginas individuales)
 export async function getManufacturerBySlug(slug: string): Promise<Manufacturer> {
   try {
-    const q = query(
-      collection(db, "manufacturers"),
-      where("slug", "==", slug) // Búsqueda exacta
-    );
-    
+    const q = query(collection(db, "manufacturers"), where("slug", "==", slug));
     const snapshot = await getDocs(q);
-    
-    if (snapshot.empty) {
-      throw new Error(`Fabricante "${slug}" no encontrado`);
-    }
+
+    if (snapshot.empty) throw new Error(`Fabricante "${slug}" no encontrado`);
 
     const doc = snapshot.docs[0];
-    return {
-      id: doc.id,
-      name: doc.data().name,
-      slug: doc.data().slug,
-      logo: doc.data().logo,
-      description: doc.data().description
-    };
-    
+    return { id: doc.id, ...doc.data() } as Manufacturer;
+
   } catch (error) {
     console.error(`Error fetching manufacturer ${slug}:`, error);
-    throw error; // Puedes personalizar el error
+    throw error;
   }
 }

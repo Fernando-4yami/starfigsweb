@@ -33,7 +33,7 @@
   "include": [
     "src",
     ".next/types/**/*.ts"
-  ],
+, "scripts/generateSlugs.js"  ],
   "exclude": [
     "node_modules"
   ]

@@ -1,162 +1,198 @@
-// src/lib/firebase/products.ts
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
+import { db } from './config';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  deleteDoc,
+  updateDoc,
+  query,
   orderBy,
-  where,
   limit,
+  where,
+  serverTimestamp,
   Timestamp,
-  DocumentData
+  increment,
 } from 'firebase/firestore';
 
-import { db } from './firebase';
+// ✅ NUEVO: función para generar slug limpio desde el nombre
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD') // eliminar tildes
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 export interface Product {
-  id?: string;
+  id: string;
   name: string;
+  slug: string; // ✅ NUEVO campo obligatorio
   price: number;
-  description: string;
-  imageUrl: string;
-  category: string;
-  brand: string;
-  brandSlug?: string;
-  stock: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  description?: string;
+  imageUrls: string[];
+  brand?: string;
+  createdAt?: Timestamp | null;
+  isNewRelease?: boolean;
+  heightCm?: number;
+  views?: number;
 }
 
-interface FirestoreProduct extends Omit<Product, 'id' | 'createdAt' | 'updatedAt'> {
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-}
-
-const toDate = (timestamp: Timestamp | undefined): Date | undefined => {
-  if (timestamp instanceof Timestamp) {
-    return timestamp.toDate();
-  }
-  return undefined;
-};
-
-const mapToProduct = (docId: string, data: DocumentData): Product => {
-  const createdAt = data.createdAt instanceof Timestamp ? data.createdAt : undefined;
-  const updatedAt = data.updatedAt instanceof Timestamp ? data.updatedAt : undefined;
-
-  return {
-    id: docId,
-    name: typeof data.name === 'string' ? data.name : '',
-    price: typeof data.price === 'number' ? data.price : 0,
-    description: typeof data.description === 'string' ? data.description : '',
-    imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : '/placeholder-product.jpg',
-    category: typeof data.category === 'string' ? data.category : '',
-    brand: typeof data.brand === 'string' ? data.brand : '',
-    brandSlug: typeof data.brandSlug === 'string' ? data.brandSlug : '',
-    stock: typeof data.stock === 'number' ? data.stock : 0,
-    createdAt: toDate(createdAt),
-    updatedAt: toDate(updatedAt)
-  };
-};
-
-export async function getNewReleases(): Promise<Product[]> {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const q = query(
-    collection(db, 'products'),
-    where('createdAt', '>=', Timestamp.fromDate(thirtyDaysAgo)),
-    orderBy('createdAt', 'desc'),
-    limit(12)
-  );
-  
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => mapToProduct(doc.id, doc.data()));
-}
+const productsCollection = collection(db, 'products');
 
 export async function getProducts(): Promise<Product[]> {
-  const q = query(
-    collection(db, 'products'),
-    orderBy('createdAt', 'desc')
-  );
-  
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => mapToProduct(doc.id, doc.data()));
+  const snapshot = await getDocs(productsCollection);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
 }
 
-export async function getProductsByBrand(brandSlug: string): Promise<Product[]> {
-  const q = query(
-    collection(db, 'products'),
-    where('brandSlug', '==', brandSlug.toLowerCase()),
-    orderBy('createdAt', 'desc')
-  );
-  
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => mapToProduct(doc.id, doc.data()));
-}
-
-export async function uploadImage(file: File): Promise<string> {
-  if (!file) throw new Error("No se proporcionó archivo");
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!res.ok) {
-    throw new Error('Error al subir la imagen');
+export async function addProduct(
+  product: Omit<Product, 'id' | 'slug'> & { createdAt?: Timestamp | null }
+): Promise<void> {
+  if (!Array.isArray(product.imageUrls)) {
+    throw new Error('imageUrls debe ser un arreglo de strings');
   }
 
-  const data = await res.json();
-  return data.url as string;
-}
+  const slug = generateSlug(product.name); // ✅ Generar slug automático
 
-export async function addProduct(product: Omit<Product, 'id'>): Promise<string> {
-  // Validación previa
-  if (!product.name || product.name.trim() === '') {
-    throw new Error("El nombre es requerido");
-  }
-  if (typeof product.price !== 'number' || isNaN(product.price) || product.price <= 0) {
-    throw new Error("El precio debe ser un número mayor a cero");
-  }
-  if (typeof product.stock !== 'number' || isNaN(product.stock) || product.stock < 0) {
-    throw new Error("El stock debe ser un número igual o mayor a cero");
-  }
-
-  const productToAdd: FirestoreProduct = {
+  await addDoc(productsCollection, {
     ...product,
-    brandSlug: product.brand.toLowerCase().replace(/\s+/g, '-'),
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  };
+    slug,
+    createdAt: product.createdAt ?? serverTimestamp(),
+    views: 0,
+  });
+}
 
+export async function getNewReleases(): Promise<Product[]> {
+  const q = query(
+    productsCollection,
+    where('isNewRelease', '==', true),
+    orderBy('createdAt', 'desc'),
+    limit(20)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+export async function getProductsByBrand(brandName: string): Promise<Product[]> {
+  const q = query(
+    productsCollection,
+    where('brand', '==', brandName),
+    orderBy('createdAt', 'desc')
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+export async function getProductById(productId: string): Promise<Product | null> {
   try {
-    const docRef = await addDoc(collection(db, 'products'), productToAdd);
-    return docRef.id;
-  } catch (err: any) {
-    // Imprime el objeto completo (incluye props no enumerables)
-    console.error(
-      'Error firebase al agregar producto (objeto completo):',
-      JSON.stringify(err, Object.getOwnPropertyNames(err), 2)
-    );
-    // Lanza un error con el JSON completo para verlo en frontend
-    throw new Error(
-      `Firebase Error completo: ${JSON.stringify(
-        err,
-        Object.getOwnPropertyNames(err)
-      )}`
-    );
+    const docRef = doc(db, 'products', productId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) return null;
+
+    return {
+      id: docSnap.id,
+      ...(docSnap.data() as Omit<Product, 'id'>),
+    };
+  } catch (error) {
+    console.error('Error obteniendo producto por ID:', error);
+    return null;
   }
 }
 
-export const productsService = {
-  getProducts,
-  getProductsByBrand,
-  getNewReleases,
-  uploadImage,
-  addProduct
-};
+export async function deleteProductById(productId: string): Promise<void> {
+  try {
+    const docRef = doc(db, 'products', productId);
+    await deleteDoc(docRef);
+    console.log(`Producto con ID ${productId} eliminado correctamente.`);
+  } catch (error) {
+    console.error('Error eliminando producto:', error);
+    throw error;
+  }
+}
 
-export default productsService;
+export async function updateProduct(
+  id: string,
+  data: Partial<Omit<Product, 'id' | 'createdAt'>>
+): Promise<void> {
+  try {
+    const docRef = doc(db, 'products', id);
+    await updateDoc(docRef, data);
+    console.log(`Producto con ID ${id} actualizado correctamente.`);
+  } catch (error) {
+    console.error('Error actualizando producto:', error);
+    throw error;
+  }
+}
+
+export async function incrementProductViews(productId: string): Promise<void> {
+  try {
+    const docRef = doc(db, 'products', productId);
+    await updateDoc(docRef, { views: increment(1) });
+  } catch (error) {
+    console.error('Error incrementando views:', error);
+  }
+}
+
+export async function getPopularProducts(limitCount = 10): Promise<Product[]> {
+  const q = query(productsCollection, orderBy('views', 'desc'), limit(limitCount));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+export async function getNewReleasesByDateRange(startDate: Date, endDate: Date): Promise<Product[]> {
+  const startTimestamp = Timestamp.fromDate(startDate);
+  const endTimestamp = Timestamp.fromDate(endDate);
+
+  const q = query(
+    productsCollection,
+    where('isNewRelease', '==', true),
+    where('createdAt', '>=', startTimestamp),
+    where('createdAt', '<=', endTimestamp),
+    orderBy('createdAt', 'desc')
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+export async function getAllProducts(): Promise<Product[]> {
+  const snapshot = await getDocs(productsCollection);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+// ✅ NUEVA FUNCIÓN: obtener producto por slug (único)
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const q = query(productsCollection, where('slug', '==', slug), limit(1));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) return null;
+
+  const docSnap = snapshot.docs[0];
+  return {
+    id: docSnap.id,
+    ...(docSnap.data() as Omit<Product, 'id'>),
+  };
+}

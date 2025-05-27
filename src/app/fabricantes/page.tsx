@@ -1,4 +1,3 @@
-// src/app/fabricantes/page.tsx
 import { getManufacturers } from "@/lib/firebase/manufacturers";
 import Link from "next/link";
 
