@@ -6,12 +6,12 @@ import { getStorage } from 'firebase/storage';
 
 // ✅ Asegúrate que este bucket termina en `.appspot.com`, no `.firebasestorage.app`
 const firebaseConfig = {
-  apiKey: "AIzaSyAXfYj3yO5y0JtL4ocVRvYK7T4lG5QtDv8",
-  authDomain: "starfigs-29d31.firebaseapp.com",
-  projectId: "starfigs-29d31",
-  storageBucket: "starfigs-29d31",  // ✅ CORRECTO
-  messagingSenderId: "937714963213",
-  appId: "1:937714963213:web:279ede7394fc5677811644"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Inicializar app (solo una vez)

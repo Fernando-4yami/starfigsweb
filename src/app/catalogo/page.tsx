@@ -1,7 +1,7 @@
+"use client";
 import React, { useEffect, useState } from 'react';
 import { getProducts, Product } from '@/lib/firebase/products';
 import ProductCard from '@/components/ProductCard';
-
 export default function CatalogoPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
