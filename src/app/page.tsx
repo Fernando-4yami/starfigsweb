@@ -75,7 +75,12 @@ export default function RankingAndReleases() {
         setRanking(popular);
         setReleases(prevReleases);
         setCurrentReleases(currReleases);
-        setNewProducts(futureReleases.slice(0, 15));
+
+        const sortedFuture = futureReleases.sort(
+          (a, b) => (b.releaseDate?.seconds || 0) - (a.releaseDate?.seconds || 0)
+        );
+
+        setNewProducts(sortedFuture.slice(0, 15));
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -93,7 +98,7 @@ export default function RankingAndReleases() {
 
   return (
     <section className="py-12 px-6" style={{ background: 'transparent', minHeight: '100vh' }}>
-      {/* PRÓXIMOS LANZAMIENTOS */}
+      {/* NUEVOS LANZAMIENTOS */}
       <h2 className="text-3xl md:text-4xl font-medium text-gray-800 mb-2 text-center tracking-wide select-none">
         Nuevos lanzamientos
       </h2>

@@ -1,10 +1,11 @@
-// app/products/[slug]/page.tsx
-
 import { getProductBySlug, getProductsByBrand, getProducts } from '@/lib/firebase/products';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ProductCard from '@/components/ProductCard';
 import dynamic from 'next/dynamic';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { MessageCircle } from 'lucide-react'; // Ícono de WhatsApp
 
 interface ProductPageProps {
   params: { slug: string };
@@ -15,7 +16,7 @@ const Gallery = dynamic(() => import('@/components/Gallery'), { ssr: false });
 export async function generateStaticParams() {
   const products = await getProducts();
   return products.map(product => ({
-    slug: product.slug, // asegurarte que cada producto tenga un slug en la base
+    slug: product.slug,
   }));
 }
 
@@ -44,7 +45,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getProductBySlug(params.slug);
-  if (!product) return notFound();
+  if (!product) {
+    console.error(`Producto no encontrado con slug: ${params.slug}`);
+    return notFound();
+  }
 
   let relatedProducts = [] as typeof product[];
 
@@ -52,6 +56,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
     relatedProducts = await getProductsByBrand(product.brand);
     relatedProducts = relatedProducts.filter(p => p.slug !== product.slug);
   }
+
+  const now = new Date();
+  const releaseDate = product.releaseDate?.toDate();
+  const showReleaseTag =
+    !!releaseDate &&
+    (releaseDate.getFullYear() > now.getFullYear() ||
+      (releaseDate.getFullYear() === now.getFullYear() &&
+        releaseDate.getMonth() >= now.getMonth()));
+
+  const releaseMonthYear = releaseDate
+    ? format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
+    : '';
+
+  const productUrl = `https://tusitioweb.com/products/${product.slug}`;
+  const whatsappMessage = `Hola, estoy interesado en reservar el producto *${product.name}*.\n${productUrl}`;
+  const whatsappUrl = `https://wa.me/51926951167?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-12">
@@ -61,11 +81,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold">{product.name}</h1>
 
+          {product.releaseDate && (() => {
+            const releaseDate = product.releaseDate.toDate();
+            const now = new Date();
+            const isUpcoming =
+              releaseDate.getFullYear() > now.getFullYear() ||
+              (releaseDate.getFullYear() === now.getFullYear() &&
+                releaseDate.getMonth() >= now.getMonth());
+
+            const releaseMonthYear = format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase());
+
+            return isUpcoming ? (
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide bg-gradient-to-r from-purple-700 to-pink-500 text-white px-3 py-1 rounded-full shadow">
+                  ✨ Pre-venta
+                </span>
+                <span className="text-sm text-gray-600 font-medium">{releaseMonthYear}</span>
+              </div>
+            ) : null;
+          })()}
+
           {product.brand && (
             <span className="text-sm text-gray-600">
               Fabricante: <strong>{product.brand}</strong>
             </span>
           )}
+
+          {product.line && (
+            <span className="text-sm text-gray-600">
+              Línea: <strong>{product.line}</strong>
+            </span>
+          )}
+
           {product.heightCm && (
             <span className="text-sm text-gray-600">
               Altura: <strong>{product.heightCm} cm aprox.</strong>
@@ -80,15 +127,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
           )}
 
-          {product.isNewRelease && (
-            <span className="inline-block bg-green-100 text-green-800 px-3 py-1 text-xs font-semibold rounded-full w-fit">
-              Nuevo Lanzamiento
-            </span>
-          )}
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <button className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded transition-colors duration-200">
+              Añadir al carrito
+            </button>
 
-          <button className="mt-6 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded">
-            Añadir al carrito
-          </button>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition-colors duration-200"
+            >
+              <MessageCircle size={18} strokeWidth={2} />
+              Reservar por WhatsApp
+            </a>
+          </div>
         </div>
       </div>
 

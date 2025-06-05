@@ -1,34 +1,15 @@
 'use client';
 import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const { cart } = useCart();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
-
-  const manufacturers = [
-    { id: '1', name: 'Bandai Spirits', slug: 'bandai' },
-    { id: '2', name: 'Good Smile', slug: 'goodsmile' },
-    { id: '3', name: 'Taito', slug: 'taito' }
-  ];
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setIsDropdownOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsDropdownOpen(false);
-    }, 150);
-  };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,13 +19,24 @@ export default function Navbar() {
     }
   };
 
+  const categories = [
+    { name: 'ICHIBAN KUJI', path: '/categorias/ichiban-kuji' },
+    { name: 'POP UP PARADE', path: '/categorias/pop-up-parade' },
+    { name: 'NENDOROID', path: '/categorias/nendoroid' },
+    { name: 'FIGMA', path: '/categorias/figma' },
+    { name: 'FIGUARTS', path: '/categorias/figuarts' },
+    { name: 'PLUSH', path: '/categorias/plush' },
+    { name: 'SCALE', path: '/categorias/scale' },
+    { name: 'FIGURAS PRICING', path: '/categorias/pricing' },
+  ];
+
   return (
     <nav className="relative z-50 flex items-center justify-between px-6 py-4 bg-white shadow-md">
       {/* Logo + Buscador */}
       <div className="flex items-center gap-4">
-        <div className="text-2xl font-bold text-red-600 whitespace-nowrap">
+        <Link href="/" className="text-2xl font-bold text-red-600 whitespace-nowrap">
           Starfigs
-        </div>
+        </Link>
 
         <form onSubmit={handleSearch} className="w-44 sm:w-64">
           <input
@@ -67,37 +59,11 @@ export default function Navbar() {
 
       {/* Menú en Pantallas Grandes */}
       <div className="hidden lg:flex gap-6 items-center">
-        <Link href="/" className="hover:text-blue-600 font-medium">
-          Inicio
-        </Link>
-
-        <Link href="/nuevos-lanzamientos" className="hover:text-blue-600 font-medium">
-          Nuevos Lanzamientos
-        </Link>
-
-        <div
-          className="relative"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <button className="flex items-center gap-1 hover:text-blue-600 font-medium">
-            Fabricantes <span>▾</span>
-          </button>
-          {isDropdownOpen && (
-            <div className="absolute bg-white shadow-lg rounded-md mt-2 z-50 min-w-[180px] pointer-events-auto">
-              {manufacturers.map((m) => (
-                <Link
-                  key={m.id}
-                  href={`/fabricantes/${m.slug}`}
-                  className="block px-4 py-2 hover:bg-gray-100 whitespace-nowrap"
-                  onClickCapture={() => setIsDropdownOpen(false)}
-                >
-                  {m.name}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        {categories.map((c) => (
+          <Link key={c.name} href={c.path} className="hover:text-blue-600 font-medium">
+            {c.name}
+          </Link>
+        ))}
 
         <Link href="/carrito" className="text-lg hover:text-blue-600">
           🛒 ({cart.length})
@@ -121,29 +87,16 @@ export default function Navbar() {
             <X size={24} />
           </button>
 
-          <Link href="/" className="hover:text-blue-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
-            Inicio
-          </Link>
-
-          <Link href="/nuevos-lanzamientos" className="hover:text-blue-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
-            Nuevos Lanzamientos
-          </Link>
-
-          <div className="border-t pt-2">
-            <span className="font-medium text-gray-700">Fabricantes</span>
-            <div className="pl-2 mt-1 space-y-1">
-              {manufacturers.map((m) => (
-                <Link
-                  key={m.id}
-                  href={`/fabricantes/${m.slug}`}
-                  className="block hover:text-blue-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {m.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+          {categories.map((c) => (
+            <Link
+              key={c.name}
+              href={c.path}
+              className="hover:text-blue-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {c.name}
+            </Link>
+          ))}
 
           <Link href="/carrito" className="text-lg hover:text-blue-600" onClick={() => setMobileMenuOpen(false)}>
             🛒 ({cart.length})

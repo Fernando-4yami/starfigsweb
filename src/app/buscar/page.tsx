@@ -1,3 +1,4 @@
+//src/app/buscar.page.tsx
 import { getAllProducts, Product } from '@/lib/firebase/products';
 import ProductCard from '@/components/ProductCard';
 

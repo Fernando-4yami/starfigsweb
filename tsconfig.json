@@ -1,40 +1,31 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
-    "allowJs": true,
-    "jsx": "preserve",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
+    "target": "esnext",                      // 👍 Bien para funciones modernas
+    "module": "esnext",                      // 👍 Bien, aunque puedes usar "commonjs" para scripts Node
+    "lib": ["dom", "esnext"],                // 👍 Correcto para apps web y scripts
+    "allowJs": true,                         // 👍 Si tienes scripts JS mezclados
+    "jsx": "preserve",                       // 👍 Next.js
+    "moduleResolution": "node",              // ✅ Necesario para imports
+    "resolveJsonModule": true,               // ✅ Necesario para `require('./serviceAccountKey.json')`
+    "isolatedModules": true,                 // ⚠️ Bien, pero requiere que todos los archivos sean módulos
+    "esModuleInterop": true,                 // ✅ Necesario para importar módulos CommonJS (como Firebase Admin)
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "src",
     "paths": {
-      "@/*": [
-        "*"
-      ]
+      "@/*": ["*"]
     },
-    "strict": false,
+    "strict": false,                         // 🔁 Considera activarlo en el futuro
     "noEmit": true,
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "strictNullChecks": true
+    "plugins": [{ "name": "next" }],
+    "strictNullChecks": true                 // ✅ Bien
   },
   "include": [
     "src",
-    ".next/types/**/*.ts"
-, "scripts/generateSlugs.js"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    ".next/types/**/*.ts",
+    "scripts/generateSlugs.js",
+    "scripts/migrateReleaseDate.ts"
+  ],
+  "exclude": ["node_modules"]
 }

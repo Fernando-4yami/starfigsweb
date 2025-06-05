@@ -1,6 +1,6 @@
 // src/scripts/upload-batch.ts
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase/config"; // Usando el alias @
+import { db } from "@/lib/firebase/firebase"; // Usando el alias @
 import productsData from "../../products.json"; // Asegúrate de tener este archivo
 
 interface Product {

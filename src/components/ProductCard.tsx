@@ -11,8 +11,7 @@ interface Product {
   imageUrls: string[];
   price: number;
   heightCm?: number;
-  createdAt?: Timestamp | null;
-  isNewRelease?: boolean;
+  releaseDate?: Timestamp | null;
 }
 
 interface ProductCardProps {
@@ -21,18 +20,24 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const now = new Date();
-  const createdAtDate = product.createdAt?.toDate();
+  const releaseDate = product.releaseDate?.toDate();
 
-  // Mostrar la etiqueta si el producto se lanza en el mes actual o más adelante
+  const isCurrentMonth =
+    !!releaseDate &&
+    releaseDate.getFullYear() === now.getFullYear() &&
+    releaseDate.getMonth() === now.getMonth();
+
   const showReleaseTag =
-    !!createdAtDate &&
-    (createdAtDate.getFullYear() > now.getFullYear() ||
-      (createdAtDate.getFullYear() === now.getFullYear() &&
-        createdAtDate.getMonth() >= now.getMonth())); // >= incluye el mes actual
+    !!releaseDate &&
+    (releaseDate.getFullYear() > now.getFullYear() ||
+      (releaseDate.getFullYear() === now.getFullYear() &&
+        releaseDate.getMonth() >= now.getMonth()));
 
-  const releaseMonthYear = createdAtDate
-    ? format(createdAtDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
+  const releaseMonthYear = releaseDate
+    ? format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
     : '';
+
+  const tagColorClass = isCurrentMonth ? 'bg-blue-600' : 'bg-amber-600';
 
   return (
     <Link
@@ -42,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
         <div className="relative w-full" style={{ paddingTop: '100%' }}>
           {showReleaseTag && (
-            <span className="absolute top-2 left-2 bg-amber-600 text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10">
+            <span className={`absolute top-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}>
               {releaseMonthYear}
             </span>
           )}

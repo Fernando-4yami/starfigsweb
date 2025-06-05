@@ -1,4 +1,4 @@
-import { db } from './config';
+import { db } from './firebase';
 import {
   collection,
   addDoc,
@@ -16,11 +16,11 @@ import {
   increment,
 } from 'firebase/firestore';
 
-// ✅ NUEVO: función para generar slug limpio desde el nombre
+// ✅ Slug desde el nombre del producto
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD') // eliminar tildes
+    .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
@@ -31,13 +31,14 @@ function generateSlug(name: string): string {
 export interface Product {
   id: string;
   name: string;
-  slug: string; // ✅ NUEVO campo obligatorio
+  slug: string;
   price: number;
   description?: string;
   imageUrls: string[];
   brand?: string;
+  line?: string;
   createdAt?: Timestamp | null;
-  isNewRelease?: boolean;
+  releaseDate?: Timestamp | null; // ✅ Asegura que puede ser nulo
   heightCm?: number;
   views?: number;
 }
@@ -53,42 +54,28 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function addProduct(
-  product: Omit<Product, 'id' | 'slug'> & { createdAt?: Timestamp | null }
+  product: Omit<Product, 'id' | 'slug'> & {
+    createdAt?: Timestamp | null;
+    releaseDate?: Timestamp | null; // ✅ Se admite null o Timestamp
+  }
 ): Promise<void> {
   if (!Array.isArray(product.imageUrls)) {
     throw new Error('imageUrls debe ser un arreglo de strings');
   }
 
-  const slug = generateSlug(product.name); // ✅ Generar slug automático
+  const slug = generateSlug(product.name);
 
   await addDoc(productsCollection, {
     ...product,
     slug,
     createdAt: product.createdAt ?? serverTimestamp(),
+    releaseDate: product.releaseDate ?? null, // ✅ Se guarda correctamente
     views: 0,
   });
 }
 
 export async function getNewReleases(): Promise<Product[]> {
-  const q = query(
-    productsCollection,
-    where('isNewRelease', '==', true),
-    orderBy('createdAt', 'desc'),
-    limit(20)
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...(doc.data() as Omit<Product, 'id'>),
-  }));
-}
-
-export async function getProductsByBrand(brandName: string): Promise<Product[]> {
-  const q = query(
-    productsCollection,
-    where('brand', '==', brandName),
-    orderBy('createdAt', 'desc')
-  );
+  const q = query(productsCollection, orderBy('createdAt', 'desc'), limit(20));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -100,13 +87,8 @@ export async function getProductById(productId: string): Promise<Product | null>
   try {
     const docRef = doc(db, 'products', productId);
     const docSnap = await getDoc(docRef);
-
     if (!docSnap.exists()) return null;
-
-    return {
-      id: docSnap.id,
-      ...(docSnap.data() as Omit<Product, 'id'>),
-    };
+    return { id: docSnap.id, ...(docSnap.data() as Omit<Product, 'id'>) };
   } catch (error) {
     console.error('Error obteniendo producto por ID:', error);
     return null;
@@ -159,21 +141,19 @@ export async function getPopularProducts(limitCount = 10): Promise<Product[]> {
 export async function getNewReleasesByDateRange(startDate: Date, endDate: Date): Promise<Product[]> {
   const startTimestamp = Timestamp.fromDate(startDate);
   const endTimestamp = Timestamp.fromDate(endDate);
-
   const q = query(
     productsCollection,
-    where('isNewRelease', '==', true),
-    where('createdAt', '>=', startTimestamp),
-    where('createdAt', '<=', endTimestamp),
-    orderBy('createdAt', 'desc')
+    where('releaseDate', '>=', startTimestamp),
+    where('releaseDate', '<=', endTimestamp),
+    orderBy('releaseDate', 'desc')
   );
-
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
     ...(doc.data() as Omit<Product, 'id'>),
   }));
 }
+
 
 export async function getAllProducts(): Promise<Product[]> {
   const snapshot = await getDocs(productsCollection);
@@ -183,16 +163,29 @@ export async function getAllProducts(): Promise<Product[]> {
   }));
 }
 
-// ✅ NUEVA FUNCIÓN: obtener producto por slug (único)
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const q = query(productsCollection, where('slug', '==', slug), limit(1));
   const snapshot = await getDocs(q);
-
   if (snapshot.empty) return null;
-
   const docSnap = snapshot.docs[0];
-  return {
-    id: docSnap.id,
-    ...(docSnap.data() as Omit<Product, 'id'>),
-  };
+  return { id: docSnap.id, ...(docSnap.data() as Omit<Product, 'id'>) };
+}
+
+export async function getProductsByBrand(brand: string): Promise<Product[]> {
+  const q = query(productsCollection, where('brand', '==', brand));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
+}
+
+// ✅ Nueva función: productos por línea
+export async function getProductsByLine(line: string): Promise<Product[]> {
+  const q = query(productsCollection, where('line', '==', line));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...(doc.data() as Omit<Product, 'id'>),
+  }));
 }

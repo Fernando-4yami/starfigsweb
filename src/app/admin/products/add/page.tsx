@@ -1,28 +1,126 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { addProduct } from '@/lib/firebase/products';
+import { createLineIfNotExists } from '@/lib/firebase/lines';
+import { createManufacturerIfNotExists } from '@/lib/firebase/manufacturers';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase/config';
-import { Timestamp } from '@/lib/firebase/config'; // Importa Timestamp desde tu config
+import { storage, Timestamp, db } from '@/lib/firebase/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
-const manufacturers = [
-  { id: '1', name: 'Bandai Spirits', value: 'Bandai Spirits' },
-  { id: '2', name: 'Good Smile Company', value: 'Good Smile Company' },
-  { id: '3', name: 'Taito', value: 'Taito' }
-];
+// 🔹 Combobox personalizado
+function Combobox({
+  label,
+  value,
+  onChange,
+  options,
+  name,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  name: string;
+  required?: boolean;
+}) {
+  const [showOptions, setShowOptions] = useState(false);
+  const [filteredOptions, setFilteredOptions] = useState<string[]>(options);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowOptions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleFocus = () => {
+    setFilteredOptions(options);
+    setShowOptions(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    onChange(val);
+    setFilteredOptions(options.filter(opt => opt.toLowerCase().includes(val.toLowerCase())));
+  };
+
+  const handleOptionClick = (option: string) => {
+    onChange(option);
+    setShowOptions(false);
+  };
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <label className="block font-medium mb-1" htmlFor={name}>{label}</label>
+      <input
+        id={name}
+        name={name}
+        value={value}
+        onFocus={handleFocus}
+        onChange={handleInputChange}
+        required={required}
+        className="w-full border p-2 rounded"
+        autoComplete="off"
+      />
+      {showOptions && filteredOptions.length > 0 && (
+        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+          {filteredOptions.map((opt) => (
+            <li
+              key={opt}
+              className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+              onClick={() => handleOptionClick(opt)}
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function AddProductPage() {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [heightCm, setHeightCm] = useState('');
-  const [description, setDescription] = useState('');
-  const [brand, setBrand] = useState('');
+  const [form, setForm] = useState({
+    name: '',
+    price: '',
+    heightCm: '',
+    description: '',
+    brand: '',
+    line: '',
+    releaseDate: '',
+  });
   const [files, setFiles] = useState<FileList | null>(null);
-  const [isNewRelease, setIsNewRelease] = useState(false);
-  const [releaseDate, setReleaseDate] = useState('');  // Fecha opcional
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [lines, setLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const snapshot = await getDocs(collection(db, 'products'));
+      const brandSet = new Set<string>();
+      const lineSet = new Set<string>();
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.brand) brandSet.add(data.brand);
+        if (data.line) lineSet.add(data.line);
+      });
+
+      setBrands([...brandSet].sort());
+      setLines([...lineSet].sort());
+    };
+    fetchData();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -33,8 +131,8 @@ export default function AddProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!brand) {
-      alert('Selecciona un fabricante');
+    if (!form.brand || !form.line) {
+      alert('Selecciona o escribe un fabricante y una línea');
       return;
     }
 
@@ -43,13 +141,8 @@ export default function AddProductPage() {
       return;
     }
 
-    if (name.trim().length < 3) {
-      alert('El nombre debe tener al menos 3 caracteres');
-      return;
-    }
-
-    if (Number(price) <= 0) {
-      alert('El precio debe ser mayor a 0');
+    if (form.name.trim().length < 3 || Number(form.price) <= 0) {
+      alert('Nombre o precio inválido');
       return;
     }
 
@@ -71,8 +164,8 @@ export default function AddProductPage() {
               setUploadProgress(progress);
             },
             (error) => {
-              console.error('Error subiendo imagen:', error);
-              alert('Error al subir la imagen');
+              console.error(error);
+              alert('Error al subir imagen');
               setLoading(false);
               reject(error);
             },
@@ -85,147 +178,152 @@ export default function AddProductPage() {
         });
       }
 
-      // Convertir releaseDate a Timestamp si existe, sino usar Timestamp.now()
-      const createdAtTimestamp = releaseDate
-        ? Timestamp.fromDate(new Date(releaseDate))
-        : Timestamp.now();
+      const createdAt = Timestamp.now();
+      const releaseDate = form.releaseDate
+        ? Timestamp.fromDate(new Date(form.releaseDate))
+        : null;
+
+      const manufacturerDoc = await createManufacturerIfNotExists(form.brand);
+      const lineDoc = await createLineIfNotExists(form.line, form.brand);
 
       await addProduct({
-        name,
-        price: Number(price),
-        description,
+        name: form.name,
+        price: Number(form.price),
+        description: form.description,
         imageUrls: uploadedUrls,
-        brand,
-        isNewRelease,
-        heightCm: heightCm ? Number(heightCm) : undefined,
-        createdAt: createdAtTimestamp,
+        brand: manufacturerDoc.name,
+        line: lineDoc.name,
+        heightCm: form.heightCm ? Number(form.heightCm) : undefined,
+        createdAt,
+        releaseDate,
       });
 
       alert('Producto agregado con éxito');
-      setName('');
-      setPrice('');
-      setHeightCm('');
-      setDescription('');
-      setBrand('');
+
+      setForm({
+        name: '',
+        price: '',
+        heightCm: '',
+        description: '',
+        brand: '',
+        line: '',
+        releaseDate: '',
+      });
       setFiles(null);
-      setIsNewRelease(false);
-      setReleaseDate('');
       setUploadProgress(0);
-      setLoading(false);
     } catch (error) {
-      console.error('Error agregando producto:', error);
+      console.error(error);
       alert('Error al agregar producto');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 space-y-4">
-      <label className="block">
-        Nombre
+      <h1 className="text-xl font-bold">Agregar Producto</h1>
+
+      <div>
+        <label className="block font-medium" htmlFor="name">Nombre</label>
         <input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          name="name"
+          id="name"
+          value={form.name}
+          onChange={handleInputChange}
+          className="w-full border p-2 rounded"
           required
-          className="w-full border p-2 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        Precio
+      <div>
+        <label className="block font-medium" htmlFor="price">Precio</label>
         <input
+          name="price"
+          id="price"
           type="number"
-          value={price}
-          onChange={e => setPrice(e.target.value)}
+          value={form.price}
+          onChange={handleInputChange}
+          className="w-full border p-2 rounded"
           required
-          min="0"
-          step="0.01"
-          className="w-full border p-2 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        Altura (cm)
+      <div>
+        <label className="block font-medium" htmlFor="heightCm">Altura (cm)</label>
         <input
+          name="heightCm"
+          id="heightCm"
           type="number"
-          value={heightCm}
-          onChange={e => setHeightCm(e.target.value)}
-          placeholder="Ej. 17"
-          min="0"
-          step="0.1"
+          value={form.heightCm}
+          onChange={handleInputChange}
           className="w-full border p-2 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        Descripción
+      <div>
+        <label className="block font-medium" htmlFor="description">Descripción</label>
         <textarea
-          value={description}
-          onChange={e => setDescription(e.target.value)}
+          name="description"
+          id="description"
+          value={form.description}
+          onChange={handleInputChange}
           className="w-full border p-2 rounded"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        Imágenes
+      <Combobox
+        label="Fabricante"
+        name="brand"
+        value={form.brand}
+        onChange={(val) => setForm({ ...form, brand: val })}
+        options={brands}
+        required
+      />
+
+      <Combobox
+        label="Línea"
+        name="line"
+        value={form.line}
+        onChange={(val) => setForm({ ...form, line: val })}
+        options={lines}
+        required
+      />
+
+      <div>
+        <label htmlFor="releaseDate" className="block font-medium">Fecha de lanzamiento</label>
         <input
+          name="releaseDate"
+          id="releaseDate"
+          type="date"
+          value={form.releaseDate}
+          onChange={handleInputChange}
+          className="w-full border p-2 rounded"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="images" className="block font-medium">Imágenes</label>
+        <input
+          id="images"
           type="file"
-          accept="image/*"
           onChange={handleFileChange}
           multiple
-          required
           className="w-full"
         />
-      </label>
+      </div>
 
       {uploadProgress > 0 && (
-        <p>Subiendo imagen: {uploadProgress.toFixed(0)}%</p>
+        <div className="text-sm text-gray-600">
+          Subiendo imágenes: {Math.round(uploadProgress)}%
+        </div>
       )}
-
-      <label className="block">
-        Fabricante
-        <select
-          value={brand}
-          onChange={e => setBrand(e.target.value)}
-          required
-          className="w-full border p-2 rounded"
-        >
-          <option value="">Selecciona un fabricante</option>
-          {manufacturers.map(m => (
-            <option key={m.id} value={m.value}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="block">
-        Fecha de lanzamiento (opcional)
-        <input
-          type="date"
-          value={releaseDate}
-          onChange={e => setReleaseDate(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-      </label>
-
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={isNewRelease}
-          onChange={e => setIsNewRelease(e.target.checked)}
-          className="w-4 h-4"
-        />
-        Nuevo Lanzamiento
-      </label>
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition disabled:opacity-50"
+        className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
       >
-        {loading ? 'Subiendo...' : 'Agregar Producto'}
+        {loading ? 'Subiendo...' : 'Agregar producto'}
       </button>
     </form>
   );

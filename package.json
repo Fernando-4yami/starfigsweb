@@ -12,7 +12,8 @@
     "tailwind:watch": "tailwindcss -i ./src/styles/globals.css -o ./public/styles.css --watch"
   },
   "dependencies": {
-    "@firebase/storage": "^0.13.10",
+    "@headlessui/react": "^2.2.4",
+    "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "firebase": "^11.8.1",
     "firebase-admin": "^13.4.0",
@@ -38,5 +39,18 @@
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "next.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fernando-4yami/starfigs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fernando-4yami/starfigs/issues"
+  },
+  "homepage": "https://github.com/Fernando-4yami/starfigs#readme"
 }
