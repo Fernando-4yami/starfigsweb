@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageCircle } from 'lucide-react';
 
-export const revalidate = 60; // ♻️ Revalida cada 1 minuto
+export const revalidate = 600; // ♻️ Revalida cada 1 minuto
 
 interface ProductPageProps {
   params: { slug: string };

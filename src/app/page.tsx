@@ -1,3 +1,5 @@
+export const revalidate = 600; // o el tiempo en segundos que prefieras
+
 // src/app/(rutas)/page.tsx (o el path que uses para esta página)
 
 import {
