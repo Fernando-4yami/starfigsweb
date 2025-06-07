@@ -1,19 +1,20 @@
-export const dynamic = 'force-dynamic'; // Directiva de Next.js
-
 import { getProductBySlug, getProductsByBrand, getProducts } from '@/lib/firebase/products';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ProductCard from '@/components/ProductCard';
-import dynamicFn from 'next/dynamic'; // Renombrado para evitar conflicto
+import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageCircle } from 'lucide-react';
+
+export const revalidate = 60; // ♻️ Revalida cada 1 minuto
 
 interface ProductPageProps {
   params: { slug: string };
 }
 
-const Gallery = dynamicFn(() => import('@/components/Gallery'), { ssr: false });
+const Gallery = dynamic(() => import('@/components/Gallery'), { ssr: false });
+
 
 function firebaseUrlToCleanPath(url: string): string {
   try {
