@@ -1,8 +1,10 @@
+export const dynamic = 'force-dynamic'; // Directiva de Next.js
+
 import { getProductBySlug, getProductsByBrand, getProducts } from '@/lib/firebase/products';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ProductCard from '@/components/ProductCard';
-import dynamic from 'next/dynamic';
+import dynamicFn from 'next/dynamic'; // Renombrado para evitar conflicto
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageCircle } from 'lucide-react';
@@ -11,7 +13,7 @@ interface ProductPageProps {
   params: { slug: string };
 }
 
-const Gallery = dynamic(() => import('@/components/Gallery'), { ssr: false });
+const Gallery = dynamicFn(() => import('@/components/Gallery'), { ssr: false });
 
 function firebaseUrlToCleanPath(url: string): string {
   try {
@@ -89,7 +91,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Aquí pasamos las URLs limpias a Gallery */}
         <Gallery
           imageUrls={product.imageUrls?.map(firebaseUrlToCleanPath) ?? []}
           productName={product.name}
