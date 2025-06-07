@@ -82,7 +82,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ? format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
     : '';
 
-  const productUrl = `https://tusitioweb.com/products/${product.slug}`;
+  const productUrl = `https://stafigsperu.com/products/${product.slug}`;
   const whatsappMessage = `Hola, estoy interesado en reservar el producto *${product.name}*.\n${productUrl}`;
   const whatsappUrl = `https://wa.me/51926951167?text=${encodeURIComponent(whatsappMessage)}`;
 
