@@ -5,13 +5,26 @@ import ProductCard from '@/components/ProductCard';
 import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MessageCircle } from 'lucide-react'; // Ícono de WhatsApp
+import { MessageCircle } from 'lucide-react';
 
 interface ProductPageProps {
   params: { slug: string };
 }
 
 const Gallery = dynamic(() => import('@/components/Gallery'), { ssr: false });
+
+function firebaseUrlToCleanPath(url: string): string {
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    const match = decodedUrl.match(/\/o\/(.+)\?alt=media/);
+    if (match && match[1]) {
+      return `/images/${match[1]}`;
+    }
+  } catch {
+    // fallback si falla
+  }
+  return url;
+}
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -34,7 +47,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         {
           url:
             Array.isArray(product.imageUrls) && product.imageUrls.length > 0
-              ? product.imageUrls[0]
+              ? firebaseUrlToCleanPath(product.imageUrls[0])
               : '/placeholder.png',
           alt: product.name,
         },
@@ -76,7 +89,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-12">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Gallery imageUrls={product.imageUrls ?? []} productName={product.name} />
+        {/* Aquí pasamos las URLs limpias a Gallery */}
+        <Gallery
+          imageUrls={product.imageUrls?.map(firebaseUrlToCleanPath) ?? []}
+          productName={product.name}
+        />
 
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold">{product.name}</h1>
@@ -150,7 +167,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h2 className="text-2xl font-bold mb-4">Productos relacionados</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {relatedProducts.map(p => (
-              <ProductCard key={p.slug} product={p} />
+              <ProductCard
+                key={p.slug}
+                product={{
+                  ...p,
+                  imageUrls: p.imageUrls?.map(firebaseUrlToCleanPath) ?? [],
+                }}
+              />
             ))}
           </div>
         </div>

@@ -27,11 +27,13 @@ export default function ProductCard({ product }: ProductCardProps) {
     releaseDate.getFullYear() === now.getFullYear() &&
     releaseDate.getMonth() === now.getMonth();
 
-  const showReleaseTag =
+  const isFutureRelease =
     !!releaseDate &&
     (releaseDate.getFullYear() > now.getFullYear() ||
       (releaseDate.getFullYear() === now.getFullYear() &&
-        releaseDate.getMonth() >= now.getMonth()));
+        releaseDate.getMonth() > now.getMonth()));
+
+  const showReleaseTag = !!releaseDate && (isCurrentMonth || isFutureRelease);
 
   const releaseMonthYear = releaseDate
     ? format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())

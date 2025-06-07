@@ -1,4 +1,3 @@
-//src/components/Gallery.tsx
 'use client';
 
 import { useState } from 'react';
@@ -16,24 +15,21 @@ export default function Gallery({ imageUrls, productName }: GalleryProps) {
   }
 
   const prevImage = () => {
-    setCurrentIndex((i) => (i === 0 ? imageUrls.length - 1 : i - 1));
+    setCurrentIndex(i => (i === 0 ? imageUrls.length - 1 : i - 1));
   };
 
   const nextImage = () => {
-    setCurrentIndex((i) => (i === imageUrls.length - 1 ? 0 : i + 1));
+    setCurrentIndex(i => (i === imageUrls.length - 1 ? 0 : i + 1));
   };
 
   return (
     <div>
-      {/* Imagen principal */}
       <div className="relative w-full h-96 md:h-[400px]">
         <img
           src={imageUrls[currentIndex]}
           alt={`${productName} imagen ${currentIndex + 1}`}
           className="object-contain w-full h-full rounded-md"
         />
-
-        {/* Flechas - ejemplo simple */}
         <button
           onClick={prevImage}
           className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2"
@@ -48,7 +44,6 @@ export default function Gallery({ imageUrls, productName }: GalleryProps) {
         </button>
       </div>
 
-      {/* Miniaturas debajo */}
       <div className="flex gap-2 mt-4 overflow-x-auto">
         {imageUrls.map((url, index) => (
           <img
