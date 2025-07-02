@@ -1,69 +1,103 @@
+import { db } from "@/lib/firebase/firebase"
 import {
+  type DocumentData,
+  type QueryDocumentSnapshot,
+  type SnapshotOptions,
   collection,
-  query,
-  getDocs,
-  where,
+  doc,
   orderBy,
-  addDoc,
-  getDoc,
+  query,
   serverTimestamp,
-} from 'firebase/firestore';
-import { db } from './firebase';
-import { slugify } from '@/lib/firebase/utils/slugify';
+  setDoc,
+  where,
+} from "firebase/firestore"
+
+import { slugify } from "@/lib/utils"
+import { normalizeText as normalizeProductLine } from "@/lib/utils"
 
 export interface Line {
-  id: string;
-  name: string;
-  slug: string;
-  manufacturer?: string;
-  description?: string;
-  logo?: string;
+  id?: string
+  name: string
+  slug: string
+  description: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 
-export async function getLines(): Promise<Line[]> {
+const lineConverter = {
+  toFirestore(line: Line): DocumentData {
+    return {
+      name: line.name,
+      slug: line.slug,
+      description: line.description,
+      createdAt: line.createdAt || serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Line {
+    const data = snapshot.data(options)
+    return {
+      id: snapshot.id,
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+    }
+  },
+}
+
+export const addLine = async (line: Omit<Line, "id">) => {
   try {
-    const q = query(collection(db, 'lines'), orderBy('name'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Line[];
-  } catch (error) {
-    console.error('Error fetching lines:', error);
-    return [];
+    const linesRef = collection(db, "lines").withConverter(lineConverter)
+    const newLineDoc = doc(linesRef)
+
+    const slug = slugify(line.name)
+    const normalizedName = normalizeProductLine(line.name)
+
+    await setDoc(newLineDoc, {
+      ...line,
+      slug: slug,
+      name: normalizedName,
+    })
+
+    return { id: newLineDoc.id, ...line }
+  } catch (error: any) {
+    throw new Error(error.message)
   }
 }
 
-export async function getLineBySlug(slug: string): Promise<Line> {
+export const getLines = async () => {
   try {
-    const q = query(collection(db, 'lines'), where('slug', '==', slug));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) throw new Error(`Línea "${slug}" no encontrada`);
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as Line;
-  } catch (error) {
-    console.error(`Error fetching line ${slug}:`, error);
-    throw error;
+    const linesRef = collection(db, "lines").withConverter(lineConverter)
+    const q = query(linesRef, orderBy("createdAt", "desc"))
+
+    // TODO: Fix this any
+    const querySnapshot: any = await getDocs(q)
+
+    const lines = querySnapshot.docs.map((doc: any) => doc.data())
+    return lines
+  } catch (error: any) {
+    throw new Error(error.message)
   }
 }
 
-export async function createLineIfNotExists(name: string, manufacturer?: string): Promise<Line> {
-  const slug = slugify(name);
-  const q = query(collection(db, 'lines'), where('slug', '==', slug));
-  const snapshot = await getDocs(q);
+export const getLine = async (slug: string) => {
+  try {
+    const linesRef = collection(db, "lines").withConverter(lineConverter)
+    const q = query(linesRef, where("slug", "==", slug))
+    // TODO: Fix this any
+    const querySnapshot: any = await getDocs(q)
 
-  if (!snapshot.empty) {
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as Line;
+    if (querySnapshot.empty) {
+      return null
+    }
+
+    const line = querySnapshot.docs[0].data()
+    return line
+  } catch (error: any) {
+    throw new Error(error.message)
   }
-
-  const ref = await addDoc(collection(db, 'lines'), {
-    name,
-    slug,
-    manufacturer: manufacturer || null,
-    createdAt: serverTimestamp(),
-  });
-
-  const newDoc = await getDoc(ref);
-  return { id: ref.id, ...newDoc.data() } as Line;
 }
+
+import { getDocs } from "firebase/firestore"

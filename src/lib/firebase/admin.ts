@@ -1,18 +1,17 @@
-// lib/firebase/admin.ts
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getStorage } from 'firebase-admin/storage';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { initializeApp, getApps } from "firebase/app"
+import { getStorage } from "firebase/storage"
 
-const serviceAccount = JSON.parse(
-  readFileSync(join(process.cwd(), 'lib/firebase/serviceAccountKey.json'), 'utf8')
-);
-
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccount),
-    storageBucket: 'starfigs-29d31', // 👈 reemplaza esto por el bucket real
-  });
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 }
 
-export const storage = getStorage();
+// Initialize Firebase
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+
+export const storage = getStorage(app)

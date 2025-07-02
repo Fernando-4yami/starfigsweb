@@ -2,6 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 🚀 OPTIMIZACIONES CRÍTICAS PARA LCP */
+@layer base {
+  html {
+    font-display: swap;
+    text-rendering: optimizeSpeed;
+  }
+
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-display: swap;
+  }
+
+  /* 🎯 ESTILOS CRÍTICOS PARA HERO - Evitar FOUC */
+  .hero-critical {
+    background: linear-gradient(to right, #2563eb, #1e40af);
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .hero-title-critical {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    font-display: swap;
+  }
+
+  @media (min-width: 768px) {
+    .hero-title-critical {
+      font-size: 3.75rem;
+    }
+  }
+
+  /* ✅ Optimizar fuentes */
+  * {
+    font-display: swap;
+  }
+}
+
+/* 🎨 Animación suave para el banner de cookies */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
 /* global.css */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
@@ -9,4 +68,46 @@
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* 🚀 OPTIMIZACIONES ADICIONALES */
+@layer utilities {
+  .transition-optimized {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* ✅ Evitar layout shifts */
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+
+  /* 🎯 Optimizar animaciones */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* 🚀 NUEVAS OPTIMIZACIONES PARA IMÁGENES CRÍTICAS */
+  .critical-image {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px;
+  }
+
+  /* 🎯 Preload hint para imágenes prioritarias */
+  img[data-priority="true"] {
+    content-visibility: auto;
+  }
+
+  /* 🚀 Optimizar scroll para galerías */
+  .gallery-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 🎯 Reducir layout shifts en cards */
+  .product-card-image {
+    content-visibility: auto;
+    contain-intrinsic-size: 300px 300px;
+  }
 }

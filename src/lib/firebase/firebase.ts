@@ -3,6 +3,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, Timestamp } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAuth } from 'firebase/auth'; // ✅ Agregar esta línea
 
 // ✅ Asegúrate que este bucket termina en `.appspot.com`, no `.firebasestorage.app`
 const firebaseConfig = {
@@ -21,4 +22,5 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export { app };
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const auth = getAuth(app); // ✅ Agregar esta línea
 export { Timestamp };

@@ -1,83 +1,126 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Timestamp } from 'firebase/firestore';
+"use client"
 
-interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  imageUrls: string[];
-  price: number;
-  heightCm?: number;
-  releaseDate?: Timestamp | null;
-}
+import type React from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+import { incrementProductViews, type Product } from "@/lib/firebase/products"
 
 interface ProductCardProps {
-  product: Product;
+  product: Product
+}
+
+// 🔧 FUNCIÓN HELPER PARA PARSEAR FECHA SEGURA (como fallback)
+const parseReleaseDate = (releaseDate: any): Date | null => {
+  if (!releaseDate) return null
+
+  // Si ya es un objeto Date (caso normal después de normalización)
+  if (releaseDate instanceof Date) {
+    return releaseDate
+  }
+
+  // Si es Timestamp de Firestore (fallback)
+  if (releaseDate.toDate && typeof releaseDate.toDate === "function") {
+    return releaseDate.toDate()
+  }
+
+  // Si es objeto con seconds (serializado - fallback)
+  if (releaseDate.seconds) {
+    return new Date(releaseDate.seconds * 1000)
+  }
+
+  // Si es string o number (fallback)
+  if (typeof releaseDate === "string" || typeof releaseDate === "number") {
+    return new Date(releaseDate)
+  }
+
+  console.warn("Formato de fecha no reconocido:", releaseDate)
+  return null
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const now = new Date();
-  const releaseDate = product.releaseDate?.toDate();
+  const now = new Date()
+
+  // 🔧 USAR FUNCIÓN HELPER PARA PARSEAR FECHA (principalmente como fallback)
+  const releaseDate = parseReleaseDate(product.releaseDate)
 
   const isCurrentMonth =
-    !!releaseDate &&
-    releaseDate.getFullYear() === now.getFullYear() &&
-    releaseDate.getMonth() === now.getMonth();
+    !!releaseDate && releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() === now.getMonth()
 
   const isFutureRelease =
     !!releaseDate &&
     (releaseDate.getFullYear() > now.getFullYear() ||
-      (releaseDate.getFullYear() === now.getFullYear() &&
-        releaseDate.getMonth() > now.getMonth()));
+      (releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() > now.getMonth()))
 
-  const showReleaseTag = !!releaseDate && (isCurrentMonth || isFutureRelease);
+  const showReleaseTag = !!releaseDate && (isCurrentMonth || isFutureRelease)
 
   const releaseMonthYear = releaseDate
-    ? format(releaseDate, 'MMMM yyyy', { locale: es }).replace(/^./, str => str.toUpperCase())
-    : '';
+    ? format(releaseDate, "MMMM yyyy", { locale: es }).replace(/^./, (str) => str.toUpperCase())
+    : ""
 
-  const tagColorClass = isCurrentMonth ? 'bg-blue-600' : 'bg-amber-600';
+  const tagColorClass = isCurrentMonth ? "bg-emerald-500" : "bg-amber-600"
+
+  // 🚀 FUNCIÓN MEJORADA PARA INCREMENTAR VISTAS
+  const handleClick = async (e: React.MouseEvent) => {
+    try {
+      console.log(`🔍 Incrementando views para producto: ${product.id} - ${product.name}`)
+
+      // Ejecutar sin await para no bloquear la navegación
+      incrementProductViews(product.id)
+        .then(() => {
+          console.log(`✅ Views incrementadas para: ${product.name}`)
+        })
+        .catch((error) => {
+          console.error(`❌ Error incrementando views para ${product.name}:`, error)
+        })
+    } catch (error) {
+      console.error("Error en handleClick:", error)
+    }
+  }
 
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group block text-inherit no-underline"
-    >
+    <Link href={`/products/${product.slug}`} className="group block text-inherit no-underline" onClick={handleClick}>
       <div className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
-        <div className="relative w-full" style={{ paddingTop: '100%' }}>
+        {/* Contenedor cuadrado para imagen */}
+        <div className="relative w-full h-0 pb-[100%] bg-gray-50 overflow-hidden">
+          {/* Etiqueta de lanzamiento */}
           {showReleaseTag && (
-            <span className={`absolute top-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}>
+            <span
+              className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}
+            >
               {releaseMonthYear}
             </span>
           )}
+
+          {/* 🚀 Usar thumbnailUrl (300px) si existe, sino imageUrl original */}
           <Image
-            src={product.imageUrls?.[0] || '/placeholder.png'}
+            src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-contain transition-transform duration-300 bg-white"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
           />
         </div>
 
+        {/* Info del producto */}
         <div className="p-4 flex flex-col gap-1">
-          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-2">
+          <h3 className="text-sm font-semibold text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-2">
             {product.name}
           </h3>
 
           {product.heightCm && (
-            <span className="text-sm text-gray-500">
+            <span className="text-xs text-gray-500">
               Altura: <strong>{product.heightCm} cm</strong>
             </span>
           )}
 
-          <span className="text-red-600 font-bold text-lg">
-            S/. {product.price.toFixed(2)}
-          </span>
+          {/* 🔧 SOLO MOSTRAR PRECIO SI ES MAYOR A 0 */}
+          {product.price > 0 && (
+            <span className="text-orange-600 font-bold text-base">S/. {product.price.toFixed(2)}</span>
+          )}
         </div>
       </div>
     </Link>
-  );
+  )
 }
