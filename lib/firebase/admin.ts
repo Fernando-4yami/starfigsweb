@@ -2,6 +2,20 @@ import { initializeApp, cert, getApps } from "firebase-admin/app"
 import { getStorage, type Storage } from "firebase-admin/storage"
 import { readFileSync } from "fs"
 import { join } from "path"
+import * as admin from "firebase-admin";
+import * as fs from "fs";
+
+if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(
+    fs.readFileSync("lib/firebase/serviceAccountKey.json", "utf8")
+  );
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
+
+export { admin };
 
 function initializeAdminAndGetStorage(): Storage | null {
   if (getApps().length > 0) {

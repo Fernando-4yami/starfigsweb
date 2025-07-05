@@ -112,12 +112,11 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     searchType: "line",
     seriesList: commonSeries,
   },
-
   ichiban: {
     name: "Ichiban Kuji",
     slug: "ichiban",
-    description: "Loterías premium japonesas con figuras exclusivas",
-    badge: "🎲 Sistema de lotería japonés • Figuras de colección únicas",
+    description: "",
+    badge: " ",
     iconName: "Gift",
     colors: {
       primary: "text-orange-800",

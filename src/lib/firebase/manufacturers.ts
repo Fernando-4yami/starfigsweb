@@ -1,112 +1,135 @@
 import { db } from "./firebase"
-import { collection, getDocs, query, orderBy, where, addDoc, serverTimestamp } from "firebase/firestore"
-import { slugify } from "@/lib/utils/slugify"
+import {
+  type DocumentData,
+  type QueryDocumentSnapshot,
+  type SnapshotOptions,
+  collection,
+  doc,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+  getDocs,
+} from "firebase/firestore"
+
+import { slugify, normalizeText } from "@/lib/utils"
 
 export interface Manufacturer {
-  id: string
+  id?: string
   name: string
   slug: string
-  logo: string
+  logo?: string
   description?: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 
-export interface Line {
-  id: string
-  name: string
-  slug: string
-  description?: string
+const manufacturerConverter = {
+  toFirestore(manufacturer: Manufacturer): DocumentData {
+    return {
+      name: manufacturer.name,
+      slug: manufacturer.slug,
+      logo: manufacturer.logo || "",
+      description: manufacturer.description || "",
+      createdAt: manufacturer.createdAt || serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Manufacturer {
+    const data = snapshot.data(options)
+    return {
+      id: snapshot.id,
+      name: data.name,
+      slug: data.slug,
+      logo: data.logo,
+      description: data.description,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+    }
+  },
 }
 
-// --- GETTERS ---
-
-export async function getManufacturers(): Promise<Manufacturer[]> {
+export const addManufacturer = async (manufacturer: Omit<Manufacturer, "id">) => {
   try {
-    const q = query(collection(db, "manufacturers"), orderBy("name"))
-    const snapshot = await getDocs(q)
+    const manufacturersRef = collection(db, "manufacturers").withConverter(manufacturerConverter)
+    const newManufacturerDoc = doc(manufacturersRef)
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Manufacturer[]
-  } catch (error) {
-    console.error("Error fetching manufacturers:", error)
-    return []
-  }
-}
+    const slug = slugify(manufacturer.name)
+    const normalizedName = normalizeText(manufacturer.name)
 
-export async function getManufacturerBySlug(slug: string): Promise<Manufacturer> {
-  try {
-    const q = query(collection(db, "manufacturers"), where("slug", "==", slug))
-    const snapshot = await getDocs(q)
-
-    if (snapshot.empty) throw new Error(`Fabricante "${slug}" no encontrado`)
-
-    const doc = snapshot.docs[0]
-    return { id: doc.id, ...doc.data() } as Manufacturer
-  } catch (error) {
-    console.error(`Error fetching manufacturer ${slug}:`, error)
-    throw error
-  }
-}
-
-export async function getLines(): Promise<Line[]> {
-  try {
-    const q = query(collection(db, "lines"), orderBy("name"))
-    const snapshot = await getDocs(q)
-
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Line[]
-  } catch (error) {
-    console.error("Error fetching lines:", error)
-    return []
-  }
-}
-
-export async function getLineBySlug(slug: string): Promise<Line> {
-  try {
-    const q = query(collection(db, "lines"), where("slug", "==", slug))
-    const snapshot = await getDocs(q)
-
-    if (snapshot.empty) throw new Error(`Línea "${slug}" no encontrada`)
-
-    const doc = snapshot.docs[0]
-    return { id: doc.id, ...doc.data() } as Line
-  } catch (error) {
-    console.error(`Error fetching line ${slug}:`, error)
-    throw error
-  }
-}
-
-// --- CREATORS ---
-
-export async function createManufacturerIfNotExists(name: string): Promise<Manufacturer> {
-  const slug = slugify(name)
-
-  try {
-    const existing = await getManufacturerBySlug(slug)
-    return existing
-  } catch {
-    const newDoc = await addDoc(collection(db, "manufacturers"), {
-      name,
-      slug,
-      logo: "", // Puedes permitir agregar logo luego
-      description: "",
-      createdAt: serverTimestamp(),
+    await setDoc(newManufacturerDoc, {
+      ...manufacturer,
+      slug: slug,
+      name: normalizedName,
     })
 
-    return {
-      id: newDoc.id,
-      name,
-      slug,
+    return { id: newManufacturerDoc.id, ...manufacturer }
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}
+
+export const getManufacturers = async () => {
+  try {
+    const manufacturersRef = collection(db, "manufacturers").withConverter(manufacturerConverter)
+    const q = query(manufacturersRef, orderBy("createdAt", "desc"))
+
+    const querySnapshot = await getDocs(q)
+    const manufacturers = querySnapshot.docs.map((doc) => doc.data())
+    return manufacturers
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}
+
+export const getManufacturer = async (slug: string) => {
+  try {
+    const manufacturersRef = collection(db, "manufacturers").withConverter(manufacturerConverter)
+    const q = query(manufacturersRef, where("slug", "==", slug))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      return null
+    }
+
+    const manufacturer = querySnapshot.docs[0].data()
+    return manufacturer
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}
+
+// 🆕 FUNCIÓN FALTANTE: createManufacturerIfNotExists
+export const createManufacturerIfNotExists = async (name: string): Promise<Manufacturer> => {
+  try {
+    const normalizedName = normalizeText(name)
+    const slug = slugify(normalizedName)
+
+    // Buscar si ya existe
+    const existingManufacturer = await getManufacturer(slug)
+    if (existingManufacturer) {
+      return existingManufacturer
+    }
+
+    // Si no existe, crear nuevo fabricante
+    const newManufacturer: Omit<Manufacturer, "id"> = {
+      name: normalizedName,
+      slug: slug,
       logo: "",
       description: "",
     }
+
+    const result = await addManufacturer(newManufacturer)
+    return {
+      id: result.id,
+      name: result.name,
+      slug: slug,
+      logo: "",
+      description: "",
+    }
+  } catch (error: any) {
+    console.error("Error creating manufacturer:", error)
+    throw new Error(`Failed to create manufacturer: ${error.message}`)
   }
 }
-
-// ❌ ELIMINAR ESTA FUNCIÓN DUPLICADA - Ya existe en lines.ts
-// export async function createLineIfNotExists(name: string): Promise<Line> {
-//   // ... función eliminada para evitar conflictos
-// }

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, Home, Package, Calendar, Filter, X } from "lucide-react"
+import { ChevronRight, Home, Package, Calendar, Filter, X } from 'lucide-react'
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import DynamicIcon from "@/components/dynamic-icon"
@@ -73,20 +73,6 @@ export default function CategoryPage({ config }: CategoryPageProps) {
           <ChevronRight className="w-4 h-4" />
           <span className={`${config.colors.primary} font-medium`}>{config.name}</span>
         </nav>
-
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <DynamicIcon name={config.iconName} className={`w-12 h-12 ${config.colors.secondary} mr-3`} />
-            <h1 className={`text-3xl font-bold ${config.colors.primary}`}>{config.name}</h1>
-          </div>
-          <p className="text-gray-600 mt-2">{config.description}</p>
-          <div
-            className={`mt-4 inline-flex items-center px-4 py-2 ${config.colors.secondary.replace("text-", "bg-").replace("-600", "-100")} ${config.colors.primary} rounded-full text-sm font-medium`}
-          >
-            {config.badge}
-          </div>
-        </div>
 
         {/* 🎯 REF PARA SCROLL TO TOP */}
         <div ref={resultsRef} />

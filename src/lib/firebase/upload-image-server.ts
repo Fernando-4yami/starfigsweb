@@ -1,3 +1,4 @@
+// src/lib/firebase/upload-image-server.ts
 import { storage as adminStorage } from "../../../lib/firebase/admin"
 import axios from "axios"
 import { v4 as uuidv4 } from "uuid"
@@ -20,7 +21,9 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
 
     const webpBuffer = await sharp(originalBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
-    const bucket = (adminStorage as any).bucket()
+    
+    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE
+    const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(webpBuffer, {
@@ -56,7 +59,9 @@ export async function uploadImageBufferAsWebP(imageBuffer: Buffer, originalFileN
     console.log(`Processing ${originalFileName} for WebP conversion and upload.`)
     const webpBuffer = await sharp(imageBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
-    const bucket = (adminStorage as any).bucket()
+    
+    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE
+    const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(webpBuffer, {
@@ -77,7 +82,7 @@ export async function uploadImageBufferAsWebP(imageBuffer: Buffer, originalFileN
 }
 
 /**
- * NUEVA: Sube un buffer ya procesado (sin procesamiento adicional)
+ * 🔧 ARREGLADA: Sube un buffer ya procesado especificando bucket explícitamente
  */
 export async function uploadProcessedImageBuffer(
   processedBuffer: Buffer,
@@ -94,7 +99,9 @@ export async function uploadProcessedImageBuffer(
   try {
     console.log(`Uploading already processed ${originalFileName}.`)
     const filename = `${folder}/${uuidv4()}.webp`
-    const bucket = (adminStorage as any).bucket()
+    
+    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE - ESTA ES LA LÍNEA CLAVE
+    const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(processedBuffer, {

@@ -1,17 +1,52 @@
-import { initializeApp, getApps } from "firebase/app"
-import { getStorage } from "firebase/storage"
+// src/lib/firebase/admin.ts
+import admin from 'firebase-admin'
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+// Verificar variables de entorno
+if (!process.env.FIREBASE_PROJECT_ID) {
+  console.error('❌ FIREBASE_PROJECT_ID no está configurado')
+  throw new Error('FIREBASE_PROJECT_ID is required')
 }
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+if (!process.env.FIREBASE_STORAGE_BUCKET) {
+  console.error('❌ FIREBASE_STORAGE_BUCKET no está configurado')
+  throw new Error('FIREBASE_STORAGE_BUCKET is required')
+}
 
-export const storage = getStorage(app)
+if (!process.env.FIREBASE_CLIENT_EMAIL) {
+  console.error('❌ FIREBASE_CLIENT_EMAIL no está configurado')
+  throw new Error('FIREBASE_CLIENT_EMAIL is required')
+}
+
+if (!process.env.FIREBASE_PRIVATE_KEY) {
+  console.error('❌ FIREBASE_PRIVATE_KEY no está configurado')
+  throw new Error('FIREBASE_PRIVATE_KEY is required')
+}
+
+// Inicializar Firebase Admin SDK (solo una vez)
+if (!admin.apps.length) {
+  try {
+    console.log('🔧 Inicializando Firebase Admin SDK...')
+    console.log('📦 Project ID:', process.env.FIREBASE_PROJECT_ID)
+    console.log('🪣 Storage Bucket:', process.env.FIREBASE_STORAGE_BUCKET)
+    console.log('📧 Client Email:', process.env.FIREBASE_CLIENT_EMAIL)
+    
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      }),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    })
+    
+    console.log('✅ Firebase Admin SDK inicializado correctamente')
+  } catch (error) {
+    console.error('❌ Error inicializando Firebase Admin SDK:', error)
+    throw error
+  }
+}
+
+// Exportar instancias del Admin SDK
+export const storage = admin.storage()
+export const db = admin.firestore()
+export default admin
