@@ -240,7 +240,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
               )}
 
               {/* ✅ LÍNEAS - Solo para categorías específicas */}
-              {(config.name === "Scale Figures" || config.name === "Figuras Pricing") &&
+              {(config.name === "Figuras Escala" || config.name === "Figuras de Premio") &&
                 filterOptions.lines.length > 0 && (
                   <div className="mb-6">
                     <h4 className="font-medium text-gray-700 mb-3">Líneas</h4>

@@ -41,7 +41,7 @@ const commonSeries = [
 
 export const categoryConfigs: Record<string, CategoryConfig> = {
   scale: {
-    name: "Scale Figures",
+    name: "Figuras Escala",
     slug: "scale",
     description: "Figuras a escala de máximo detalle y calidad",
     badge: "📏 Proporciones perfectas • Detalles excepcionales",
@@ -227,7 +227,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   },
 
   pricing: {
-    name: "Figuras Pricing",
+    name: "Figuras de Premio",
     slug: "pricing",
     description: "Figuras de líneas premium con excelente relación calidad-precio",
     badge: "💰 Líneas premium con excelente relación calidad-precio • Más de 20 líneas disponibles",

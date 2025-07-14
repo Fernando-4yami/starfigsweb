@@ -96,8 +96,8 @@ export default function Navbar() {
     { name: "FIGMA", path: "/categorias/figma" },
     { name: "FIGUARTS", path: "/categorias/figuarts" },
     { name: "PLUSH", path: "/categorias/plush" },
-    { name: "SCALE", path: "/categorias/scale" },
-    { name: "FIGURAS PRICING", path: "/categorias/pricing" },
+    { name: "ESCALA", path: "/categorias/scale" },
+    { name: "FIGURAS DE PREMIO", path: "/categorias/pricing" },
   ]
 
   return (
@@ -221,7 +221,7 @@ export default function Navbar() {
               className="block text-center text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
-              © 2024 Starfigs - Tienda de Anime
+              © 2025 Starfigs
             </Link>
           </div>
         </div>
