@@ -112,6 +112,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     searchType: "line",
     seriesList: commonSeries,
   },
+
   ichiban: {
     name: "Ichiban Kuji",
     slug: "ichiban",
