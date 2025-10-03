@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -26,7 +25,6 @@ export default function Navbar() {
     }
   }
 
-  // Scroll detection
   useEffect(() => {
     const controlNavbar = () => {
       const currentScrollY = window.scrollY
@@ -43,9 +41,7 @@ export default function Navbar() {
     }
 
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsNavbarVisible(true)
-      }
+      if (window.innerWidth >= 1024) setIsNavbarVisible(true)
     }
 
     window.addEventListener("scroll", controlNavbar, { passive: true })
@@ -97,8 +93,8 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            {/* Logo con imagen pequeña e invertida en dark */}
+          <div className="flex items-center justify-between h-12">
+            {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center">
                 <Image
@@ -112,18 +108,18 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Buscador - Desktop */}
-            <div className="hidden md:block flex-1 max-w-lg mx-8">
-              <form onSubmit={handleSearch} className="relative">
+            {/* Buscador Desktop */}
+            <div className="hidden md:flex flex-1 mx-8">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <input
                   ref={searchInputRef}
                   type="text"
                   placeholder="Buscar figuras, nendoroids, plushies..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                  className="w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-400 w-4 h-4" />
               </form>
             </div>
 
@@ -138,8 +134,6 @@ export default function Navbar() {
                   {category.name}
                 </Link>
               ))}
-
-              {/* 🔥 Ocultamos el botón de tema en dark */}
               <div className="dark:hidden">
                 <ThemeToggle />
               </div>
@@ -147,7 +141,6 @@ export default function Navbar() {
 
             {/* Botones Mobile */}
             <div className="flex items-center gap-2 lg:hidden">
-              {/* 🔥 Ocultamos también en dark en móvil */}
               <div className="dark:hidden">
                 <ThemeToggle />
               </div>
@@ -159,6 +152,21 @@ export default function Navbar() {
                 {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
+          </div>
+
+          {/* Buscador Móvil */}
+          <div className="md:hidden mt-2 px-4 mb-3">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Buscar figuras..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-400 w-4 h-4" />
+            </form>
           </div>
         </div>
       </nav>
@@ -177,8 +185,7 @@ export default function Navbar() {
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-400">Categorías</h2>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -189,24 +196,20 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Contenido */}
-          <div className="flex-1 overflow-y-auto py-4">
-            <div className="space-y-1 px-4">
-              {categories.map((category) => (
-                <Link
-                  key={category.name}
-                  href={category.path}
-                  className="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
+          <div className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
+            {categories.map((category) => (
+              <Link
+                key={category.name}
+                href={category.path}
+                className="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {category.name}
+              </Link>
+            ))}
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+          <div className="border-t border-gray-200 dark:border-gray-800 p-4">
             <Link
               href="/"
               className="block text-center text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors font-medium"
