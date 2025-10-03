@@ -9,7 +9,6 @@ import { useEffect, useState, useMemo, useCallback } from "react"
 import Image from "next/image"
 import { parseSerializedDate, serializeProduct, type SerializedProduct } from "@/lib/serialize-product"
 
-// 🎯 Componentes extraídos
 import ProductBreadcrumbs from "@/components/product/product-breadcrumbs"
 import ProductInfo from "@/components/product/product-info"
 import ProductSpecs from "@/components/product/product-specs"
@@ -24,7 +23,6 @@ interface ProductPageClientProps {
   initialProduct?: SerializedProduct
 }
 
-// 🚀 CRITICAL IMAGE - Componente separado para LCP
 function CriticalProductImage({
   src,
   alt,
@@ -80,10 +78,8 @@ function CriticalProductImage({
 export default function ProductPageClient({ params, initialProduct }: ProductPageClientProps) {
   const [product, setProduct] = useState<SerializedProduct | null>(initialProduct || null)
   const [loading, setLoading] = useState(!initialProduct)
-  const [showFullGallery, setShowFullGallery] = useState(false)
   const [criticalImageLoaded, setCriticalImageLoaded] = useState(false)
 
-  // 🚀 FETCH PRINCIPAL - Solo si no hay initialProduct
   useEffect(() => {
     if (initialProduct) {
       setLoading(false)
@@ -99,7 +95,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
         }
 
         const serializedProduct = serializeProduct(fetchedProduct)
-
         setProduct(serializedProduct)
         setLoading(false)
       } catch (error) {
@@ -111,36 +106,25 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
     fetchProduct()
   }, [params.slug, initialProduct])
 
-  // 🚀 TRACKING - Solo si tenemos producto
   useEffect(() => {
     if (!product) return
-
     const timer = setTimeout(() => {
       Promise.all([
         incrementProductViews(product.id),
         trackProductView(product.id, product.name, product.category || "figura", product.price),
       ]).catch(console.error)
     }, 100)
-
     return () => clearTimeout(timer)
   }, [product])
 
-  // 🚀 CALLBACKS MEMOIZADOS
   const handleWhatsAppClick = useCallback(() => {
     if (product) {
       trackWhatsAppClick(product.name, product.id)
     }
   }, [product])
 
-  // 🚀 CÁLCULOS MEMOIZADOS
   const productData = useMemo(() => {
     if (!product) return null
-
-    console.log("[v0] Product data:", {
-      stock: product.stock,
-      discount: product.discount,
-      lowStockThreshold: product.lowStockThreshold,
-    })
 
     const now = new Date()
     const releaseDate = parseSerializedDate(product.releaseDate)
@@ -150,7 +134,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
       (releaseDate.getFullYear() > now.getFullYear() ||
         (releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() > now.getMonth()))
 
-    // 🔧 SOLO CALCULAR releaseMonthYear SI showReleaseTag ES TRUE
     const releaseMonthYear =
       showReleaseTag && releaseDate
         ? format(releaseDate, "MMMM yyyy", { locale: es }).replace(/^./, (str) => str.toUpperCase())
@@ -160,18 +143,12 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
     const whatsappMessage = ` *${product.name}*.\n${productUrl}`
     const whatsappUrl = `https://wa.me/51926951167?text=${encodeURIComponent(whatsappMessage)}`
 
-    return {
-      releaseDate,
-      showReleaseTag,
-      releaseMonthYear,
-      productUrl,
-      whatsappUrl,
-    }
+    return { releaseDate, showReleaseTag, releaseMonthYear, productUrl, whatsappUrl }
   }, [product])
 
   if (loading || !product || !productData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
@@ -180,19 +157,17 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   const mainImageUrl = product.imageUrls?.[0] || "/placeholder.svg"
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
-      {/* Breadcrumbs */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12 bg-white text-gray-900">
       <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* 🚀 IMAGEN CRÍTICA */}
         <div className="space-y-4">
           {product.imageUrls?.length > 1 ? (
             <ProgressiveGallery
               imageUrls={product.imageUrls}
               galleryThumbnailUrls={product.galleryThumbnailUrls}
               productName={product.name}
-              priority={true} // Para LCP
+              priority={true}
             />
           ) : (
             <CriticalProductImage
@@ -202,18 +177,15 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             />
           )}
 
-          {/* Image Disclaimer */}
           <div className="text-xs text-gray-500 italic text-center px-2 py-1 bg-gray-50 rounded border-l-2 border-gray-300">
             <span className="opacity-75">
               Las imágenes mostradas son de carácter referencial y pueden no corresponder exactamente al producto final.
             </span>
           </div>
 
-          {/* Share buttons */}
           <ShareButtons productUrl={productData.productUrl} productName={product.name} />
         </div>
 
-        {/* Información del producto */}
         <div className="space-y-6">
           <ProductInfo
             name={product.name}
@@ -227,10 +199,14 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             discount={product.discount}
           />
 
-          {/* 🎉 BANNER DE PROMOCIÓN */}
           <PromotionBanner />
 
-          <ProductSpecs brand={product.brand} line={product.line} heightCm={product.heightCm} scale={product.scale} />
+          <ProductSpecs
+            brand={product.brand}
+            line={product.line}
+            heightCm={product.heightCm}
+            scale={product.scale}
+          />
 
           {product.description && (
             <div className="space-y-2">
@@ -248,7 +224,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
         </div>
       </div>
 
-      {/* 🚀 PRODUCTOS RELACIONADOS INFINITOS */}
       <div className="mt-16">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-blue-800 mb-2">Productos relacionados</h2>

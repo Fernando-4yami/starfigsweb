@@ -92,7 +92,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
           </div>
 
           {/* Contenido principal */}
-          <div className="flex-1">
+          <div className="flex-1 bg-white p-4 rounded-lg shadow-md/5 border border-gray-200">
             {/* Barra superior */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 
                             p-4 bg-white rounded-lg shadow-md/5 border border-gray-200">
@@ -104,7 +104,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                   <Filter className="w-4 h-4" />
                   Filtros {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </button>
-                <div className={`flex items-center gap-2 ${config.colors.secondary}`}>
+                <div className="flex items-center gap-2 text-blue-600">
                   <Package className="w-5 h-5" />
                   <span className="font-semibold">
                     {paginationInfo.startIndex}-{paginationInfo.endIndex} de {paginationInfo.totalItems} productos
@@ -126,7 +126,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                   id="sort"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className={`px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 ${config.colors.focus}`}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="newest">Más recientes</option>
                   <option value="oldest">Más antiguos</option>
@@ -144,7 +144,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                 <p className="text-gray-600 mb-6">Intenta ajustar los filtros para ver más resultados</p>
                 <button
                   onClick={clearAllFilters}
-                  className={`px-6 py-3 ${config.colors.secondary.replace("text-", "bg-")} text-white font-medium rounded-lg hover:${config.colors.secondary.replace("text-", "bg-").replace("-600", "-700")} transition-colors`}
+                  className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Limpiar filtros
                 </button>
@@ -224,7 +224,7 @@ function FiltersContent({
         {activeFiltersCount > 0 && (
           <button
             onClick={clearAllFilters}
-            className={`text-sm ${config.colors.secondary} hover:${config.colors.secondary.replace("-600", "-700")}`}
+            className="text-sm text-blue-600 hover:text-blue-700"
           >
             Limpiar ({activeFiltersCount})
           </button>
@@ -247,7 +247,7 @@ function FiltersContent({
                       : filters.series.filter((s: string) => s !== series)
                     handleFilterChange("series", newSeries)
                   }}
-                  className={`rounded border-gray-300 ${config.colors.secondary} ${config.colors.focus}`}
+                  className="rounded border-gray-300 accent-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   {series} ({products.filter((p) => p.name.toLowerCase().includes(series.toLowerCase())).length})
@@ -274,7 +274,7 @@ function FiltersContent({
                       : filters.brands.filter((b: string) => b !== brand)
                     handleFilterChange("brands", newBrands)
                   }}
-                  className={`rounded border-gray-300 ${config.colors.secondary} ${config.colors.focus}`}
+                  className="rounded border-gray-300 accent-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   {brand} ({products.filter((p) => p.brand === brand).length})
@@ -301,7 +301,7 @@ function FiltersContent({
                       : filters.categories.filter((c: string) => c !== category)
                     handleFilterChange("categories", newCategories)
                   }}
-                  className={`rounded border-gray-300 ${config.colors.secondary} ${config.colors.focus}`}
+                  className="rounded border-gray-300 accent-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   {category} ({products.filter((p) => p.category === category).length})
@@ -365,7 +365,7 @@ function FiltersContent({
                       : filters.scales.filter((s: string) => s !== scale)
                     handleFilterChange("scales", newScales)
                   }}
-                  className={`rounded border-gray-300 ${config.colors.secondary} ${config.colors.focus}`}
+                  className="rounded border-gray-300 accent-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   {scale} ({products.filter((p) => p.scale === scale).length})
@@ -393,7 +393,7 @@ function FiltersContent({
                         : filters.lines.filter((l: string) => l !== line)
                       handleFilterChange("lines", newLines)
                     }}
-                    className={`rounded border-gray-300 ${config.colors.secondary} ${config.colors.focus}`}
+                    className="rounded border-gray-300 accent-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-600">
                     {line} ({products.filter((p) => p.line === line).length})
@@ -414,7 +414,7 @@ function FiltersContent({
               name="releaseDate"
               checked={filters.hasReleaseDate === null}
               onChange={() => handleFilterChange("hasReleaseDate", null)}
-              className={`${config.colors.secondary} ${config.colors.focus}`}
+              className="accent-blue-600 focus:ring-blue-500"
             />
             <span className="ml-2 text-sm text-gray-600">Todos</span>
           </label>
@@ -424,7 +424,7 @@ function FiltersContent({
               name="releaseDate"
               checked={filters.hasReleaseDate === true}
               onChange={() => handleFilterChange("hasReleaseDate", true)}
-              className={`${config.colors.secondary} ${config.colors.focus}`}
+              className="accent-blue-600 focus:ring-blue-500"
             />
             <span className="ml-2 text-sm text-gray-600">Pre-venta</span>
           </label>
@@ -434,7 +434,7 @@ function FiltersContent({
               name="releaseDate"
               checked={filters.hasReleaseDate === false}
               onChange={() => handleFilterChange("hasReleaseDate", false)}
-              className={`${config.colors.secondary} ${config.colors.focus}`}
+              className="accent-blue-600 focus:ring-blue-500"
             />
             <span className="ml-2 text-sm text-gray-600">Lanzamientos pasados</span>
           </label>
