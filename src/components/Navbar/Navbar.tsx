@@ -5,13 +5,12 @@ import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 import Image from "next/image"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [isNavbarVisible, setIsNavbarVisible] = useState(false) // oculto por defecto
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -25,7 +24,6 @@ export default function Navbar() {
     }
   }
 
-  // Mostrar/ocultar navbar al hacer scroll (solo móvil)
   useEffect(() => {
     const controlNavbar = () => {
       const currentScrollY = window.scrollY
@@ -40,9 +38,40 @@ export default function Navbar() {
       }
       setLastScrollY(currentScrollY)
     }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setIsNavbarVisible(true)
+    }
+
     window.addEventListener("scroll", controlNavbar, { passive: true })
-    return () => window.removeEventListener("scroll", controlNavbar)
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("scroll", controlNavbar)
+      window.removeEventListener("resize", handleResize)
+    }
   }, [lastScrollY])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuOpen && !(event.target as Element).closest(".mobile-menu")) {
+        setMobileMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden"
+      setIsNavbarVisible(true)
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [mobileMenuOpen])
 
   const categories = [
     { name: "ICHIBAN KUJI", path: "/categorias/ichiban-kuji" },
@@ -58,7 +87,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 bg-gray-50 border-b border-gray-200 transition-transform duration-300 ease-in-out ${
+        className={`sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200 transition-transform duration-300 ease-in-out ${
           isNavbarVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -67,7 +96,14 @@ export default function Navbar() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center">
-                <Image src="/starfigs.png" alt="Starfigs Logo" width={120} height={32} className="h-8 w-auto" priority />
+                <Image
+                  src="/starfigs.png"
+                  alt="Starfigs Logo"
+                  width={120}
+                  height={32}
+                  className="h-8 w-auto"
+                  priority
+                />
               </Link>
             </div>
 
@@ -80,7 +116,7 @@ export default function Navbar() {
                   placeholder="Buscar figuras, nendoroids, plushies..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-amber-500 focus:border-transparent text-sm"
+                  className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               </form>
@@ -97,16 +133,10 @@ export default function Navbar() {
                   {category.name}
                 </Link>
               ))}
-              <div className="hidden">
-                <ThemeToggle /> {/* oculto */}
-              </div>
             </div>
 
             {/* Botones Mobile */}
             <div className="flex items-center gap-2 lg:hidden">
-              <div className="hidden">
-                <ThemeToggle /> {/* oculto */}
-              </div>
               <button
                 className="p-2 rounded-md text-gray-700 hover:text-amber-600 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -126,7 +156,7 @@ export default function Navbar() {
                 placeholder="Buscar figuras..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-amber-500 focus:border-transparent text-sm"
+                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             </form>
@@ -135,11 +165,15 @@ export default function Navbar() {
       </nav>
 
       {/* Overlay Mobile */}
-      {mobileMenuOpen && <div className="fixed inset-0 z-40 lg:hidden bg-black bg-opacity-50 transition-opacity" />}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+        </div>
+      )}
 
       {/* Menú Móvil */}
       <div
-        className={`mobile-menu fixed top-0 right-0 z-50 h-full w-80 max-w-sm bg-gray-50 shadow-xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`mobile-menu fixed top-0 right-0 z-50 h-full w-80 max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:hidden ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
