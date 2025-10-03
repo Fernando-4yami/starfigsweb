@@ -1,29 +1,24 @@
 "use client"
 
-import { Moon, Sun } from "lucide-react"
+import { Sun } from "lucide-react"
+import { useEffect } from "react"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { setTheme } = useTheme()
 
-  // Evitar hydration mismatch
+  // Forzar siempre light
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return <div className="w-9 h-9 rounded-md border border-border" />
-  }
+    setTheme("light")
+  }, [setTheme])
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-md border border-border hover:bg-accent transition-colors"
-      aria-label="Toggle theme"
+      className="p-2 rounded-md border border-border bg-accent text-foreground cursor-not-allowed opacity-50"
+      aria-label="Tema fijo a claro"
+      disabled
     >
-      {theme === "dark" ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-foreground" />}
+      <Sun className="w-5 h-5 text-yellow-500" />
     </button>
   )
 }
