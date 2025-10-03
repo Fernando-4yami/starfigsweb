@@ -1,5 +1,5 @@
-// 🔧 Script para bajar S/. 20 a TODOS los productos
-// Ejecutar con: node scripts/decrease-all-prices-by-20.mjs
+// 🔧 Script para reducir S/. 10 a productos de 10 soles o menos
+// Ejecutar con: node scripts/decrease-under-10-by-10.mjs
 
 import admin from 'firebase-admin'
 import { readFile } from 'fs/promises'
@@ -24,12 +24,13 @@ const db = admin.firestore()
 
 // 🔧 Configuración
 const CONFIG = {
-  decreaseAmount: 20,
+  decreaseAmount: 10,
+  maxPrice: 10,
   collectionName: 'products',
 }
 
 async function main() {
-  console.log('🔧 Disminuyendo S/. 20 a TODOS los productos...')
+  console.log(`🔧 Reduciendo S/. ${CONFIG.decreaseAmount} a productos con precio <= S/. ${CONFIG.maxPrice}...`)
   const snapshot = await db.collection(CONFIG.collectionName).get()
 
   if (snapshot.empty) {
@@ -50,15 +51,17 @@ async function main() {
       continue
     }
 
-    const newPrice = Math.max(originalPrice - CONFIG.decreaseAmount, 0) // evita negativos
+    if (originalPrice <= CONFIG.maxPrice) {
+      const newPrice = Math.max(0, originalPrice - CONFIG.decreaseAmount) // Evitar precios negativos
 
-    try {
-      await doc.ref.update({ price: newPrice })
-      updated++
-      console.log(`✅ ${data.name || doc.id}: S/. ${originalPrice} → S/. ${newPrice}`)
-    } catch (err) {
-      console.error(`❌ Error al actualizar ${data.name || doc.id}:`, err.message)
-      errors++
+      try {
+        await doc.ref.update({ price: newPrice })
+        updated++
+        console.log(`✅ ${data.name || doc.id}: S/. ${originalPrice} → S/. ${newPrice}`)
+      } catch (err) {
+        console.error(`❌ Error al actualizar ${data.name || doc.id}:`, err.message)
+        errors++
+      }
     }
   }
 

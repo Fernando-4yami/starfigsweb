@@ -2,112 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🚀 OPTIMIZACIONES CRÍTICAS PARA LCP */
+/* Variables globales estilo shadcn/ui */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 47.4% 11.2%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 47.4% 11.2%;
+
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 215 20.2% 65.1%;
+}
+
+/* 🌙 Variables para dark mode */
+.dark {
+  --background: 222.2 47.4% 7%;        /* un gris oscuro pero no negro */
+  --foreground: 210 40% 96%;           /* texto casi blanco */
+
+  --card: 222.2 47.4% 10%;
+  --card-foreground: 210 40% 96%;
+
+  --popover: 222.2 47.4% 10%;
+  --popover-foreground: 210 40% 96%;
+
+  --primary: 210 40% 96%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 96%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 70%;
+
+  --accent: 217.2 32.6% 20%;
+  --accent-foreground: 210 40% 96%;
+
+  --destructive: 0 62.8% 40%;
+  --destructive-foreground: 210 40% 96%;
+
+  --border: 217.2 32.6% 25%;
+  --input: 217.2 32.6% 25%;
+  --ring: 212.7 26.8% 83.9%;
+}
+
 @layer base {
-  html {
-    font-display: swap;
-    text-rendering: optimizeSpeed;
+  * {
+    @apply border-border;
   }
 
   body {
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-display: swap;
-  }
-
-  /* 🎯 ESTILOS CRÍTICOS PARA HERO - Evitar FOUC */
-  .hero-critical {
-    background: linear-gradient(to right, #2563eb, #1e40af);
-    color: white;
-    padding: 4rem 0;
-    margin-bottom: 3rem;
-    position: relative;
-  }
-
-  .hero-title-critical {
-    font-size: 2.25rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    line-height: 1.1;
-    font-display: swap;
-  }
-
-  @media (min-width: 768px) {
-    .hero-title-critical {
-      font-size: 3.75rem;
-    }
-  }
-
-  /* ✅ Optimizar fuentes */
-  * {
-    font-display: swap;
-  }
-}
-
-/* 🎨 Animación suave para el banner de cookies */
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-/* global.css */
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* 🚀 OPTIMIZACIONES ADICIONALES */
-@layer utilities {
-  .transition-optimized {
-    transition-property: transform, opacity;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
-  /* ✅ Evitar layout shifts */
-  .aspect-square {
-    aspect-ratio: 1 / 1;
-  }
-
-  /* 🎯 Optimizar animaciones */
-  .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  /* 🚀 NUEVAS OPTIMIZACIONES PARA IMÁGENES CRÍTICAS */
-  .critical-image {
-    content-visibility: auto;
-    contain-intrinsic-size: 500px;
-  }
-
-  /* 🎯 Preload hint para imágenes prioritarias */
-  img[data-priority="true"] {
-    content-visibility: auto;
-  }
-
-  /* 🚀 Optimizar scroll para galerías */
-  .gallery-scroll {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* 🎯 Reducir layout shifts en cards */
-  .product-card-image {
-    content-visibility: auto;
-    contain-intrinsic-size: 300px 300px;
+    @apply bg-background text-foreground;
   }
 }

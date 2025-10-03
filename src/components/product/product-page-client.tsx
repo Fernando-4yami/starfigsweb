@@ -136,12 +136,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   const productData = useMemo(() => {
     if (!product) return null
 
-    console.log("[v0] Product data:", {
-      stock: product.stock,
-      discount: product.discount,
-      lowStockThreshold: product.lowStockThreshold,
-    })
-
     const now = new Date()
     const releaseDate = parseSerializedDate(product.releaseDate)
 
@@ -157,7 +151,7 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
         : ""
 
     const productUrl = `https://starfigsperu.com/products/${product.slug}`
-    const whatsappMessage = ` *${product.name}*.\n${productUrl}`
+    const whatsappMessage = `Hola, estoy interesado en reservar el producto *${product.name}*.\n${productUrl}`
     const whatsappUrl = `https://wa.me/51926951167?text=${encodeURIComponent(whatsappMessage)}`
 
     return {
@@ -243,7 +237,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             whatsappUrl={productData.whatsappUrl}
             onWhatsAppClick={handleWhatsAppClick}
             releaseDate={product.releaseDate}
-            stock={product.stock}
           />
         </div>
       </div>

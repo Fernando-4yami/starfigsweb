@@ -89,6 +89,14 @@ function normalizeForComparison(text: string): string {
   return normalizeText(text).toLowerCase()
 }
 
+export interface Discount {
+  type: "percentage" | "fixed" // Tipo de descuento: porcentaje o monto fijo
+  value: number // Valor del descuento (ej: 20 para 20% o 50 para $50)
+  startDate?: Date | null // Fecha de inicio del descuento (opcional)
+  endDate?: Date | null // Fecha de fin del descuento (opcional)
+  isActive: boolean // Si el descuento está activo
+}
+
 // 🎯 INTERFAZ OPTIMIZADA
 interface FirebaseProductData {
   name?: string
@@ -107,6 +115,15 @@ interface FirebaseProductData {
   scale?: string
   views?: number
   lastViewedAt?: any
+  stock?: number
+  lowStockThreshold?: number
+  discount?: {
+    type: "percentage" | "fixed"
+    value: number
+    startDate?: any
+    endDate?: any
+    isActive: boolean
+  }
   [key: string]: any
 }
 
@@ -128,11 +145,25 @@ export interface Product {
   category?: string
   views?: number
   lastViewedAt?: Date | null
+  stock?: number // Cantidad disponible en inventario
+  lowStockThreshold?: number // Umbral para mostrar alerta de stock bajo
+  discount?: Discount // Descuento opcional
 }
 
 // 🚀 NORMALIZACIÓN CORREGIDA
 function normalizeProduct(docData: any, docId: string): Product {
   const data: FirebaseProductData = docData
+
+  let discount: Discount | undefined = undefined
+  if (data.discount) {
+    discount = {
+      type: data.discount.type || "percentage",
+      value: data.discount.value || 0,
+      startDate: data.discount.startDate ? data.discount.startDate.toDate() : null,
+      endDate: data.discount.endDate ? data.discount.endDate.toDate() : null,
+      isActive: data.discount.isActive ?? false,
+    }
+  }
 
   return {
     id: docId,
@@ -152,6 +183,66 @@ function normalizeProduct(docData: any, docId: string): Product {
     scale: data.scale || undefined,
     views: data.views || 0,
     lastViewedAt: data.lastViewedAt ? data.lastViewedAt.toDate() : null,
+    stock: data.stock ?? undefined,
+    lowStockThreshold: data.lowStockThreshold ?? undefined,
+    discount,
+  }
+}
+
+export function calculateFinalPrice(product: Product): number {
+  if (!product.discount || !product.discount.isActive) {
+    return product.price
+  }
+
+  // Check if discount is within valid date range
+  const now = new Date()
+  if (product.discount.startDate && now < product.discount.startDate) {
+    return product.price
+  }
+  if (product.discount.endDate && now > product.discount.endDate) {
+    return product.price
+  }
+
+  // Calculate discounted price
+  if (product.discount.type === "percentage") {
+    const discountAmount = (product.price * product.discount.value) / 100
+    return Math.max(0, product.price - discountAmount)
+  } else {
+    // fixed discount
+    return Math.max(0, product.price - product.discount.value)
+  }
+}
+
+export function isInStock(product: Product): boolean {
+  return (product.stock ?? 0) > 0
+}
+
+export function hasActiveDiscount(product: Product): boolean {
+  if (!product.discount || !product.discount.isActive) {
+    return false
+  }
+
+  const now = new Date()
+  if (product.discount.startDate && now < product.discount.startDate) {
+    return false
+  }
+  if (product.discount.endDate && now > product.discount.endDate) {
+    return false
+  }
+
+  return true
+}
+
+export function getDiscountPercentage(product: Product): number {
+  if (!hasActiveDiscount(product)) {
+    return 0
+  }
+
+  if (product.discount!.type === "percentage") {
+    return product.discount!.value
+  } else {
+    // Calculate percentage from fixed amount
+    return Math.round((product.discount!.value / product.price) * 100)
   }
 }
 
@@ -162,6 +253,8 @@ export interface SearchFilters {
   minPrice?: number
   maxPrice?: number
   hasReleaseDate?: boolean
+  inStock?: boolean // Filter only products with stock > 0
+  onSale?: boolean // Filter only products with active discounts
 }
 
 const productsCollection = collection(db, "products")
@@ -285,6 +378,17 @@ function validateProduct(product: Partial<Product>): void {
   if (!Array.isArray(product.imageUrls) || product.imageUrls.length === 0) {
     throw new Error("Se requiere al menos una imagen")
   }
+  if (product.stock !== undefined && product.stock < 0) {
+    throw new Error("El stock no puede ser negativo")
+  }
+  if (product.discount) {
+    if (product.discount.value < 0) {
+      throw new Error("El valor del descuento no puede ser negativo")
+    }
+    if (product.discount.type === "percentage" && product.discount.value > 100) {
+      throw new Error("El descuento porcentual no puede ser mayor a 100%")
+    }
+  }
 }
 
 // 🚀 AGREGAR PRODUCTO OPTIMIZADO
@@ -298,10 +402,34 @@ export async function addProduct(
     validateProduct(product)
 
     const slug = generateSlug(product.name)
+    // 🔥 BUSCAR Y ELIMINAR PRODUCTO DUPLICADO AUTOMÁTICAMENTE
+    console.log(`🔍 Verificando duplicados para slug: "${slug}"`)
     const existingProduct = await getProductBySlug(slug)
+
     if (existingProduct) {
-      throw new Error(`Ya existe un producto con el nombre similar: ${product.name}`)
+      console.log(`🗑️ Producto duplicado encontrado: "${existingProduct.name}" (ID: ${existingProduct.id})`)
+      console.log(`🔄 Eliminando producto anterior para reemplazar...`)
+
+      try {
+        await deleteProductById(existingProduct.id)
+        console.log(`✅ Producto anterior eliminado exitosamente`)
+      } catch (deleteError) {
+        console.error(`❌ Error eliminando producto duplicado:`, deleteError)
+        // Continuar con la creación del nuevo producto aunque falle la eliminación
+      }
+    } else {
+      console.log(`✅ No se encontraron duplicados para: "${product.name}"`)
     }
+
+    const discountData = product.discount
+      ? {
+          type: product.discount.type,
+          value: product.discount.value,
+          startDate: product.discount.startDate ? Timestamp.fromDate(product.discount.startDate) : null,
+          endDate: product.discount.endDate ? Timestamp.fromDate(product.discount.endDate) : null,
+          isActive: product.discount.isActive,
+        }
+      : undefined
 
     const productToAdd = {
       ...product,
@@ -311,9 +439,14 @@ export async function addProduct(
       releaseDate: product.releaseDate ?? null,
       views: 0,
       lastViewedAt: null,
+      stock: product.stock ?? 0,
+      lowStockThreshold: product.lowStockThreshold,
+      discount: discountData,
     }
 
     const docRef = await addDoc(productsCollection, productToAdd)
+
+    console.log(`🎉 Nuevo producto agregado: "${product.name}" (ID: ${docRef.id})`)
 
     // Limpiar caché de todos los productos
     allProductsCache = null
@@ -595,6 +728,148 @@ export async function incrementProductViews(productId: string): Promise<void> {
   }
 }
 
+export async function decreaseStock(productId: string, quantity = 1): Promise<boolean> {
+  try {
+    const product = await getProductById(productId)
+    if (!product) {
+      throw new Error("Producto no encontrado")
+    }
+
+    if (product.stock !== undefined && product.stock < quantity) {
+      console.error(`Stock insuficiente. Disponible: ${product.stock}, Solicitado: ${quantity}`)
+      return false
+    }
+
+    const docRef = doc(db, "products", productId)
+    await updateDoc(docRef, {
+      stock: increment(-quantity),
+    })
+
+    console.log(`✅ Stock actualizado para producto ${productId}: -${quantity}`)
+
+    // Clear cache for this product
+    allProductsCache = null
+    const keysToDelete = Array.from(cache.keys()).filter(
+      (key) => key.includes(productId) || key.startsWith("products-"),
+    )
+    keysToDelete.forEach((key) => cache.delete(key))
+
+    return true
+  } catch (error) {
+    console.error("Error disminuyendo stock:", error)
+    return false
+  }
+}
+
+export async function increaseStock(productId: string, quantity = 1): Promise<void> {
+  try {
+    const docRef = doc(db, "products", productId)
+    await updateDoc(docRef, {
+      stock: increment(quantity),
+    })
+
+    console.log(`✅ Stock aumentado para producto ${productId}: +${quantity}`)
+
+    // Clear cache
+    allProductsCache = null
+    const keysToDelete = Array.from(cache.keys()).filter(
+      (key) => key.includes(productId) || key.startsWith("products-"),
+    )
+    keysToDelete.forEach((key) => cache.delete(key))
+  } catch (error) {
+    console.error("Error aumentando stock:", error)
+    throw error
+  }
+}
+
+export async function updateProductDiscount(productId: string, discount: Discount | null): Promise<void> {
+  try {
+    const docRef = doc(db, "products", productId)
+
+    const discountData = discount
+      ? {
+          type: discount.type,
+          value: discount.value,
+          startDate: discount.startDate ? Timestamp.fromDate(discount.startDate) : null,
+          endDate: discount.endDate ? Timestamp.fromDate(discount.endDate) : null,
+          isActive: discount.isActive,
+        }
+      : null
+
+    await updateDoc(docRef, {
+      discount: discountData,
+    })
+
+    console.log(`✅ Descuento actualizado para producto ${productId}`)
+
+    // Clear cache
+    allProductsCache = null
+    const keysToDelete = Array.from(cache.keys()).filter(
+      (key) => key.includes(productId) || key.startsWith("products-"),
+    )
+    keysToDelete.forEach((key) => cache.delete(key))
+  } catch (error) {
+    console.error("Error actualizando descuento:", error)
+    throw error
+  }
+}
+
+export async function getProductsOnSale(limitCount = 20): Promise<Product[]> {
+  try {
+    const cacheKey = `on-sale-${limitCount}`
+    const cached = getCachedData<Product[]>(cacheKey)
+    if (cached) return cached
+
+    console.log("🔍 Obteniendo productos en oferta...")
+
+    // Get all products and filter by active discount
+    const allProducts = await getAllProductsForSearch()
+    const productsOnSale = allProducts.filter((product) => hasActiveDiscount(product))
+
+    // Sort by discount percentage (highest first)
+    productsOnSale.sort((a, b) => {
+      const discountA = getDiscountPercentage(a)
+      const discountB = getDiscountPercentage(b)
+      return discountB - discountA
+    })
+
+    const limitedProducts = productsOnSale.slice(0, limitCount)
+    console.log(`✅ ${limitedProducts.length} productos en oferta obtenidos`)
+
+    setCachedData(cacheKey, limitedProducts, CACHE_DURATION)
+    return limitedProducts
+  } catch (error) {
+    console.error("Error obteniendo productos en oferta:", error)
+    return []
+  }
+}
+
+export async function getLowStockProducts(threshold = 5): Promise<Product[]> {
+  try {
+    const cacheKey = `low-stock-${threshold}`
+    const cached = getCachedData<Product[]>(cacheKey)
+    if (cached) return cached
+
+    console.log(`🔍 Obteniendo productos con stock bajo (< ${threshold})...`)
+
+    const allProducts = await getAllProductsForSearch()
+    const lowStockProducts = allProducts.filter(
+      (product) => product.stock !== undefined && product.stock > 0 && product.stock <= threshold,
+    )
+
+    // Sort by stock (lowest first)
+    lowStockProducts.sort((a, b) => (a.stock || 0) - (b.stock || 0))
+
+    console.log(`✅ ${lowStockProducts.length} productos con stock bajo`)
+
+    setCachedData(cacheKey, lowStockProducts, CACHE_DURATION)
+    return lowStockProducts
+  } catch (error) {
+    console.error("Error obteniendo productos con stock bajo:", error)
+    return []
+  }
+}
+
 // ✅ Actualizar producto optimizado
 export async function updateProduct(id: string, data: Partial<Omit<Product, "id" | "createdAt">>): Promise<void> {
   try {
@@ -611,10 +886,29 @@ export async function updateProduct(id: string, data: Partial<Omit<Product, "id"
       data.slug = generateSlug(data.name)
     }
 
-    const updateData = {
+    const discountData = data.discount
+      ? {
+          type: data.discount.type,
+          value: data.discount.value,
+          startDate: data.discount.startDate ? Timestamp.fromDate(data.discount.startDate) : null,
+          endDate: data.discount.endDate ? Timestamp.fromDate(data.discount.endDate) : null,
+          isActive: data.discount.isActive,
+        }
+      : undefined
+
+    const updateData: any = {
       ...data,
       ...(data.views === undefined && { views: 0 }),
       ...(data.category === undefined && { category: "figura" }),
+      ...(data.stock !== undefined && { stock: data.stock }),
+      ...(data.lowStockThreshold !== undefined && { lowStockThreshold: data.lowStockThreshold }),
+      ...(discountData !== undefined && { discount: discountData }),
+    }
+
+    // Remove discount from updateData if it was converted
+    if (discountData !== undefined) {
+      delete updateData.discount
+      updateData.discount = discountData
     }
 
     const docRef = doc(db, "products", id)
@@ -759,7 +1053,6 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
     })
 
-    // Aplicar filtros adicionales
     let finalResults = results
     if (filters) {
       if (filters.category) finalResults = finalResults.filter((p) => p.category === filters.category)
@@ -767,7 +1060,10 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       if (filters.line) finalResults = finalResults.filter((p) => p.line === filters.line)
       if (filters.minPrice) finalResults = finalResults.filter((p) => p.price >= filters.minPrice!)
       if (filters.maxPrice) finalResults = finalResults.filter((p) => p.price <= filters.maxPrice!)
+      if (filters.inStock) finalResults = finalResults.filter((p) => isInStock(p))
+      if (filters.onSale) finalResults = finalResults.filter((p) => hasActiveDiscount(p))
     }
+  
 
     // Limitar resultados para mejor rendimiento
     finalResults = finalResults.slice(0, 100)
@@ -780,8 +1076,11 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
   } catch (error) {
     console.error("Error en búsqueda:", error)
     return []
+    
   }
+  
 }
+
 
 // 🧹 Utilidades de caché optimizadas
 export function clearProductsCache(): void {
@@ -804,3 +1103,35 @@ export function getCacheInfo(): { size: number; keys: string[]; duration: number
 export const getAllProducts = getProducts
 export const getProductsByBrand = async (brand: string) => searchProducts("", { brand })
 export const getProductsByCategory = async (category: string) => searchProducts("", { category })
+
+/**
+ * 🔄 Resetea las vistas de todos los productos una vez por semana.
+ * - Coloca views = 1
+ * - Registra la fecha del último reset
+ */
+import { writeBatch } from "firebase/firestore"
+
+export async function resetWeeklyViews() {
+  try {
+    const snapshot = await getDocs(collection(db, "products"))
+
+    if (snapshot.empty) {
+      console.log("⚠️ No hay productos para resetear vistas")
+      return
+    }
+
+    const batch = writeBatch(db)
+
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, {
+        views: 1,
+        lastResetAt: serverTimestamp(),
+      })
+    })
+
+    await batch.commit()
+    console.log(`✅ Reset semanal completado: ${snapshot.size} productos reiniciados en 1 vista`)
+  } catch (error) {
+    console.error("❌ Error reseteando vistas:", error)
+  }
+}

@@ -6,44 +6,20 @@ import Image from "next/image"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { incrementProductViews, type Product } from "@/lib/firebase/products"
+import {
+  parseSerializedDate,
+  hasActiveDiscount,
+  calculateFinalPrice,
+  getDiscountPercentage,
+} from "@/lib/serialize-product"
 
 interface ProductCardProps {
   product: Product
 }
 
-// 🔧 FUNCIÓN HELPER PARA PARSEAR FECHA SEGURA (como fallback)
-const parseReleaseDate = (releaseDate: any): Date | null => {
-  if (!releaseDate) return null
-
-  // Si ya es un objeto Date (caso normal después de normalización)
-  if (releaseDate instanceof Date) {
-    return releaseDate
-  }
-
-  // Si es Timestamp de Firestore (fallback)
-  if (releaseDate.toDate && typeof releaseDate.toDate === "function") {
-    return releaseDate.toDate()
-  }
-
-  // Si es objeto con seconds (serializado - fallback)
-  if (releaseDate.seconds) {
-    return new Date(releaseDate.seconds * 1000)
-  }
-
-  // Si es string o number (fallback)
-  if (typeof releaseDate === "string" || typeof releaseDate === "number") {
-    return new Date(releaseDate)
-  }
-
-  console.warn("Formato de fecha no reconocido:", releaseDate)
-  return null
-}
-
 export default function ProductCard({ product }: ProductCardProps) {
   const now = new Date()
-
-  // 🔧 USAR FUNCIÓN HELPER PARA PARSEAR FECHA (principalmente como fallback)
-  const releaseDate = parseReleaseDate(product.releaseDate)
+  const releaseDate = parseSerializedDate(product.releaseDate)
 
   const isCurrentMonth =
     !!releaseDate && releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() === now.getMonth()
@@ -61,12 +37,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const tagColorClass = isCurrentMonth ? "bg-emerald-500" : "bg-amber-600"
 
-  // 🚀 FUNCIÓN MEJORADA PARA INCREMENTAR VISTAS
+  // 🔥 Descuento
+  const hasDiscount = hasActiveDiscount(product)
+  const finalPrice = calculateFinalPrice(product)
+  const discountPercentage = getDiscountPercentage(product)
+
   const handleClick = async (e: React.MouseEvent) => {
     try {
       console.log(`🔍 Incrementando views para producto: ${product.id} - ${product.name}`)
-
-      // Ejecutar sin await para no bloquear la navegación
       incrementProductViews(product.id)
         .then(() => {
           console.log(`✅ Views incrementadas para: ${product.name}`)
@@ -82,9 +60,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.slug}`} className="group block text-inherit no-underline" onClick={handleClick}>
       <div className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
-        {/* Contenedor cuadrado para imagen */}
+        {/* Imagen */}
         <div className="relative w-full h-0 pb-[100%] bg-gray-50 overflow-hidden">
-          {/* Etiqueta de lanzamiento */}
           {showReleaseTag && (
             <span
               className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}
@@ -93,7 +70,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
 
-          {/* 🚀 Usar thumbnailUrl (300px) si existe, sino imageUrl original */}
+          {hasDiscount && (
+            <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+              -{discountPercentage}%
+            </span>
+          )}
+
           <Image
             src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
             alt={product.name}
@@ -103,21 +85,29 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
         </div>
 
-        {/* Info del producto */}
+        {/* Info */}
         <div className="p-4 flex flex-col gap-1">
           <h3 className="text-sm font-semibold text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-2">
             {product.name}
           </h3>
 
           {product.heightCm && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-700">
               Altura: <strong>{product.heightCm} cm</strong>
             </span>
           )}
 
-          {/* 🔧 SOLO MOSTRAR PRECIO SI ES MAYOR A 0 */}
           {product.price > 0 && (
-            <span className="text-orange-600 font-bold text-base">S/. {product.price.toFixed(2)}</span>
+            <div className="flex items-center gap-2">
+              {hasDiscount ? (
+                <>
+                  <span className="text-gray-500 line-through text-sm">S/. {product.price.toFixed(2)}</span>
+                  <span className="text-red-600 font-bold text-base">S/. {finalPrice.toFixed(2)}</span>
+                </>
+              ) : (
+                <span className="text-orange-600 font-bold text-base">S/. {product.price.toFixed(2)}</span>
+              )}
+            </div>
           )}
         </div>
       </div>

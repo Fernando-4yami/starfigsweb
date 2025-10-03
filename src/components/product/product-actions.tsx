@@ -1,11 +1,11 @@
 "use client"
-import { Clock, CheckCircle } from "lucide-react"
-import { Info } from "lucide-react"
+import { Clock, CheckCircle, Info } from "lucide-react"
 
 interface ProductActionsProps {
   whatsappUrl: string
   onWhatsAppClick: () => void
   releaseDate?: any
+  stock?: number | boolean
 }
 
 // 🚀 ICONO REAL DE WHATSAPP
@@ -33,7 +33,7 @@ const parseReleaseDate = (releaseDate: any): Date | null => {
   return new Date(releaseDate)
 }
 
-export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDate }: ProductActionsProps) {
+export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDate, stock }: ProductActionsProps) {
   const now = new Date()
 
   // 🔧 PARSEAR FECHA AQUÍ
@@ -44,31 +44,42 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
     (parsedReleaseDate.getFullYear() < now.getFullYear() ||
       (parsedReleaseDate.getFullYear() === now.getFullYear() && parsedReleaseDate.getMonth() <= now.getMonth()))
 
+  const hasStock = typeof stock === "number" ? stock > 0 : Boolean(stock)
+
   const handleWhatsAppClick = () => {
     onWhatsAppClick() // Para tracking
     window.open(whatsappUrl, "_blank") // Abrir WhatsApp directamente
   }
 
+  const getButtonText = () => {
+    // Solo mostrar "Comprar" si está disponible Y hay stock
+    if (isAvailable && hasStock) {
+      return "Comprar"
+    } else if (parsedReleaseDate) {
+      return "Reservar por WhatsApp"
+    } else {
+      return "Consultar por WhatsApp"
+    }
+  }
+
   return (
     <div className="space-y-4">
-      {/* 🚀 BOTÓN FUSIONADO - DISEÑO DEL PRIMERO CON FUNCIÓN DEL SEGUNDO */}
+      {/* 🚀 BOTÓN CON TEXTO DINÁMICO SEGÚN DISPONIBILIDAD Y STOCK */}
       <button
         onClick={handleWhatsAppClick}
         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
       >
         <WhatsAppIcon className="w-5 h-5" />
-        {parsedReleaseDate ? "Reservar por WhatsApp" : "Consultar por WhatsApp"}
+        {getButtonText()}
       </button>
 
-      {/* 🚀 ESTADO DE DISPONIBILIDAD */}
       {isAvailable ? (
         <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg">
           <CheckCircle className="w-4 h-4" />
           <span className="text-sm font-medium">Disponible para pedido</span>
         </div>
       ) : parsedReleaseDate ? (
-        <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg">
-
+        <div className="flex items-center gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-lg">
           <Clock className="w-4 h-4" />
           <span className="text-sm font-medium">Pre-venta - Próximo lanzamiento</span>
         </div>
@@ -78,8 +89,6 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
           <span className="text-sm font-medium">Consulta disponibilidad y precio</span>
         </div>
       )}
-
-      
     </div>
   )
 }
