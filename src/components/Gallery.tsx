@@ -116,6 +116,22 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
     return blurPlaceholders?.[index]
   }
 
+  const resetImageTransform = useCallback(() => {
+    setZoom(1)
+    setRotation(0)
+    setImagePosition({ x: 0, y: 0 })
+  }, [])
+
+  const prevImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev === 0 ? imageUrls.length - 1 : prev - 1))
+    resetImageTransform()
+  }, [imageUrls.length, resetImageTransform])
+
+  const nextImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % imageUrls.length)
+    resetImageTransform()
+  }, [imageUrls.length, resetImageTransform])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (viewMode === "fullscreen") {
@@ -142,7 +158,7 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
         }
       }
     },
-    [viewMode],
+    [viewMode, prevImage, nextImage],
   )
 
   useEffect(() => {
@@ -233,21 +249,6 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
     )
   }
 
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev === 0 ? imageUrls.length - 1 : prev - 1))
-    resetImageTransform()
-  }
-
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % imageUrls.length)
-    resetImageTransform()
-  }
-
-  const resetImageTransform = () => {
-    setZoom(1)
-    setRotation(0)
-    setImagePosition({ x: 0, y: 0 })
-  }
 
   if (viewMode === "fullscreen") {
     return (

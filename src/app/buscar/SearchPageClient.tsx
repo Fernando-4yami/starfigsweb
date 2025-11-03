@@ -397,7 +397,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
             <>
               <ChevronRight className="w-4 h-4" />
 
-              <span className="text-blue-600 font-medium">"{query}"</span>
+              <span className="text-blue-600 font-medium">&quot;{query}&quot;</span>
             </>
           )}
         </nav>
@@ -423,23 +423,23 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
 
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>
-                  • <strong>Nombre del producto:</strong> "Goku", "Nezuko", "Luffy"
+                  • <strong>Nombre del producto:</strong> &quot;Goku&quot;, &quot;Nezuko&quot;, &quot;Luffy&quot;
                 </li>
 
                 <li>
-                  • <strong>Fabricante:</strong> "Banpresto", "Good Smile Company", "Kotobukiya"
+                  • <strong>Fabricante:</strong> &quot;Banpresto&quot;, &quot;Good Smile Company&quot;, &quot;Kotobukiya&quot;
                 </li>
 
                 <li>
-                  • <strong>Línea:</strong> "Nendoroid", "Figma", "Pop Up Parade"
+                  • <strong>Línea:</strong> &quot;Nendoroid&quot;, &quot;Figma&quot;, &quot;Pop Up Parade&quot;
                 </li>
 
                 <li>
-                  • <strong>Escala:</strong> "1/7", "1/8", "1/4"
+                  • <strong>Escala:</strong> &quot;1/7&quot;, &quot;1/8&quot;, &quot;1/4&quot;
                 </li>
 
                 <li>
-                  • <strong>Serie:</strong> "One Piece", "Dragon Ball", "Demon Slayer"
+                  • <strong>Serie:</strong> &quot;One Piece&quot;, &quot;Dragon Ball&quot;, &quot;Demon Slayer&quot;
                 </li>
               </ul>
             </div>
@@ -467,7 +467,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
             <h3 className="text-xl font-semibold text-gray-800 mb-2">No se encontraron resultados</h3>
 
             <p className="text-gray-600 mb-4">
-              No hay productos que contengan los términos: <strong>"{query}"</strong>
+              No hay productos que contengan los términos: <strong>&quot;{query}&quot;</strong>
             </p>
 
             <div className="space-y-3 mb-6">
@@ -497,7 +497,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
                     {paginationInfo.startIndex}-{paginationInfo.endIndex} de {paginationInfo.totalItems} productos
                   </span>
 
-                  <span className="text-gray-500">para "{query}"</span>
+                  <span className="text-gray-500">para &quot;{query}&quot;</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-gray-500 text-sm">

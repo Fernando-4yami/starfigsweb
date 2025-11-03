@@ -90,11 +90,11 @@ function normalizeForComparison(text: string): string {
 }
 
 export interface Discount {
-  type: "percentage" | "fixed" // Tipo de descuento: porcentaje o monto fijo
-  value: number // Valor del descuento (ej: 20 para 20% o 50 para $50)
-  startDate?: Date | null // Fecha de inicio del descuento (opcional)
-  endDate?: Date | null // Fecha de fin del descuento (opcional)
-  isActive: boolean // Si el descuento está activo
+  type: "percentage" | "fixed"
+  value: number
+  startDate?: Date | null
+  endDate?: Date | null
+  isActive: boolean
 }
 
 // 🎯 INTERFAZ OPTIMIZADA
@@ -145,9 +145,9 @@ export interface Product {
   category?: string
   views?: number
   lastViewedAt?: Date | null
-  stock?: number // Cantidad disponible en inventario
-  lowStockThreshold?: number // Umbral para mostrar alerta de stock bajo
-  discount?: Discount // Descuento opcional
+  stock?: number
+  lowStockThreshold?: number
+  discount?: Discount
 }
 
 // 🚀 NORMALIZACIÓN CORREGIDA
@@ -194,7 +194,6 @@ export function calculateFinalPrice(product: Product): number {
     return product.price
   }
 
-  // Check if discount is within valid date range
   const now = new Date()
   if (product.discount.startDate && now < product.discount.startDate) {
     return product.price
@@ -203,12 +202,10 @@ export function calculateFinalPrice(product: Product): number {
     return product.price
   }
 
-  // Calculate discounted price
   if (product.discount.type === "percentage") {
     const discountAmount = (product.price * product.discount.value) / 100
     return Math.max(0, product.price - discountAmount)
   } else {
-    // fixed discount
     return Math.max(0, product.price - product.discount.value)
   }
 }
@@ -241,7 +238,6 @@ export function getDiscountPercentage(product: Product): number {
   if (product.discount!.type === "percentage") {
     return product.discount!.value
   } else {
-    // Calculate percentage from fixed amount
     return Math.round((product.discount!.value / product.price) * 100)
   }
 }
@@ -253,8 +249,8 @@ export interface SearchFilters {
   minPrice?: number
   maxPrice?: number
   hasReleaseDate?: boolean
-  inStock?: boolean // Filter only products with stock > 0
-  onSale?: boolean // Filter only products with active discounts
+  inStock?: boolean
+  onSale?: boolean
 }
 
 const productsCollection = collection(db, "products")
@@ -267,7 +263,6 @@ const ALL_PRODUCTS_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 async function getAllProductsForSearch(): Promise<Product[]> {
   const now = Date.now()
 
-  // Usar caché si está disponible y no ha expirado
   if (allProductsCache && now - allProductsCacheTime < ALL_PRODUCTS_CACHE_DURATION) {
     return allProductsCache
   }
@@ -297,7 +292,6 @@ async function getAllProductsForSearch(): Promise<Product[]> {
 
     console.log(`✅ Total productos cargados: ${allProducts.length}`)
 
-    // Actualizar caché
     allProductsCache = allProducts
     allProductsCacheTime = now
 
@@ -391,7 +385,7 @@ function validateProduct(product: Partial<Product>): void {
   }
 }
 
-// 🚀 AGREGAR PRODUCTO OPTIMIZADO
+// 🚀 AGREGAR PRODUCTO OPTIMIZADO - SIN DESCUENTOS (TEMPORALMENTE)
 export async function addProduct(
   product: Omit<Product, "id" | "slug"> & {
     createdAt?: Timestamp | null
@@ -402,7 +396,6 @@ export async function addProduct(
     validateProduct(product)
 
     const slug = generateSlug(product.name)
-    // 🔥 BUSCAR Y ELIMINAR PRODUCTO DUPLICADO AUTOMÁTICAMENTE
     console.log(`🔍 Verificando duplicados para slug: "${slug}"`)
     const existingProduct = await getProductBySlug(slug)
 
@@ -415,34 +408,53 @@ export async function addProduct(
         console.log(`✅ Producto anterior eliminado exitosamente`)
       } catch (deleteError) {
         console.error(`❌ Error eliminando producto duplicado:`, deleteError)
-        // Continuar con la creación del nuevo producto aunque falle la eliminación
       }
     } else {
       console.log(`✅ No se encontraron duplicados para: "${product.name}"`)
     }
 
-    const discountData = product.discount
-      ? {
-          type: product.discount.type,
-          value: product.discount.value,
-          startDate: product.discount.startDate ? Timestamp.fromDate(product.discount.startDate) : null,
-          endDate: product.discount.endDate ? Timestamp.fromDate(product.discount.endDate) : null,
-          isActive: product.discount.isActive,
-        }
-      : undefined
-
-    const productToAdd = {
-      ...product,
+    // 🔥 CONSTRUIR OBJETO LIMPIO SIN DISCOUNT
+    const productToAdd: any = {
+      name: product.name,
       slug,
+      price: product.price,
+      description: product.description || "",
+      imageUrls: product.imageUrls,
+      brand: product.brand || "",
+      line: product.line || "",
       category: product.category || "figura",
       createdAt: product.createdAt ?? serverTimestamp(),
       releaseDate: product.releaseDate ?? null,
       views: 0,
       lastViewedAt: null,
       stock: product.stock ?? 0,
-      lowStockThreshold: product.lowStockThreshold,
-      discount: discountData,
     }
+
+    // Agregar campos opcionales solo si existen
+    if (product.thumbnailUrl) {
+      productToAdd.thumbnailUrl = product.thumbnailUrl
+    }
+    
+    if (product.galleryThumbnailUrls && product.galleryThumbnailUrls.length > 0) {
+      productToAdd.galleryThumbnailUrls = product.galleryThumbnailUrls
+    }
+    
+    if (product.heightCm !== undefined && product.heightCm !== null) {
+      productToAdd.heightCm = product.heightCm
+    }
+    
+    if (product.scale) {
+      productToAdd.scale = product.scale
+    }
+    
+    if (product.lowStockThreshold !== undefined) {
+      productToAdd.lowStockThreshold = product.lowStockThreshold
+    }
+
+    // ⚠️ DESCUENTO TEMPORALMENTE DESHABILITADO - NO SE INCLUYE
+    // if (product.discount) { ... }
+
+    console.log("[products.ts] productToAdd:", JSON.stringify(productToAdd, null, 2))
 
     const docRef = await addDoc(productsCollection, productToAdd)
 
@@ -593,7 +605,7 @@ export async function getNewReleasesByDateRange(startDate: Date, endDate: Date):
   }
 }
 
-// 🚀 BÚSQUEDA POR LÍNEA COMPLETAMENTE REESCRITA - SÚPER AGRESIVA
+// 🚀 BÚSQUEDA POR LÍNEA COMPLETAMENTE REESCRITA
 export async function getProductsByLine(lineToSearch: string, forceRefresh = false): Promise<Product[]> {
   try {
     const cacheKey = `line-enhanced-${lineToSearch.toLowerCase().trim()}`
@@ -605,7 +617,6 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
 
     console.log(`🔍 BÚSQUEDA MEJORADA para línea: "${lineToSearch}"`)
 
-    // 🚀 OBTENER TODOS LOS PRODUCTOS DE UNA VEZ
     const allProducts = await getAllProductsForSearch()
     console.log(`📦 Buscando en ${allProducts.length} productos totales...`)
 
@@ -616,37 +627,24 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
     console.log(`🔤 Palabras clave: [${searchWords.join(", ")}]`)
 
     const foundProducts = allProducts.filter((product) => {
-      // 1. BÚSQUEDA EN CAMPO LINE (PRIORIDAD ALTA)
       if (product.line) {
         const productLine = normalizeForComparison(product.line)
 
-        // Coincidencia exacta
         if (productLine === searchTerm) return true
-
-        // Contiene el término completo
         if (productLine.includes(searchTerm)) return true
-
-        // El término contiene la línea del producto
         if (searchTerm.includes(productLine)) return true
-
-        // Búsqueda por palabras individuales en línea
         if (searchWords.some((word) => productLine.includes(word))) return true
       }
 
-      // 2. BÚSQUEDA EN NOMBRE DEL PRODUCTO (PRIORIDAD MEDIA)
       const productName = normalizeForComparison(product.name)
 
-      // Contiene el término completo en el nombre
       if (productName.includes(searchTerm)) return true
 
-      // Búsqueda por palabras individuales en nombre
       if (searchWords.length > 1) {
         const matchingWords = searchWords.filter((word) => productName.includes(word))
-        // Si coincide al menos 50% de las palabras
         if (matchingWords.length >= Math.ceil(searchWords.length * 0.5)) return true
       }
 
-      // 3. BÚSQUEDA EN OTROS CAMPOS (PRIORIDAD BAJA)
       const searchableText = [product.brand || "", product.category || "", product.description || ""]
         .join(" ")
         .toLowerCase()
@@ -656,12 +654,10 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
       return false
     })
 
-    // 🎯 ORDENAMIENTO POR RELEVANCIA
     foundProducts.sort((a, b) => {
       let scoreA = 0,
         scoreB = 0
 
-      // Puntuación por coincidencia en línea
       if (a.line) {
         const lineA = normalizeForComparison(a.line)
         if (lineA === searchTerm) scoreA += 1000
@@ -676,25 +672,21 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
         else if (searchTerm.includes(lineB)) scoreB += 300
       }
 
-      // Puntuación por coincidencia en nombre
       const nameA = normalizeForComparison(a.name)
       const nameB = normalizeForComparison(b.name)
 
       if (nameA.includes(searchTerm)) scoreA += 200
       if (nameB.includes(searchTerm)) scoreB += 200
 
-      // Puntuación por popularidad
       scoreA += (a.views || 0) * 0.1
       scoreB += (b.views || 0) * 0.1
 
-      // Ordenar por score, luego por fecha
       if (scoreA !== scoreB) return scoreB - scoreA
       return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
     })
 
     console.log(`✅ ENCONTRADOS ${foundProducts.length} productos para "${lineToSearch}"`)
 
-    // Log de los primeros 5 para debug
     foundProducts.slice(0, 5).forEach((product, index) => {
       console.log(`  ${index + 1}. ${product.name} (línea: "${product.line || "N/A"}")`)
     })
@@ -747,7 +739,6 @@ export async function decreaseStock(productId: string, quantity = 1): Promise<bo
 
     console.log(`✅ Stock actualizado para producto ${productId}: -${quantity}`)
 
-    // Clear cache for this product
     allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
       (key) => key.includes(productId) || key.startsWith("products-"),
@@ -770,7 +761,6 @@ export async function increaseStock(productId: string, quantity = 1): Promise<vo
 
     console.log(`✅ Stock aumentado para producto ${productId}: +${quantity}`)
 
-    // Clear cache
     allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
       (key) => key.includes(productId) || key.startsWith("products-"),
@@ -802,7 +792,6 @@ export async function updateProductDiscount(productId: string, discount: Discoun
 
     console.log(`✅ Descuento actualizado para producto ${productId}`)
 
-    // Clear cache
     allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
       (key) => key.includes(productId) || key.startsWith("products-"),
@@ -822,11 +811,9 @@ export async function getProductsOnSale(limitCount = 20): Promise<Product[]> {
 
     console.log("🔍 Obteniendo productos en oferta...")
 
-    // Get all products and filter by active discount
     const allProducts = await getAllProductsForSearch()
     const productsOnSale = allProducts.filter((product) => hasActiveDiscount(product))
 
-    // Sort by discount percentage (highest first)
     productsOnSale.sort((a, b) => {
       const discountA = getDiscountPercentage(a)
       const discountB = getDiscountPercentage(b)
@@ -857,7 +844,6 @@ export async function getLowStockProducts(threshold = 5): Promise<Product[]> {
       (product) => product.stock !== undefined && product.stock > 0 && product.stock <= threshold,
     )
 
-    // Sort by stock (lowest first)
     lowStockProducts.sort((a, b) => (a.stock || 0) - (b.stock || 0))
 
     console.log(`✅ ${lowStockProducts.length} productos con stock bajo`)
@@ -905,7 +891,6 @@ export async function updateProduct(id: string, data: Partial<Omit<Product, "id"
       ...(discountData !== undefined && { discount: discountData }),
     }
 
-    // Remove discount from updateData if it was converted
     if (discountData !== undefined) {
       delete updateData.discount
       updateData.discount = discountData
@@ -914,7 +899,6 @@ export async function updateProduct(id: string, data: Partial<Omit<Product, "id"
     const docRef = doc(db, "products", id)
     await updateDoc(docRef, updateData)
 
-    // Limpiar caché
     allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
       (key) => key.includes(id) || key.startsWith("products-") || key.startsWith("popular-"),
@@ -958,7 +942,6 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       return recent
     }
 
-    // 🚀 OBTENER TODOS LOS PRODUCTOS DE UNA VEZ
     const allProducts = await getAllProductsForSearch()
     console.log(`📦 Buscando en ${allProducts.length} productos...`)
 
@@ -966,9 +949,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
     const normalizedTerm = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     const searchWords = normalizedTerm.split(/\s+/).filter((word) => word.length > 0)
 
-    // 🎯 BÚSQUEDA SÚPER COMPLETA
     const results = allProducts.filter((product) => {
-      // Crear texto de búsqueda completo
       const searchableText = [
         product.name || "",
         product.description || "",
@@ -982,17 +963,13 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
 
       const normalizedProductText = searchableText.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 
-      // 1. Búsqueda directa (más rápida)
       if (normalizedProductText.includes(normalizedTerm)) return true
 
-      // 2. Búsqueda por palabras individuales
       if (searchWords.length > 1) {
         const wordMatches = searchWords.filter((word) => normalizedProductText.includes(word))
-        // Si coincide al menos 50% de las palabras
         if (wordMatches.length >= Math.ceil(searchWords.length * 0.5)) return true
       }
 
-      // 3. Búsqueda en campos específicos (más flexible)
       return searchWords.some((word) => {
         if (word.length < 2) return false
 
@@ -1008,7 +985,6 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
 
     console.log(`📦 Encontrados ${results.length} productos antes de ordenar`)
 
-    // 🎯 ORDENAMIENTO POR RELEVANCIA MEJORADO
     results.sort((a, b) => {
       const aName = a.name.toLowerCase()
       const bName = b.name.toLowerCase()
@@ -1016,25 +992,20 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       let scoreA = 0,
         scoreB = 0
 
-      // Coincidencia exacta en nombre (máxima prioridad)
       if (aName === term) scoreA += 1000
       if (bName === term) scoreB += 1000
 
-      // Empieza con el término
       if (aName.startsWith(term)) scoreA += 500
       if (bName.startsWith(term)) scoreB += 500
 
-      // Contiene el término completo
       if (aName.includes(term)) scoreA += 200
       if (bName.includes(term)) scoreB += 200
 
-      // Coincidencias en marca y línea
       if ((a.brand || "").toLowerCase().includes(term)) scoreA += 150
       if ((b.brand || "").toLowerCase().includes(term)) scoreB += 150
       if ((a.line || "").toLowerCase().includes(term)) scoreA += 150
       if ((b.line || "").toLowerCase().includes(term)) scoreB += 150
 
-      // Coincidencias por palabras individuales
       searchWords.forEach((word) => {
         if (aName.includes(word)) scoreA += 50
         if (bName.includes(word)) scoreB += 50
@@ -1044,11 +1015,9 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
         if ((b.line || "").toLowerCase().includes(word)) scoreB += 30
       })
 
-      // Popularidad (menor peso)
       scoreA += (a.views || 0) * 0.1
       scoreB += (b.views || 0) * 0.1
 
-      // Ordenar por score, luego por fecha
       if (scoreA !== scoreB) return scoreB - scoreA
       return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
     })
@@ -1063,9 +1032,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       if (filters.inStock) finalResults = finalResults.filter((p) => isInStock(p))
       if (filters.onSale) finalResults = finalResults.filter((p) => hasActiveDiscount(p))
     }
-  
 
-    // Limitar resultados para mejor rendimiento
     finalResults = finalResults.slice(0, 100)
 
     const searchTime = Date.now() - startTime
@@ -1076,11 +1043,8 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
   } catch (error) {
     console.error("Error en búsqueda:", error)
     return []
-    
   }
-  
 }
-
 
 // 🧹 Utilidades de caché optimizadas
 export function clearProductsCache(): void {
@@ -1106,8 +1070,6 @@ export const getProductsByCategory = async (category: string) => searchProducts(
 
 /**
  * 🔄 Resetea las vistas de todos los productos una vez por semana.
- * - Coloca views = 1
- * - Registra la fecha del último reset
  */
 import { writeBatch } from "firebase/firestore"
 
@@ -1135,3 +1097,4 @@ export async function resetWeeklyViews() {
     console.error("❌ Error reseteando vistas:", error)
   }
 }
+

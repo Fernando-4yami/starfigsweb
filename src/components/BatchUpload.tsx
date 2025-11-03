@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import Image from "next/image"
 import { Upload, X, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -137,10 +138,12 @@ export default function BatchUpload({ onUploadComplete, maxFiles = 10 }: BatchUp
             {files.map((file, index) => (
               <div key={index} className="relative group">
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={previews[index] || "/placeholder.svg"}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
+                    width={200}
+                    height={200}
                   />
                 </div>
 

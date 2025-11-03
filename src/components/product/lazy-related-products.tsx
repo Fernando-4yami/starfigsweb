@@ -310,7 +310,7 @@ export default function LazyRelatedProducts({
       {process.env.NODE_ENV === "development" && currentProduct && (
         <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800">
           <p>
-            <strong>Debug:</strong> Productos relacionados para "{currentProduct.name}"
+            <strong>Debug:</strong> Productos relacionados para &quot;{currentProduct.name}&quot;
           </p>
           <p>
             Línea: {currentProduct.line || "N/A"} | Marca: {currentProduct.brand || "N/A"}

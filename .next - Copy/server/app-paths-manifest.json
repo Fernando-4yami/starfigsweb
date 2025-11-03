@@ -1,0 +1,10 @@
+{
+  "/not-found": "app/not-found.js",
+  "/admin/products/add/page": "app/admin/products/add/page.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
+  "/admin/products/page": "app/admin/products/page.js",
+  "/admin/products/edit/[id]/page": "app/admin/products/edit/[id]/page.js",
+  "/page": "app/page.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js",
+  "/buscar/page": "app/buscar/page.js"
+}

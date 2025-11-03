@@ -1,0 +1,14 @@
+9e627eeb647336a4c7a17f7b07c993520b6f76b0 154526388b66d28196b6c5f305065ced40735b12 Fernando <fernandiaz20181820@gmail.com> 1751556205 -0500	commit: chore: ignore admin/products from git
+154526388b66d28196b6c5f305065ced40735b12 5829196c4a105adb5c5359110387914194242bb1 Fernando <fernandiaz20181820@gmail.com> 1751692047 -0500	commit: feat: mejoras en firebase y nuevo loading en productos
+5829196c4a105adb5c5359110387914194242bb1 f5b9cd8e3fe97781f348e69f133524baecf47b25 Fernando <fernandiaz20181820@gmail.com> 1751692938 -0500	commit: fix: Firebase Admin config compatible con Vercel
+f5b9cd8e3fe97781f348e69f133524baecf47b25 8147f857834d15995c69dfe57a408a09b5a3a4dc Fernando <fernandiaz20181820@gmail.com> 1751693011 -0500	commit: fix: evitar error de falta de serviceAccountKey.json en Vercel
+8147f857834d15995c69dfe57a408a09b5a3a4dc 4c5b19b420e758a27f90c428bf8c1bbdefb714e7 Fernando <fernandiaz20181820@gmail.com> 1752465946 -0500	commit: fix: evitar error de falta de serviceAccountKey.json en Vercel
+4c5b19b420e758a27f90c428bf8c1bbdefb714e7 616714897e5414e67518d8683884412034095c0d Fernando <fernandiaz20181820@gmail.com> 1759454349 -0500	commit: feat: add resetWeeklyViews function + other updates
+616714897e5414e67518d8683884412034095c0d 09e493d23569476fcc5a6098d4777e91f22aaec4 Fernando <fernandiaz20181820@gmail.com> 1759454993 -0500	commit: Actualizar ClientPage: nuevos lanzamientos 3 filas y títulos gris
+09e493d23569476fcc5a6098d4777e91f22aaec4 af4dbc3add247dbef80197b0ab898abb7fece3e6 Fernando <fernandiaz20181820@gmail.com> 1759455813 -0500	commit: update navbar
+af4dbc3add247dbef80197b0ab898abb7fece3e6 a0e439548dc514ce8a99932b8f3b551879448298 Fernando <fernandiaz20181820@gmail.com> 1759456187 -0500	commit: update navbar
+a0e439548dc514ce8a99932b8f3b551879448298 569f4154c3ad6bb11faf09b2437b87d9a18ce13c Fernando <fernandiaz20181820@gmail.com> 1759456445 -0500	commit: update navbarr
+569f4154c3ad6bb11faf09b2437b87d9a18ce13c 92c2a7609892cd74512fa45373922717c63cd14b Fernando <fernandiaz20181820@gmail.com> 1759456791 -0500	commit: 333
+92c2a7609892cd74512fa45373922717c63cd14b 91325c1457ff4c571bd692a664ada88aaed0087e Fernando <fernandiaz20181820@gmail.com> 1759458937 -0500	commit: Actualización: CategoryPage + filtros mobile
+91325c1457ff4c571bd692a664ada88aaed0087e 956dac4dfd348a17f17bbaa29284d7fe23746b8c Fernando <fernandiaz20181820@gmail.com> 1759459805 -0500	commit: Actualización: desactivado dark mode y ajustes de tailwind
+956dac4dfd348a17f17bbaa29284d7fe23746b8c 5ed7b0479b8502a5a4c0903b2584237cee93a16c Fernando <fernandiaz20181820@gmail.com> 1759460123 -0500	commit: Push completo: actualizar Tailwind, ThemeProvider y ThemeToggle, desactivar dark mode

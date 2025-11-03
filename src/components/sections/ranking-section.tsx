@@ -1,6 +1,7 @@
 "use client"
 
 import { memo } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { incrementProductViews } from "@/lib/firebase/products"
 import type { Product } from "@/lib/firebase/products"
@@ -76,14 +77,13 @@ function RankingSection({ products }: RankingSectionProps) {
 
                 {/* Imagen con tamaño fijo */}
                 <div className="w-40 h-40 overflow-hidden rounded-lg shadow-xl border border-blue-200 relative">
-                  <img
+                  <Image
                     src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
                     alt={product.name}
                     className="w-full h-full object-cover bg-white"
                     loading={i < 3 ? "eager" : "lazy"}
-                    onError={(e) => {
-                      e.currentTarget.src = "/placeholder.svg"
-                    }}
+                    width={160}
+                    height={160}
                   />
                 </div>
 
@@ -113,14 +113,13 @@ function RankingSection({ products }: RankingSectionProps) {
 
               {/* Imagen con tamaño fijo */}
               <div className="relative w-32 h-32 overflow-hidden rounded-lg shadow-lg border border-blue-200 group-hover:shadow-xl transition-shadow duration-300">
-                <img
+                <Image
                   src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
                   alt={product.name}
                   className="w-full h-full object-cover bg-white"
                   loading={i < 5 ? "eager" : "lazy"}
-                  onError={(e) => {
-                    e.currentTarget.src = "/placeholder.svg"
-                  }}
+                  width={128}
+                  height={128}
                 />
               </div>
 
