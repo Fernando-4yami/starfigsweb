@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
 import Image from "next/image"
+import { ThemeToggle } from "@/components/theme-toggle" // ← AGREGAR ESTO
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -87,7 +88,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200 transition-transform duration-300 ease-in-out ${
+        className={`sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 transition-transform duration-300 ease-in-out ${
           isNavbarVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -116,7 +117,10 @@ export default function Navbar() {
                   placeholder="Buscar figuras, nendoroids, plushies..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                  className="w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700 rounded-full 
+                           bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 
+                           placeholder-gray-500 dark:placeholder-gray-400 
+                           focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               </form>
@@ -128,17 +132,25 @@ export default function Navbar() {
                 <Link
                   key={category.name}
                   href={category.path}
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-amber-600 rounded-md transition-all duration-200"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 rounded-md transition-all duration-200"
                 >
                   {category.name}
                 </Link>
               ))}
+              
+              {/* 🌙 BOTÓN DE DARK MODE */}
+              <div className="ml-2">
+                <ThemeToggle />
+              </div>
             </div>
 
             {/* Botones Mobile */}
             <div className="flex items-center gap-2 lg:hidden">
+              {/* 🌙 BOTÓN DARK MODE MOBILE */}
+              <ThemeToggle />
+              
               <button
-                className="p-2 rounded-md text-gray-700 hover:text-amber-600 transition-colors"
+                className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Abrir menú"
               >
@@ -156,7 +168,10 @@ export default function Navbar() {
                 placeholder="Buscar figuras..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700 rounded-full 
+                         bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 
+                         placeholder-gray-500 dark:placeholder-gray-400 
+                         focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             </form>
@@ -173,16 +188,16 @@ export default function Navbar() {
 
       {/* Menú Móvil */}
       <div
-        className={`mobile-menu fixed top-0 right-0 z-50 h-full w-80 max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`mobile-menu fixed top-0 right-0 z-50 h-full w-80 max-w-sm bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out lg:hidden ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-amber-700">Categorías</h2>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-400">Categorías</h2>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-md text-amber-500 hover:text-amber-700 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-md text-amber-500 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Cerrar menú"
             >
               <X size={20} />
@@ -194,7 +209,7 @@ export default function Navbar() {
               <Link
                 key={category.name}
                 href={category.path}
-                className="block px-4 py-3 text-base font-medium text-gray-700 hover:text-amber-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                className="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {category.name}
@@ -202,10 +217,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-200 dark:border-gray-800 p-4">
             <Link
               href="/"
-              className="block text-center text-sm text-amber-600 hover:text-amber-700 transition-colors font-medium"
+              className="block text-center text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               © 2025 Starfigs

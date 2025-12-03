@@ -59,9 +59,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.slug}`} className="group block text-inherit no-underline" onClick={handleClick}>
-      <div className="bg-white shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 shadow-md hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-blue-500/10 transition-shadow duration-300 overflow-hidden flex flex-col border border-transparent dark:border-gray-700">
         {/* Imagen */}
-        <div className="relative w-full h-0 pb-[100%] bg-gray-50 overflow-hidden">
+        <div className="relative w-full h-0 pb-[100%] bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {showReleaseTag && (
             <span
               className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}
@@ -80,19 +80,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
             alt={product.name}
             fill
-            className="object-contain transition-transform duration-300 bg-white"
+            className="object-contain transition-transform duration-300 bg-white dark:bg-gray-800"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
           />
         </div>
 
         {/* Info */}
         <div className="p-4 flex flex-col gap-1">
-          <h3 className="text-sm font-semibold text-gray-800 group-hover:text-amber-600 transition-colors line-clamp-2">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
             {product.name}
           </h3>
 
           {product.heightCm && (
-            <span className="text-xs text-gray-700">
+            <span className="text-xs text-gray-700 dark:text-gray-300">
               Altura: <strong>{product.heightCm} cm</strong>
             </span>
           )}
@@ -101,11 +101,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="flex items-center gap-2">
               {hasDiscount ? (
                 <>
-                  <span className="text-gray-500 line-through text-sm">S/. {product.price.toFixed(2)}</span>
-                  <span className="text-red-600 font-bold text-base">S/. {finalPrice.toFixed(2)}</span>
+                  <span className="text-gray-500 dark:text-gray-400 line-through text-sm">S/. {product.price.toFixed(2)}</span>
+                  <span className="text-red-600 dark:text-red-400 font-bold text-base">S/. {finalPrice.toFixed(2)}</span>
                 </>
               ) : (
-                <span className="text-orange-600 font-bold text-base">S/. {product.price.toFixed(2)}</span>
+                <span className="text-orange-600 dark:text-orange-400 font-bold text-base">S/. {product.price.toFixed(2)}</span>
               )}
             </div>
           )}

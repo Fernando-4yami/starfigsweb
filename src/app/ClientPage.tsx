@@ -11,9 +11,9 @@ const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: 
     () =>
       Array.from({ length: itemCount }).map((_, i) => (
         <div key={i} className="animate-pulse">
-          <div className="bg-muted aspect-square rounded-lg mb-3"></div>
-          <div className="bg-muted h-4 rounded mb-2"></div>
-          <div className="bg-muted h-3 rounded w-3/4"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-3"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4"></div>
         </div>
       )),
     [itemCount],
@@ -22,7 +22,7 @@ const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: 
   return (
     <section className="mb-16">
       <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2 text-center">{title}</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
         <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-6">{skeletonItems}</div>
@@ -47,13 +47,13 @@ const ProductSection = ({
   return (
     <section className="mb-16">
       <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2 text-center">{title}</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
         <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
       </div>
 
       {products.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">{emptyMessage}</p>
+          <p className="text-gray-600 dark:text-gray-400">{emptyMessage}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
@@ -95,13 +95,13 @@ const ProductSectionWithLoadMore = ({
   return (
     <section className="mb-16">
       <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2 text-center">{title}</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
         <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
       </div>
 
       {products.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">{emptyMessage}</p>
+          <p className="text-gray-600 dark:text-gray-400">{emptyMessage}</p>
         </div>
       ) : (
         <>
@@ -113,7 +113,7 @@ const ProductSectionWithLoadMore = ({
             <div className="flex justify-center mt-10">
               <button
                 onClick={handleLoadMore}
-                className="px-8 py-3 bg-white border-2 border-purple-300 text-purple-700 font-medium rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors duration-200"
+                className="px-8 py-3 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium rounded-lg hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 Ver más productos ({products.length - visibleCount} restantes)
               </button>
@@ -190,7 +190,7 @@ export default function HomePage() {
   const ctaSection = useMemo(
     () => (
       <section className="relative py-20 mt-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-white to-gray-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 backdrop-blur-sm"></div>
         <div className="relative max-w-4xl mx-auto text-center px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             ¿No encuentras lo que buscas?
@@ -203,7 +203,7 @@ export default function HomePage() {
               href="https://api.whatsapp.com/send/?phone=51926951167&text=Hola!%20%C2%BFPrecio%20y%20disponibilidad%20de%20esto%3F%0A%0AAdjunto%20imagen%20si%20tengo%20%F0%9F%91%8D&type=phone_number&app_absent=0"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-8 py-3 bg-emerald-500 text-white font-semibold rounded-full shadow-md hover:bg-emerald-600 hover:shadow-lg transition-all duration-300"
+              className="inline-flex items-center px-8 py-3 bg-emerald-500 dark:bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-600 dark:hover:bg-emerald-700 hover:shadow-lg transition-all duration-300"
             >
               Contactar por WhatsApp
             </a>
@@ -215,7 +215,7 @@ export default function HomePage() {
   )
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {data.loading ? (
           <SectionSkeleton title="Nuevos Lanzamientos" itemCount={18} />
@@ -256,7 +256,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* CTA Section */}
       {ctaSection}
     </main>
   )

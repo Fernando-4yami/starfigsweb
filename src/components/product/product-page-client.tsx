@@ -9,7 +9,6 @@ import { useEffect, useState, useMemo, useCallback } from "react"
 import Image from "next/image"
 import { parseSerializedDate, serializeProduct, type SerializedProduct } from "@/lib/serialize-product"
 
-// 🎯 Componentes extraídos
 import ProductBreadcrumbs from "@/components/product/product-breadcrumbs"
 import ProductInfo from "@/components/product/product-info"
 import ProductSpecs from "@/components/product/product-specs"
@@ -24,7 +23,6 @@ interface ProductPageClientProps {
   initialProduct?: SerializedProduct
 }
 
-// 🚀 CRITICAL IMAGE - Componente separado para LCP
 function CriticalProductImage({
   src,
   alt,
@@ -48,14 +46,14 @@ function CriticalProductImage({
 
   if (imageError) {
     return (
-      <div className="w-full h-96 md:h-[500px] bg-gray-100 rounded-xl flex items-center justify-center">
-        <div className="text-gray-400">Imagen no disponible</div>
+      <div className="w-full h-96 md:h-[500px] bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+        <div className="text-gray-400 dark:text-gray-600">Imagen no disponible</div>
       </div>
     )
   }
 
   return (
-    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 rounded-xl overflow-hidden">
+    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
       <Image
         src={src || "/placeholder.svg"}
         alt={alt}
@@ -69,8 +67,8 @@ function CriticalProductImage({
       />
 
       {!imageLoaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>
@@ -80,10 +78,8 @@ function CriticalProductImage({
 export default function ProductPageClient({ params, initialProduct }: ProductPageClientProps) {
   const [product, setProduct] = useState<SerializedProduct | null>(initialProduct || null)
   const [loading, setLoading] = useState(!initialProduct)
-  const [showFullGallery, setShowFullGallery] = useState(false)
   const [criticalImageLoaded, setCriticalImageLoaded] = useState(false)
 
-  // 🚀 FETCH PRINCIPAL - Solo si no hay initialProduct
   useEffect(() => {
     if (initialProduct) {
       setLoading(false)
@@ -99,7 +95,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
         }
 
         const serializedProduct = serializeProduct(fetchedProduct)
-
         setProduct(serializedProduct)
         setLoading(false)
       } catch (error) {
@@ -111,7 +106,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
     fetchProduct()
   }, [params.slug, initialProduct])
 
-  // 🚀 TRACKING - Solo si tenemos producto
   useEffect(() => {
     if (!product) return
 
@@ -125,14 +119,12 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
     return () => clearTimeout(timer)
   }, [product])
 
-  // 🚀 CALLBACKS MEMOIZADOS
   const handleWhatsAppClick = useCallback(() => {
     if (product) {
       trackWhatsAppClick(product.name, product.id)
     }
   }, [product])
 
-  // 🚀 CÁLCULOS MEMOIZADOS
   const productData = useMemo(() => {
     if (!product) return null
 
@@ -144,14 +136,13 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
       (releaseDate.getFullYear() > now.getFullYear() ||
         (releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() > now.getMonth()))
 
-    // 🔧 SOLO CALCULAR releaseMonthYear SI showReleaseTag ES TRUE
     const releaseMonthYear =
       showReleaseTag && releaseDate
         ? format(releaseDate, "MMMM yyyy", { locale: es }).replace(/^./, (str) => str.toUpperCase())
         : ""
 
     const productUrl = `https://starfigsperu.com/products/${product.slug}`
-    const whatsappMessage = `Hola, estoy interesado en reservar el producto *${product.name}*.\n${productUrl}`
+    const whatsappMessage = ` *${product.name}*.\n${productUrl}`
     const whatsappUrl = `https://wa.me/51926951167?text=${encodeURIComponent(whatsappMessage)}`
 
     return {
@@ -165,8 +156,8 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
 
   if (loading || !product || !productData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     )
   }
@@ -174,19 +165,17 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   const mainImageUrl = product.imageUrls?.[0] || "/placeholder.svg"
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
-      {/* Breadcrumbs */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* 🚀 IMAGEN CRÍTICA */}
         <div className="space-y-4">
           {product.imageUrls?.length > 1 ? (
             <ProgressiveGallery
               imageUrls={product.imageUrls}
               galleryThumbnailUrls={product.galleryThumbnailUrls}
               productName={product.name}
-              priority={true} // Para LCP
+              priority={true}
             />
           ) : (
             <CriticalProductImage
@@ -196,18 +185,15 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             />
           )}
 
-          {/* Image Disclaimer */}
-          <div className="text-xs text-gray-500 italic text-center px-2 py-1 bg-gray-50 rounded border-l-2 border-gray-300">
+          <div className="text-xs text-gray-500 dark:text-gray-400 italic text-center px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded border-l-2 border-gray-300 dark:border-gray-700">
             <span className="opacity-75">
               Las imágenes mostradas son de carácter referencial y pueden no corresponder exactamente al producto final.
             </span>
           </div>
 
-          {/* Share buttons */}
           <ShareButtons productUrl={productData.productUrl} productName={product.name} />
         </div>
 
-        {/* Información del producto */}
         <div className="space-y-6">
           <ProductInfo
             name={product.name}
@@ -221,15 +207,19 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             discount={product.discount}
           />
 
-          {/* 🎉 BANNER DE PROMOCIÓN */}
           <PromotionBanner />
 
-          <ProductSpecs brand={product.brand} line={product.line} heightCm={product.heightCm} scale={product.scale} />
+          <ProductSpecs
+            brand={product.brand}
+            line={product.line}
+            heightCm={product.heightCm}
+            scale={product.scale}
+          />
 
           {product.description && (
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-blue-800">Descripción</h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{product.description}</p>
+              <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-400">Descripción</h3>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{product.description}</p>
             </div>
           )}
 
@@ -237,14 +227,14 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             whatsappUrl={productData.whatsappUrl}
             onWhatsAppClick={handleWhatsAppClick}
             releaseDate={product.releaseDate}
+            stock={product.stock}
           />
         </div>
       </div>
 
-      {/* 🚀 PRODUCTOS RELACIONADOS INFINITOS */}
       <div className="mt-16">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-2">Productos relacionados</h2>
+          <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-400 mb-2">Productos relacionados</h2>
         </div>
 
         <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
