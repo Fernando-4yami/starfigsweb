@@ -6,8 +6,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="light"
-      enableSystem={false} // <--- desactiva el dark mode automático del sistema
+      defaultTheme="dark" // ✅ DARK MODE POR DEFAULT
+      enableSystem={false}
     >
       {children}
     </NextThemesProvider>

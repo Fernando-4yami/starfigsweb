@@ -177,24 +177,25 @@ export default function ProgressiveGallery({
         )}
       </div>
 
-      {/* 🚀 MODAL PANTALLA COMPLETA CON DARK MODE */}
+      {/* 🚀 MODAL PANTALLA COMPLETA - FIXED CON TOP-0 PARA CUBRIR TODO */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 dark:bg-black/98 flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center p-8">
+        <div className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen z-[9999] bg-black/95 dark:bg-black/98">
+          {/* Contenedor centrado que ocupa todo el espacio */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
             <Image
               src={imageUrls[selectedIndex] || "/placeholder.svg"}
               alt={`${productName} - Pantalla completa`}
-              width={1200}
-              height={800}
-              className="max-w-[90vw] max-h-[90vh] object-contain"
+              width={1600}
+              height={1200}
+              className="max-w-full max-h-full w-auto h-auto object-contain"
               quality={95}
             />
           </div>
 
-          {/* Controles pantalla completa con dark mode mejorado */}
+          {/* Controles pantalla completa */}
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute top-4 right-4 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Cerrar pantalla completa"
           >
             <X className="w-6 h-6" />
@@ -202,7 +203,7 @@ export default function ProgressiveGallery({
 
           <button
             onClick={prevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Imagen anterior"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -210,14 +211,14 @@ export default function ProgressiveGallery({
 
           <button
             onClick={nextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Siguiente imagen"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          {/* Indicador pantalla completa con dark mode */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 dark:bg-white/20 text-white px-4 py-2 rounded">
+          {/* Indicador pantalla completa */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 dark:bg-white/20 text-white px-4 py-2 rounded z-10">
             {selectedIndex + 1} / {imageUrls.length}
           </div>
         </div>

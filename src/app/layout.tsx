@@ -3,7 +3,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/Navbar/Navbar"
-import ScrollToTop from "@/components/scroll-to-top" // ← AGREGAR ESTO
+import Footer from "@/components/Footer"
+import ScrollToTop from "@/components/scroll-to-top"
+import PageTransitionProvider from "@/components/PageTransitionProvider"
 import { Suspense } from "react"
 import "../styles/globals.css"
 
@@ -26,10 +28,15 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <ScrollToTop /> {/* ← AGREGAR ESTO */}
-            <Navbar />
-            {children}
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <PageTransitionProvider>
+              <ScrollToTop />
+              <Navbar />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </PageTransitionProvider>
           </ThemeProvider>
         </Suspense>
       </body>
