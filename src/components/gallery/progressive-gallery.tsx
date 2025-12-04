@@ -8,7 +8,7 @@ interface ProgressiveGalleryProps {
   imageUrls: string[]
   galleryThumbnailUrls?: string[]
   productName: string
-  priority?: boolean // 🚀 NUEVO PROP PARA LCP
+  priority?: boolean
 }
 
 export default function ProgressiveGallery({
@@ -19,25 +19,22 @@ export default function ProgressiveGallery({
 }: ProgressiveGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])) // Principal ya cargada
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]))
   const [loadedThumbnails, setLoadedThumbnails] = useState<Set<number>>(new Set())
   const [thumbnailsLoaded, setThumbnailsLoaded] = useState(false)
 
-  // 🚀 CARGAR MINIATURAS DESPUÉS DE LA PRINCIPAL
   useEffect(() => {
     const timer = setTimeout(() => {
       setThumbnailsLoaded(true)
-    }, 500) // Delay para que cargue después de la principal
+    }, 500)
 
     return () => clearTimeout(timer)
   }, [])
 
-  // 🚀 PRECARGAR IMAGEN CUANDO SE SELECCIONA MINIATURA
   const handleThumbnailClick = useCallback(
     (index: number) => {
       setSelectedIndex(index)
 
-      // Precargar imagen si no está cargada
       if (!loadedImages.has(index)) {
         const img = new window.Image()
         img.onload = () => {
@@ -63,7 +60,6 @@ export default function ProgressiveGallery({
     handleThumbnailClick(newIndex)
   }, [selectedIndex, imageUrls.length, handleThumbnailClick])
 
-  // 🚀 KEYBOARD NAVIGATION
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen) {
@@ -82,14 +78,14 @@ export default function ProgressiveGallery({
   return (
     <>
       <div className="space-y-4">
-        {/* 🚀 IMAGEN PRINCIPAL - SIN LUPA */}
+        {/* 🚀 IMAGEN PRINCIPAL CON DARK MODE */}
         <div className="relative group">
-          <div className="relative w-full h-96 md:h-[500px] bg-gray-100 rounded-xl overflow-hidden">
+          <div className="relative w-full h-96 md:h-[500px] bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <Image
               src={imageUrls[selectedIndex] || "/placeholder.svg"}
               alt={`${productName} - Imagen ${selectedIndex + 1}`}
               fill
-              priority={priority && selectedIndex === 0} // 🚀 PRIORITY SOLO PARA LA PRIMERA
+              priority={priority && selectedIndex === 0}
               className={`object-contain transition-all duration-300 ${
                 loadedImages.has(selectedIndex) ? "opacity-100 blur-0" : "opacity-0 blur-sm"
               }`}
@@ -98,17 +94,17 @@ export default function ProgressiveGallery({
               quality={90}
             />
 
-            {/* 🚀 BLUR PLACEHOLDER */}
+            {/* 🚀 BLUR PLACEHOLDER CON DARK MODE */}
             {!loadedImages.has(selectedIndex) && (
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 animate-pulse flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
-            {/* 🚀 CONTROLES DE NAVEGACIÓN */}
+            {/* 🚀 CONTROLES DE NAVEGACIÓN CON DARK MODE */}
             <button
               onClick={prevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
               aria-label="Imagen anterior"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -116,31 +112,31 @@ export default function ProgressiveGallery({
 
             <button
               onClick={nextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
               aria-label="Siguiente imagen"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* 🚀 BOTÓN PANTALLA COMPLETA */}
+            {/* 🚀 BOTÓN PANTALLA COMPLETA CON DARK MODE */}
             <button
               onClick={() => setIsFullscreen(true)}
-              className="absolute top-2 right-2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
+              className="absolute top-2 right-2 w-10 h-10 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
               aria-label="Ver en pantalla completa"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
 
-            {/* 🚀 INDICADOR DE IMAGEN */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+            {/* 🚀 INDICADOR DE IMAGEN CON DARK MODE */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 dark:bg-white/20 text-white text-xs px-2 py-1 rounded">
               {selectedIndex + 1} / {imageUrls.length}
             </div>
           </div>
         </div>
 
-        {/* 🚀 MINIATURAS - CARGAN DESPUÉS */}
+        {/* 🚀 MINIATURAS CON DARK MODE */}
         {thumbnailsLoaded && (
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
             {imageUrls.map((url, index) => {
               const thumbnailUrl = galleryThumbnailUrls?.[index] || url
               const isSelected = index === selectedIndex
@@ -151,23 +147,29 @@ export default function ProgressiveGallery({
                   key={index}
                   onClick={() => handleThumbnailClick(index)}
                   className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                    isSelected ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-gray-300"
+                    isSelected 
+                      ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800" 
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  <Image
-                    src={thumbnailUrl || "/placeholder.svg"}
-                    alt={`${productName} miniatura ${index + 1}`}
-                    fill
-                    className={`object-cover transition-all duration-300 ${
-                      isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                    }`}
-                    sizes="64px"
-                    onLoad={() => handleThumbnailLoad(index)}
-                    quality={60}
-                  />
+                  <div className="w-full h-full bg-white dark:bg-gray-800">
+                    <Image
+                      src={thumbnailUrl || "/placeholder.svg"}
+                      alt={`${productName} miniatura ${index + 1}`}
+                      fill
+                      className={`object-cover transition-all duration-300 ${
+                        isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                      }`}
+                      sizes="64px"
+                      onLoad={() => handleThumbnailLoad(index)}
+                      quality={60}
+                    />
 
-                  {/* 🚀 BLUR PLACEHOLDER MINIATURA */}
-                  {!isLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+                    {/* 🚀 BLUR PLACEHOLDER MINIATURA CON DARK MODE */}
+                    {!isLoaded && (
+                      <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                    )}
+                  </div>
                 </button>
               )
             })}
@@ -175,10 +177,9 @@ export default function ProgressiveGallery({
         )}
       </div>
 
-      {/* 🚀 MODAL PANTALLA COMPLETA - CENTRADO PERFECTO */}
+      {/* 🚀 MODAL PANTALLA COMPLETA CON DARK MODE */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
-          {/* Contenedor centrado */}
+        <div className="fixed inset-0 z-50 bg-black/95 dark:bg-black/98 flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center p-8">
             <Image
               src={imageUrls[selectedIndex] || "/placeholder.svg"}
@@ -190,10 +191,10 @@ export default function ProgressiveGallery({
             />
           </div>
 
-          {/* Controles pantalla completa */}
+          {/* Controles pantalla completa con dark mode mejorado */}
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute top-4 right-4 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
             aria-label="Cerrar pantalla completa"
           >
             <X className="w-6 h-6" />
@@ -201,7 +202,7 @@ export default function ProgressiveGallery({
 
           <button
             onClick={prevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
             aria-label="Imagen anterior"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -209,18 +210,37 @@ export default function ProgressiveGallery({
 
           <button
             onClick={nextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 dark:bg-white/20 hover:bg-black/70 dark:hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-colors"
             aria-label="Siguiente imagen"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          {/* Indicador pantalla completa */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded">
+          {/* Indicador pantalla completa con dark mode */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 dark:bg-white/20 text-white px-4 py-2 rounded">
             {selectedIndex + 1} / {imageUrls.length}
           </div>
         </div>
       )}
+
+      {/* Estilos para scrollbar dark mode */}
+      <style jsx>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgb(156 163 175);
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgb(75 85 99);
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background-color: rgb(243 244 246);
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-track {
+          background-color: rgb(31 41 55);
+        }
+      `}</style>
     </>
   )
 }

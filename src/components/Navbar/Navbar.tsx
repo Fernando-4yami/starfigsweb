@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
 import Image from "next/image"
-import { ThemeToggle } from "@/components/theme-toggle" // ← AGREGAR ESTO
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -94,7 +94,7 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
-            {/* Logo */}
+            {/* Logo con inversión en dark mode */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center">
                 <Image
@@ -102,7 +102,7 @@ export default function Navbar() {
                   alt="Starfigs Logo"
                   width={120}
                   height={32}
-                  className="h-8 w-auto"
+                  className="h-8 w-auto dark:invert dark:brightness-0 dark:contrast-200 transition-all duration-300"
                   priority
                 />
               </Link>
@@ -138,7 +138,6 @@ export default function Navbar() {
                 </Link>
               ))}
               
-              {/* 🌙 BOTÓN DE DARK MODE */}
               <div className="ml-2">
                 <ThemeToggle />
               </div>
@@ -146,7 +145,6 @@ export default function Navbar() {
 
             {/* Botones Mobile */}
             <div className="flex items-center gap-2 lg:hidden">
-              {/* 🌙 BOTÓN DARK MODE MOBILE */}
               <ThemeToggle />
               
               <button

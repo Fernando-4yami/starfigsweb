@@ -18,9 +18,9 @@ interface InfiniteRelatedProductsProps {
 
 // 🎯 TIPOS DE COINCIDENCIA POR JERARQUÍA
 enum MatchType {
-  NOMBRE_Y_LINEA = 1, // Prioridad máxima
-  NOMBRE = 2, // Prioridad media
-  LINEA = 3, // Prioridad baja
+  NOMBRE_Y_LINEA = 1,
+  NOMBRE = 2,
+  LINEA = 3,
 }
 
 interface ProductMatch {
@@ -32,7 +32,6 @@ interface ProductMatch {
   reasons: string[]
 }
 
-// 🎯 FUNCIÓN PARA EXTRAER PALABRAS CLAVE DEL NOMBRE
 function extractKeywords(productName: string): string[] {
   const cleanName = productName
     .toLowerCase()
@@ -41,47 +40,11 @@ function extractKeywords(productName: string): string[] {
     .trim()
 
   const stopWords = [
-    "figura",
-    "figure",
-    "figurine",
-    "scale",
-    "cm",
-    "pvc",
-    "abs",
-    "limited",
-    "edition",
-    "special",
-    "ver",
-    "version",
-    "vol",
-    "volume",
-    "set",
-    "pack",
-    "collection",
-    "series",
-    "line",
-    "model",
-    "kit",
-    "de",
-    "la",
-    "el",
-    "en",
-    "y",
-    "con",
-    "para",
-    "por",
-    "un",
-    "una",
-    "the",
-    "and",
-    "or",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "of",
-    "with",
+    "figura", "figure", "figurine", "scale", "cm", "pvc", "abs", "limited",
+    "edition", "special", "ver", "version", "vol", "volume", "set", "pack",
+    "collection", "series", "line", "model", "kit", "de", "la", "el", "en",
+    "y", "con", "para", "por", "un", "una", "the", "and", "or", "in", "on",
+    "at", "to", "for", "of", "with",
   ]
 
   const words = cleanName
@@ -93,7 +56,6 @@ function extractKeywords(productName: string): string[] {
   return [...new Set(words)]
 }
 
-// 🎯 FUNCIÓN PARA CALCULAR SIMILITUD DE NOMBRES
 function calculateNameSimilarity(name1: string, name2: string): number {
   const keywords1 = extractKeywords(name1)
   const keywords2 = extractKeywords(name2)
@@ -112,51 +74,39 @@ function calculateNameSimilarity(name1: string, name2: string): number {
   return Math.min(exactScore + partialScore, 100)
 }
 
-// 🎯 FUNCIÓN PARA VERIFICAR COINCIDENCIA EXACTA DE LÍNEA
 function isExactLineMatch(line1: string, line2: string): boolean {
   if (!line1 || !line2) return false
   const normalize = (str: string) => str.toLowerCase().trim()
   return normalize(line1) === normalize(line2)
 }
 
-// 🎯 FUNCIÓN PRINCIPAL PARA CLASIFICAR PRODUCTOS POR JERARQUÍA
 function classifyProductMatch(currentProduct: SerializedProduct | Product, product: Product): ProductMatch | null {
   const nameScore = calculateNameSimilarity(currentProduct.name, product.name)
   const isLineExact = isExactLineMatch(currentProduct.line || "", product.line || "")
 
-  // Umbrales para determinar si el nombre es "muy parecido"
-  const NAME_SIMILARITY_THRESHOLD = 40 // 40% o más se considera "muy parecido"
-
+  const NAME_SIMILARITY_THRESHOLD = 40
   const isNameSimilar = nameScore >= NAME_SIMILARITY_THRESHOLD
   const reasons: string[] = []
 
   let matchType: MatchType
   let totalScore = 0
 
-  // 🏆 JERARQUÍA 1: NOMBRE Y LÍNEA (Prioridad máxima)
   if (isNameSimilar && isLineExact) {
     matchType = MatchType.NOMBRE_Y_LINEA
-    totalScore = 1000 + nameScore // Base 1000 + similitud de nombre
+    totalScore = 1000 + nameScore
     reasons.push(`nombre similar (${nameScore.toFixed(1)}%) + línea exacta`)
-  }
-  // 🥈 JERARQUÍA 2: SOLO NOMBRE (Prioridad media)
-  else if (isNameSimilar) {
+  } else if (isNameSimilar) {
     matchType = MatchType.NOMBRE
-    totalScore = 500 + nameScore // Base 500 + similitud de nombre
+    totalScore = 500 + nameScore
     reasons.push(`nombre similar (${nameScore.toFixed(1)}%)`)
-  }
-  // 🥉 JERARQUÍA 3: SOLO LÍNEA (Prioridad baja)
-  else if (isLineExact) {
+  } else if (isLineExact) {
     matchType = MatchType.LINEA
-    totalScore = 100 // Base 100 para línea exacta
+    totalScore = 100
     reasons.push(`línea exacta: "${product.line}"`)
-  }
-  // ❌ NO CALIFICA
-  else {
+  } else {
     return null
   }
 
-  // 🎯 BONUS MENORES (no afectan la jerarquía principal)
   if (currentProduct.brand && product.brand === currentProduct.brand) {
     totalScore += 5
     reasons.push(`misma marca: "${product.brand}"`)
@@ -197,14 +147,12 @@ export default function InfiniteRelatedProducts({
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
 
-  // 🚀 CARGAR TODOS LOS PRODUCTOS RELACIONADOS AL INICIO (CON CACHE)
   useEffect(() => {
     const fetchAllRelatedProducts = async () => {
       try {
         setLoading(true)
         console.log(`🎯 BÚSQUEDA JERÁRQUICA de productos relacionados para: "${currentProduct.name}"`)
 
-        // 🚀 INTENTAR OBTENER DEL CACHE PRIMERO
         const currentLine = currentProduct.line || ""
         const currentSeries = extractKeywords(currentProduct.name)
 
@@ -217,7 +165,6 @@ export default function InfiniteRelatedProducts({
 
         if (cachedProducts && cachedProducts.length > 0) {
           setAllRelatedProducts(cachedProducts)
-
           const initialProducts = cachedProducts.slice(0, initialBatchSize)
           setDisplayedProducts(initialProducts)
           setCurrentIndex(initialBatchSize)
@@ -226,7 +173,6 @@ export default function InfiniteRelatedProducts({
           return
         }
 
-        // 🚀 SI NO HAY CACHE, HACER LA CONSULTA NORMAL
         console.log(`🔍 No hay cache, consultando base de datos...`)
         const allProducts = await getProducts(300)
 
@@ -234,7 +180,6 @@ export default function InfiniteRelatedProducts({
         console.log(`  - Nombre: "${currentProduct.name}"`)
         console.log(`  - Línea: "${currentLine}"`)
 
-        // 🎯 CLASIFICAR PRODUCTOS POR JERARQUÍA
         const productMatches: ProductMatch[] = []
 
         allProducts
@@ -246,57 +191,24 @@ export default function InfiniteRelatedProducts({
             }
           })
 
-        // 🏆 ORDENAR POR JERARQUÍA Y LUEGO POR SCORE
         productMatches.sort((a, b) => {
-          // Primero por tipo de coincidencia (jerarquía)
           if (a.matchType !== b.matchType) {
-            return a.matchType - b.matchType // Menor número = mayor prioridad
+            return a.matchType - b.matchType
           }
-
-          // Dentro de la misma jerarquía, por score total
           return b.totalScore - a.totalScore
         })
 
         const finalProducts = productMatches.map((match) => match.product)
 
-        // 🚀 GUARDAR EN CACHE
         setCachedRelatedProducts(currentProduct.id, finalProducts, currentLine, currentSeries, currentProduct.name)
 
         setAllRelatedProducts(finalProducts)
-
         const initialProducts = finalProducts.slice(0, initialBatchSize)
         setDisplayedProducts(initialProducts)
         setCurrentIndex(initialBatchSize)
         setHasMore(finalProducts.length > initialBatchSize)
 
         console.log(`✅ Encontrados ${finalProducts.length} productos relacionados por JERARQUÍA`)
-
-        // 🎯 LOG DETALLADO POR JERARQUÍA
-        const byType = {
-          [MatchType.NOMBRE_Y_LINEA]: productMatches.filter((m) => m.matchType === MatchType.NOMBRE_Y_LINEA),
-          [MatchType.NOMBRE]: productMatches.filter((m) => m.matchType === MatchType.NOMBRE),
-          [MatchType.LINEA]: productMatches.filter((m) => m.matchType === MatchType.LINEA),
-        }
-
-        console.log(`📊 Distribución por jerarquía:`)
-        console.log(`  🏆 Nombre + Línea: ${byType[MatchType.NOMBRE_Y_LINEA].length} productos`)
-        console.log(`  🥈 Solo Nombre: ${byType[MatchType.NOMBRE].length} productos`)
-        console.log(`  🥉 Solo Línea: ${byType[MatchType.LINEA].length} productos`)
-
-        // Log de muestra para debug
-        if (productMatches.length > 0) {
-          console.log(`📋 Top 5 productos más relevantes:`)
-          productMatches.slice(0, 5).forEach((match, index) => {
-            const typeLabel =
-              match.matchType === MatchType.NOMBRE_Y_LINEA
-                ? "NOMBRE+LÍNEA"
-                : match.matchType === MatchType.NOMBRE
-                  ? "NOMBRE"
-                  : "LÍNEA"
-            console.log(`  ${index + 1}. [${typeLabel}] ${match.product.name}`)
-            console.log(`     Score: ${match.totalScore.toFixed(1)} | ${match.reasons.join(", ")}`)
-          })
-        }
       } catch (error) {
         console.error("Error fetching infinite related products:", error)
         setAllRelatedProducts([])
@@ -309,12 +221,10 @@ export default function InfiniteRelatedProducts({
     fetchAllRelatedProducts()
   }, [currentProduct, initialBatchSize])
 
-  // 🧹 LIMPIAR CACHE EXPIRADO AL MONTAR EL COMPONENTE
   useEffect(() => {
     cleanupRelatedProductsCache()
   }, [])
 
-  // 🚀 FUNCIÓN PARA CARGAR MÁS PRODUCTOS
   const loadMoreProducts = useCallback(() => {
     if (loadingMore || !hasMore) return
 
@@ -336,7 +246,6 @@ export default function InfiniteRelatedProducts({
     }, 300)
   }, [allRelatedProducts, displayedProducts, currentIndex, loadMoreBatchSize, loadingMore, hasMore])
 
-  // 🎯 INTERSECTION OBSERVER PARA LAZY LOADING
   useEffect(() => {
     if (!hasMore || loadingMore) return
 
@@ -367,16 +276,15 @@ export default function InfiniteRelatedProducts({
     }
   }, [hasMore, loadingMore, loadMoreProducts])
 
-  // 🎯 LOADING INICIAL
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {Array.from({ length: initialBatchSize }).map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 aspect-square rounded-lg mb-3"></div>
-              <div className="bg-gray-200 h-4 rounded mb-2"></div>
-              <div className="bg-gray-200 h-3 rounded w-3/4"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-3"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4"></div>
             </div>
           ))}
         </div>
@@ -384,11 +292,10 @@ export default function InfiniteRelatedProducts({
     )
   }
 
-  // 🎯 NO HAY PRODUCTOS
   if (allRelatedProducts.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg">
-        <div className="text-gray-500">
+      <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="text-gray-500 dark:text-gray-400">
           <p className="text-lg font-medium mb-2">No hay productos relacionados</p>
         </div>
       </div>
@@ -397,7 +304,6 @@ export default function InfiniteRelatedProducts({
 
   return (
     <div className="space-y-8">
-      {/* 🎯 GRID DE PRODUCTOS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {displayedProducts.map((product, index) => (
           <div
@@ -413,28 +319,30 @@ export default function InfiniteRelatedProducts({
         ))}
       </div>
 
-      {/* 🎯 LOADING MORE INDICATOR */}
       {hasMore && (
         <div ref={loadMoreRef} className="flex flex-col items-center py-8">
           {loadingMore ? (
             <div className="flex flex-col items-center space-y-4">
               <div className="flex space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>
                 <div
-                  className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"
+                  className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"
                   style={{ animationDelay: "0.1s" }}
                 ></div>
                 <div
-                  className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"
+                  className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}
                 ></div>
               </div>
-              <p className="text-gray-600 text-sm">Cargando más productos relacionados...</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Cargando más productos relacionados...</p>
             </div>
           ) : (
             <button
               onClick={loadMoreProducts}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg 
+                       hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
+                       dark:focus:ring-offset-gray-900"
             >
               Cargar más productos ({allRelatedProducts.length - displayedProducts.length} restantes)
             </button>
@@ -442,11 +350,6 @@ export default function InfiniteRelatedProducts({
         </div>
       )}
 
-
-
-
-
-      {/* 🎨 ESTILOS CSS PARA ANIMACIONES */}
       <style jsx>{`
         @keyframes fade-in {
           from {

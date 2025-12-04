@@ -67,24 +67,32 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
       {/* 🚀 BOTÓN CON TEXTO DINÁMICO SEGÚN DISPONIBILIDAD Y STOCK */}
       <button
         onClick={handleWhatsAppClick}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 
+                   text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 
+                   transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
       >
         <WhatsAppIcon className="w-5 h-5" />
         {getButtonText()}
       </button>
 
       {isAvailable ? (
-        <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 
+                        bg-green-50 dark:bg-green-950/30 px-4 py-2 rounded-lg 
+                        border border-green-200 dark:border-green-900">
           <CheckCircle className="w-4 h-4" />
           <span className="text-sm font-medium">Disponible para pedido</span>
         </div>
       ) : parsedReleaseDate ? (
-        <div className="flex items-center gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 
+                        bg-purple-50 dark:bg-purple-950/30 px-4 py-2 rounded-lg
+                        border border-purple-200 dark:border-purple-900">
           <Clock className="w-4 h-4" />
           <span className="text-sm font-medium">Pre-venta - Próximo lanzamiento</span>
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 
+                        bg-blue-50 dark:bg-blue-950/30 px-4 py-2 rounded-lg
+                        border border-blue-200 dark:border-blue-900">
           <Info className="w-4 h-4" />
           <span className="text-sm font-medium">Consulta disponibilidad y precio</span>
         </div>

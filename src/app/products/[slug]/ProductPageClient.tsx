@@ -46,14 +46,14 @@ function CriticalProductImage({
 
   if (imageError) {
     return (
-      <div className="w-full h-96 md:h-[500px] bg-gray-100 rounded-xl flex items-center justify-center">
-        <div className="text-gray-400">Imagen no disponible</div>
+      <div className="w-full h-96 md:h-[500px] bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+        <div className="text-gray-400 dark:text-gray-600">Imagen no disponible</div>
       </div>
     )
   }
 
   return (
-    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 rounded-xl overflow-hidden">
+    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
       <Image
         src={src || "/placeholder.svg"}
         alt={alt}
@@ -67,8 +67,8 @@ function CriticalProductImage({
       />
 
       {!imageLoaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>
@@ -148,8 +148,8 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
 
   if (loading || !product || !productData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     )
   }
@@ -157,79 +157,83 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   const mainImageUrl = product.imageUrls?.[0] || "/placeholder.svg"
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12 bg-white text-gray-900">
-      <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
+        <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        <div className="space-y-4">
-          {product.imageUrls?.length > 1 ? (
-            <ProgressiveGallery
-              imageUrls={product.imageUrls}
-              galleryThumbnailUrls={product.galleryThumbnailUrls}
-              productName={product.name}
-              priority={true}
-            />
-          ) : (
-            <CriticalProductImage
-              src={mainImageUrl}
-              alt={`${product.name} imagen principal`}
-              onLoad={() => setCriticalImageLoaded(true)}
-            />
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          <div className="space-y-4">
+            {product.imageUrls?.length > 1 ? (
+              <ProgressiveGallery
+                imageUrls={product.imageUrls}
+                galleryThumbnailUrls={product.galleryThumbnailUrls}
+                productName={product.name}
+                priority={true}
+              />
+            ) : (
+              <CriticalProductImage
+                src={mainImageUrl}
+                alt={`${product.name} imagen principal`}
+                onLoad={() => setCriticalImageLoaded(true)}
+              />
+            )}
 
-          <div className="text-xs text-gray-500 italic text-center px-2 py-1 bg-gray-50 rounded border-l-2 border-gray-300">
-            <span className="opacity-75">
-              Las imágenes mostradas son de carácter referencial y pueden no corresponder exactamente al producto final.
-            </span>
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic text-center px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded border-l-2 border-gray-300 dark:border-gray-700">
+              <span className="opacity-75">
+                Las imágenes mostradas son de carácter referencial y pueden no corresponder exactamente al producto final.
+              </span>
+            </div>
+
+            <ShareButtons productUrl={productData.productUrl} productName={product.name} />
           </div>
 
-          <ShareButtons productUrl={productData.productUrl} productName={product.name} />
+          <div className="space-y-6">
+            <ProductInfo
+              name={product.name}
+              price={product.price}
+              category={product.category || "figura"}
+              releaseDate={product.releaseDate}
+              showReleaseTag={productData.showReleaseTag}
+              releaseMonthYear={productData.releaseMonthYear}
+              stock={product.stock}
+              lowStockThreshold={product.lowStockThreshold}
+              discount={product.discount}
+            />
+
+            <PromotionBanner />
+
+            <ProductSpecs
+              brand={product.brand}
+              line={product.line}
+              heightCm={product.heightCm}
+              scale={product.scale}
+            />
+
+            {product.description && (
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-400">Descripción</h3>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                  {product.description}
+                </p>
+              </div>
+            )}
+
+            <ProductActions
+              whatsappUrl={productData.whatsappUrl}
+              onWhatsAppClick={handleWhatsAppClick}
+              releaseDate={product.releaseDate}
+              stock={product.stock}
+            />
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <ProductInfo
-            name={product.name}
-            price={product.price}
-            category={product.category || "figura"}
-            releaseDate={product.releaseDate}
-            showReleaseTag={productData.showReleaseTag}
-            releaseMonthYear={productData.releaseMonthYear}
-            stock={product.stock}
-            lowStockThreshold={product.lowStockThreshold}
-            discount={product.discount}
-          />
+        <div className="mt-16">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-400 mb-2">Productos relacionados</h2>
+          </div>
 
-          <PromotionBanner />
-
-          <ProductSpecs
-            brand={product.brand}
-            line={product.line}
-            heightCm={product.heightCm}
-            scale={product.scale}
-          />
-
-          {product.description && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-blue-800">Descripción</h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{product.description}</p>
-            </div>
-          )}
-
-          <ProductActions
-            whatsappUrl={productData.whatsappUrl}
-            onWhatsAppClick={handleWhatsAppClick}
-            releaseDate={product.releaseDate}
-            stock={product.stock}
-          />
+          <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
         </div>
-      </div>
-
-      <div className="mt-16">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-2">Productos relacionados</h2>
-        </div>
-
-        <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
       </div>
     </div>
   )
