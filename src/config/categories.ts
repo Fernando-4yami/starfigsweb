@@ -49,7 +49,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-emerald-800",
       secondary: "text-emerald-600",
-      gradient: "bg-gradient-to-b from-emerald-50 via-white to-teal-50",
+      gradient: "bg-gradient-to-b from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-emerald-500",
     },
     searchTerms: ["scale", "Scale", "SCALE", "1/7", "1/8", "1/6", "1/4"],
@@ -66,7 +66,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-blue-800",
       secondary: "text-blue-600",
-      gradient: "bg-gradient-to-b from-blue-50 via-white to-cyan-50",
+      gradient: "bg-gradient-to-b from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-blue-500",
     },
     searchTerms: [
@@ -93,7 +93,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-red-800",
       secondary: "text-red-600",
-      gradient: "bg-gradient-to-b from-red-50 via-white to-yellow-50",
+      gradient: "bg-gradient-to-b from-red-50 via-white to-yellow-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-red-500",
     },
     searchTerms: [
@@ -122,7 +122,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-orange-800",
       secondary: "text-orange-600",
-      gradient: "bg-gradient-to-b from-orange-50 via-white to-red-50",
+      gradient: "bg-gradient-to-b from-orange-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-orange-500",
     },
     searchTerms: [
@@ -151,7 +151,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-pink-800",
       secondary: "text-pink-600",
-      gradient: "bg-gradient-to-b from-pink-50 via-white to-rose-50",
+      gradient: "bg-gradient-to-b from-pink-50 via-white to-rose-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-pink-500",
     },
     searchTerms: [
@@ -181,7 +181,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-purple-800",
       secondary: "text-purple-600",
-      gradient: "bg-gradient-to-b from-purple-50 via-white to-pink-50",
+      gradient: "bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-purple-500",
     },
     searchTerms: [
@@ -208,7 +208,7 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     colors: {
       primary: "text-yellow-800",
       secondary: "text-yellow-600",
-      gradient: "bg-gradient-to-b from-yellow-50 via-white to-orange-50",
+      gradient: "bg-gradient-to-b from-yellow-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
       focus: "focus:ring-yellow-500",
     },
     searchTerms: [
@@ -234,10 +234,10 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     badge: "💰 Líneas premium con excelente relación calidad-precio • Más de 20 líneas disponibles",
     iconName: "DollarSign",
     colors: {
-      primary: "text-green-800",
-      secondary: "text-green-600",
-      gradient: "bg-gradient-to-b from-green-50 via-white to-emerald-50",
-      focus: "focus:ring-green-500",
+      primary: "text-indigo-800",
+      secondary: "text-indigo-600",
+      gradient: "bg-gradient-to-b from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900",
+      focus: "focus:ring-indigo-500",
     },
     searchTerms: [
       "Coreful",
