@@ -1,18 +1,22 @@
 // src/lib/firebase/upload-image-server.ts
-import { storage as adminStorage } from "../../../lib/firebase/admin"
+import { storage as adminStorage } from "./admin"
 import axios from "axios"
 import { v4 as uuidv4 } from "uuid"
 import sharp from "sharp"
+
+/**
+ * ✅ Generar URL pública correcta para bucket custom
+ */
+function getPublicUrl(bucketName: string, filename: string): string {
+  return `https://storage.googleapis.com/${bucketName}/${filename}`
+}
 
 /**
  * Uploads an image from a URL, converts it to WebP, and saves it to Firebase Storage.
  */
 export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "products") {
   if (!adminStorage) {
-    const errorMessage =
-      "Firebase Admin Storage not initialized. Check server logs for Admin SDK initialization errors."
-    console.error(errorMessage)
-    throw new Error(errorMessage)
+    throw new Error("Firebase Admin Storage not initialized")
   }
 
   try {
@@ -22,7 +26,7 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
     const webpBuffer = await sharp(originalBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE
+    // ✅ Bucket correcto
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
@@ -31,28 +35,25 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
       public: true,
     })
 
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`
-    console.log(`Successfully uploaded URL and converted to WebP: ${publicUrl}`)
+    const publicUrl = getPublicUrl(bucket.name, filename)
+    console.log(`✅ Uploaded from URL: ${publicUrl}`)
     return publicUrl
   } catch (error) {
-    console.error("Error uploading image from URL or converting to WebP:", error)
-    if (error instanceof Error) {
-      throw new Error(`Failed to upload image from ${imageUrl}: ${error.message}`)
-    }
-    throw new Error(`Failed to upload image from ${imageUrl} due to an unknown error.`)
+    console.error("Error uploading image from URL:", error)
+    throw new Error(`Failed to upload image from ${imageUrl}: ${error.message}`)
   }
 }
 
 /**
  * Uploads an image buffer, converts it to WebP, and saves it to Firebase Storage.
- * NOTA: Esta función procesa el buffer con Sharp
  */
-export async function uploadImageBufferAsWebP(imageBuffer: Buffer, originalFileName: string, folder = "products") {
+export async function uploadImageBufferAsWebP(
+  imageBuffer: Buffer, 
+  originalFileName: string, 
+  folder = "products"
+) {
   if (!adminStorage) {
-    const errorMessage =
-      "Firebase Admin Storage not initialized. Check server logs for Admin SDK initialization errors."
-    console.error(errorMessage)
-    throw new Error(errorMessage)
+    throw new Error("Firebase Admin Storage not initialized")
   }
 
   try {
@@ -60,7 +61,7 @@ export async function uploadImageBufferAsWebP(imageBuffer: Buffer, originalFileN
     const webpBuffer = await sharp(imageBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE
+    // ✅ Bucket correcto
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
@@ -69,20 +70,17 @@ export async function uploadImageBufferAsWebP(imageBuffer: Buffer, originalFileN
       public: true,
     })
 
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`
-    console.log(`Successfully uploaded buffer ${originalFileName} and converted to WebP: ${publicUrl}`)
+    const publicUrl = getPublicUrl(bucket.name, filename)
+    console.log(`✅ Uploaded buffer: ${publicUrl}`)
     return publicUrl
   } catch (error) {
-    console.error(`Error uploading image buffer ${originalFileName} or converting to WebP:`, error)
-    if (error instanceof Error) {
-      throw new Error(`Failed to upload image buffer ${originalFileName}: ${error.message}`)
-    }
-    throw new Error(`Failed to upload image buffer ${originalFileName} due to an unknown error.`)
+    console.error(`Error uploading image buffer ${originalFileName}:`, error)
+    throw new Error(`Failed to upload image buffer ${originalFileName}: ${error.message}`)
   }
 }
 
 /**
- * 🔧 ARREGLADA: Sube un buffer ya procesado especificando bucket explícitamente
+ * ✅ Sube un buffer ya procesado (YA ES WebP)
  */
 export async function uploadProcessedImageBuffer(
   processedBuffer: Buffer,
@@ -90,33 +88,32 @@ export async function uploadProcessedImageBuffer(
   folder = "products",
 ) {
   if (!adminStorage) {
-    const errorMessage =
-      "Firebase Admin Storage not initialized. Check server logs for Admin SDK initialization errors."
-    console.error(errorMessage)
-    throw new Error(errorMessage)
+    throw new Error("Firebase Admin Storage not initialized")
   }
 
   try {
-    console.log(`Uploading already processed ${originalFileName}.`)
+    console.log(`📤 Uploading already processed: ${originalFileName}`)
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // 🔧 ESPECIFICAR BUCKET EXPLÍCITAMENTE - ESTA ES LA LÍNEA CLAVE
+    // ✅ Bucket correcto sin .appspot.com
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(processedBuffer, {
-      metadata: { contentType: "image/webp" },
-      public: true,
+      metadata: { 
+        contentType: "image/webp",
+        cacheControl: 'public, max-age=31536000', // Cache 1 año
+      },
+      public: true, // ← CRÍTICO
     })
 
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`
-    console.log(`Successfully uploaded processed buffer: ${publicUrl}`)
+    // ✅ URL correcta para bucket custom
+    const publicUrl = getPublicUrl(bucket.name, filename)
+    
+    console.log(`✅ Uploaded: ${publicUrl}`)
     return publicUrl
   } catch (error) {
-    console.error(`Error uploading processed image buffer:`, error)
-    if (error instanceof Error) {
-      throw new Error(`Failed to upload processed image buffer: ${error.message}`)
-    }
-    throw new Error(`Failed to upload processed image buffer due to an unknown error.`)
+    console.error(`❌ Error uploading processed buffer:`, error)
+    throw new Error(`Failed to upload processed image buffer: ${error.message}`)
   }
 }
