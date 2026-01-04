@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { type NextRequest, NextResponse } from "next/server"
 import sharp from "sharp"
 import { uploadProcessedImageBuffer } from "@/lib/firebase/upload-image-server"
