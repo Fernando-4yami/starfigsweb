@@ -8,11 +8,12 @@ const nextConfig = {
   },
   images: {
     domains: ["firebasestorage.googleapis.com", "www.tsoto.net", "storage.googleapis.com"],
-    unoptimized: true, // ✅ Mantenemos esto como solicitaste
+    unoptimized: true,
   },
 
   // 🚀 Optimizaciones de performance
   experimental: {
+    serverActions: true, // ← CAMBIO: en Next.js 13 es booleano
     optimizePackageImports: ["lucide-react", "date-fns"],
   },
 
@@ -37,7 +38,6 @@ const nextConfig = {
         ],
       },
       {
-        // Cache estático para imágenes
         source: "/images/:path*",
         headers: [
           {
@@ -58,16 +58,11 @@ const nextConfig = {
     ]
   },
 
-  // 🚀 Compresión
   compress: true,
-
-  // 🔧 Configuración de build
   poweredByHeader: false,
 
-  // 🚀 Optimización de bundle
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Optimizar bundle del cliente
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

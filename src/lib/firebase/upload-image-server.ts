@@ -5,10 +5,11 @@ import { v4 as uuidv4 } from "uuid"
 import sharp from "sharp"
 
 /**
- * ✅ Generar URL pública correcta para bucket custom
+ * ✅ GENERAR URL PÚBLICA SIN TOKEN
  */
 function getPublicUrl(bucketName: string, filename: string): string {
-  return `https://storage.googleapis.com/${bucketName}/${filename}`
+  // ✅ URL PÚBLICA SIN TOKEN - Solo funciona si las reglas permiten lectura pública
+  return `https://storage.googleapis.com/${bucketName}/${encodeURIComponent(filename)}`
 }
 
 /**
@@ -26,14 +27,19 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
     const webpBuffer = await sharp(originalBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // ✅ Bucket correcto
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
+    // ✅ SUBIR CON makePublic() PARA ASEGURAR ACCESO PÚBLICO
     await file.save(webpBuffer, {
-      metadata: { contentType: "image/webp" },
-      public: true,
+      metadata: { 
+        contentType: "image/webp",
+        cacheControl: 'public, max-age=31536000',
+      },
     })
+
+    // ✅ HACER EL ARCHIVO PÚBLICO EXPLÍCITAMENTE
+    await file.makePublic()
 
     const publicUrl = getPublicUrl(bucket.name, filename)
     console.log(`✅ Uploaded from URL: ${publicUrl}`)
@@ -61,14 +67,18 @@ export async function uploadImageBufferAsWebP(
     const webpBuffer = await sharp(imageBuffer).webp({ quality: 80 }).toBuffer()
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // ✅ Bucket correcto
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(webpBuffer, {
-      metadata: { contentType: "image/webp" },
-      public: true,
+      metadata: { 
+        contentType: "image/webp",
+        cacheControl: 'public, max-age=31536000',
+      },
     })
+
+    // ✅ HACER PÚBLICO
+    await file.makePublic()
 
     const publicUrl = getPublicUrl(bucket.name, filename)
     console.log(`✅ Uploaded buffer: ${publicUrl}`)
@@ -95,19 +105,19 @@ export async function uploadProcessedImageBuffer(
     console.log(`📤 Uploading already processed: ${originalFileName}`)
     const filename = `${folder}/${uuidv4()}.webp`
     
-    // ✅ Bucket correcto sin .appspot.com
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
 
     await file.save(processedBuffer, {
       metadata: { 
         contentType: "image/webp",
-        cacheControl: 'public, max-age=31536000', // Cache 1 año
+        cacheControl: 'public, max-age=31536000',
       },
-      public: true, // ← CRÍTICO
     })
 
-    // ✅ URL correcta para bucket custom
+    // ✅ HACER PÚBLICO EXPLÍCITAMENTE
+    await file.makePublic()
+
     const publicUrl = getPublicUrl(bucket.name, filename)
     
     console.log(`✅ Uploaded: ${publicUrl}`)

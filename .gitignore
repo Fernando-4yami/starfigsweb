@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 lib/firebase/serviceAccountKey.json
 src/app/admin/products/
+**/serviceAccountKey.json

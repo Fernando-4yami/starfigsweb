@@ -16,10 +16,11 @@ import {
   increment,
   startAfter,
   type DocumentSnapshot,
+  writeBatch,
 } from "firebase/firestore"
 
 // 🚀 CACHÉ MÁS AGRESIVO
-const CACHE_DURATION = 10 * 60 * 1000 // 10 minutos
+const CACHE_DURATION = 1 * 60 * 1000 // 🔧 Bajado a 1 minuto para ver productos nuevos más rápido
 const POPULAR_CACHE_DURATION = 3 * 60 * 1000 // 3 minutos
 const SEARCH_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos para búsquedas
 
@@ -59,7 +60,7 @@ function startCacheCleanup() {
       }
     },
     3 * 60 * 1000,
-  ) // Cada 3 minutos
+  )
 }
 
 startCacheCleanup()
@@ -87,6 +88,14 @@ function normalizeText(text: string): string {
 
 function normalizeForComparison(text: string): string {
   return normalizeText(text).toLowerCase()
+}
+
+// 🔧 Helper para convertir cualquier tipo de fecha a milliseconds
+function toMs(value: any): number {
+  if (!value) return 0
+  if (typeof value.toDate === "function") return value.toDate().getTime()
+  const ms = new Date(value).getTime()
+  return isNaN(ms) ? 0 : ms
 }
 
 export interface Discount {
@@ -165,6 +174,19 @@ function normalizeProduct(docData: any, docId: string): Product {
     }
   }
 
+  // 🔧 FIX: normalizar createdAt de forma segura para Timestamps de Python y JS
+  let createdAt: Date | null = null
+  try {
+    if (data.createdAt) {
+      const d = typeof data.createdAt.toDate === "function"
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt)
+      createdAt = isNaN(d.getTime()) ? null : d
+    }
+  } catch {
+    createdAt = null
+  }
+
   return {
     id: docId,
     name: data.name || "",
@@ -177,7 +199,7 @@ function normalizeProduct(docData: any, docId: string): Product {
     brand: data.brand || "",
     line: data.line || "",
     category: data.category || "figura",
-    createdAt: data.createdAt ? data.createdAt.toDate() : null,
+    createdAt,
     releaseDate: data.releaseDate ? data.releaseDate.toDate() : null,
     heightCm: data.heightCm || undefined,
     scale: data.scale || undefined,
@@ -258,37 +280,27 @@ const productsCollection = collection(db, "products")
 // 🚀 CACHÉ DE TODOS LOS PRODUCTOS PARA BÚSQUEDA RÁPIDA
 let allProductsCache: Product[] | null = null
 let allProductsCacheTime = 0
-const ALL_PRODUCTS_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
+const ALL_PRODUCTS_CACHE_DURATION = 1 * 60 * 1000 // 🔧 1 minuto
 
-async function getAllProductsForSearch(): Promise<Product[]> {
+// 🔧 FIX PRINCIPAL: traer TODOS los productos SIN orderBy
+// orderBy("createdAt") en Firestore excluye silenciosamente documentos
+// que no tienen ese campo o lo tienen con un tipo diferente (ej: Python datetime vs serverTimestamp)
+async function getAllProductsForSearch(forceRefresh = false): Promise<Product[]> {
   const now = Date.now()
 
-  if (allProductsCache && now - allProductsCacheTime < ALL_PRODUCTS_CACHE_DURATION) {
+  if (!forceRefresh && allProductsCache && now - allProductsCacheTime < ALL_PRODUCTS_CACHE_DURATION) {
     return allProductsCache
   }
 
-  console.log("🔄 Cargando todos los productos para búsqueda...")
+  console.log("🔄 Cargando todos los productos sin filtro de orderBy...")
 
   try {
-    const allProducts: Product[] = []
-    let lastDoc: DocumentSnapshot | null = null
-    const batchSize = 1000
+    // 🔧 Sin orderBy ni limit — trae absolutamente TODOS los documentos
+    const snapshot = await getDocs(productsCollection)
+    const allProducts = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
 
-    do {
-      let q = query(productsCollection, orderBy("createdAt", "desc"), limit(batchSize))
-
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-
-      const snapshot = await getDocs(q)
-      const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-
-      allProducts.push(...products)
-      lastDoc = snapshot.docs[snapshot.docs.length - 1] || null
-
-      console.log(`📦 Cargados ${allProducts.length} productos...`)
-    } while (lastDoc)
+    // 🔧 Ordenar en cliente: más recientes primero, sin fecha al final
+    allProducts.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt))
 
     console.log(`✅ Total productos cargados: ${allProducts.length}`)
 
@@ -307,36 +319,27 @@ export async function getAllProductsForSync(): Promise<Product[]> {
   return getAllProductsForSearch()
 }
 
-// 🚀 PAGINACIÓN OPTIMIZADA
+// 🚀 PAGINACIÓN — ahora usa getAllProductsForSearch para ser consistente
 export async function getProductsPaginated(
   limitCount = 50,
   lastDoc?: DocumentSnapshot,
   forceRefresh = false,
 ): Promise<{ products: Product[]; lastDoc: DocumentSnapshot | null; hasMore: boolean }> {
   try {
-    const cacheKey = `products-paginated-${limitCount}-${lastDoc?.id || "first"}`
+    // 🔧 FIX: paginar sobre el caché cliente en vez de usar Firestore pagination con orderBy
+    const allProducts = await getAllProductsForSearch(forceRefresh)
 
-    if (!forceRefresh) {
-      const cached = getCachedData<{ products: Product[]; lastDoc: DocumentSnapshot | null; hasMore: boolean }>(
-        cacheKey,
-      )
-      if (cached) return cached
+    // Encontrar el índice de inicio según lastDoc
+    let startIndex = 0
+    if (lastDoc && !forceRefresh) {
+      const idx = allProducts.findIndex((p) => p.id === lastDoc.id)
+      if (idx !== -1) startIndex = idx + 1
     }
 
-    let q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
+    const page = allProducts.slice(startIndex, startIndex + limitCount)
+    const hasMore = startIndex + limitCount < allProducts.length
 
-    if (lastDoc) {
-      q = query(q, startAfter(lastDoc))
-    }
-
-    const snapshot = await getDocs(q)
-    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-    const newLastDoc = snapshot.docs[snapshot.docs.length - 1] || null
-    const hasMore = snapshot.docs.length === limitCount
-
-    const result = { products, lastDoc: newLastDoc, hasMore }
-    setCachedData(cacheKey, result, CACHE_DURATION)
-    return result
+    return { products: page, lastDoc: null, hasMore }
   } catch (error) {
     console.error("Error obteniendo productos paginados:", error)
     throw new Error("Failed to fetch paginated products")
@@ -346,19 +349,8 @@ export async function getProductsPaginated(
 // 🚀 FUNCIÓN PRINCIPAL OPTIMIZADA
 export async function getProducts(limitCount = 100, forceRefresh = false): Promise<Product[]> {
   try {
-    const cacheKey = `products-limited-${limitCount}`
-
-    if (!forceRefresh) {
-      const cached = getCachedData<Product[]>(cacheKey)
-      if (cached) return cached
-    }
-
-    const q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
-    const snapshot = await getDocs(q)
-    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-
-    setCachedData(cacheKey, products, CACHE_DURATION)
-    return products
+    const allProducts = await getAllProductsForSearch(forceRefresh)
+    return allProducts.slice(0, limitCount)
   } catch (error) {
     console.error("Error obteniendo productos:", error)
     throw new Error("Failed to fetch products")
@@ -385,7 +377,7 @@ function validateProduct(product: Partial<Product>): void {
   }
 }
 
-// 🚀 AGREGAR PRODUCTO OPTIMIZADO - SIN DESCUENTOS (TEMPORALMENTE)
+// 🚀 AGREGAR PRODUCTO OPTIMIZADO
 export async function addProduct(
   product: Omit<Product, "id" | "slug"> & {
     createdAt?: Timestamp | null
@@ -413,7 +405,6 @@ export async function addProduct(
       console.log(`✅ No se encontraron duplicados para: "${product.name}"`)
     }
 
-    // 🔥 CONSTRUIR OBJETO LIMPIO SIN DISCOUNT
     const productToAdd: any = {
       name: product.name,
       slug,
@@ -430,29 +421,25 @@ export async function addProduct(
       stock: product.stock ?? 0,
     }
 
-    // Agregar campos opcionales solo si existen
     if (product.thumbnailUrl) {
       productToAdd.thumbnailUrl = product.thumbnailUrl
     }
-    
+
     if (product.galleryThumbnailUrls && product.galleryThumbnailUrls.length > 0) {
       productToAdd.galleryThumbnailUrls = product.galleryThumbnailUrls
     }
-    
+
     if (product.heightCm !== undefined && product.heightCm !== null) {
       productToAdd.heightCm = product.heightCm
     }
-    
+
     if (product.scale) {
       productToAdd.scale = product.scale
     }
-    
+
     if (product.lowStockThreshold !== undefined) {
       productToAdd.lowStockThreshold = product.lowStockThreshold
     }
-
-    // ⚠️ DESCUENTO TEMPORALMENTE DESHABILITADO - NO SE INCLUYE
-    // if (product.discount) { ... }
 
     console.log("[products.ts] productToAdd:", JSON.stringify(productToAdd, null, 2))
 
@@ -460,7 +447,6 @@ export async function addProduct(
 
     console.log(`🎉 Nuevo producto agregado: "${product.name}" (ID: ${docRef.id})`)
 
-    // Limpiar caché de todos los productos
     allProductsCache = null
     cache.clear()
 
@@ -474,16 +460,8 @@ export async function addProduct(
 // 🚀 NUEVOS LANZAMIENTOS OPTIMIZADO
 export async function getNewReleases(limitCount = 20): Promise<Product[]> {
   try {
-    const cacheKey = `new-releases-${limitCount}`
-    const cached = getCachedData<Product[]>(cacheKey)
-    if (cached) return cached
-
-    const q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
-    const snapshot = await getDocs(q)
-    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-
-    setCachedData(cacheKey, products, CACHE_DURATION)
-    return products
+    const allProducts = await getAllProductsForSearch()
+    return allProducts.slice(0, limitCount)
   } catch (error) {
     console.error("Error obteniendo nuevos lanzamientos:", error)
     return []
@@ -682,7 +660,7 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
       scoreB += (b.views || 0) * 0.1
 
       if (scoreA !== scoreB) return scoreB - scoreA
-      return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+      return toMs(b.createdAt) - toMs(a.createdAt)
     })
 
     console.log(`✅ ENCONTRADOS ${foundProducts.length} productos para "${lineToSearch}"`)
@@ -715,6 +693,7 @@ export async function incrementProductViews(productId: string): Promise<void> {
     )
 
     keysToDelete.forEach((key) => cache.delete(key))
+    allProductsCache = null
   } catch (error) {
     console.error("Error incrementando views:", error)
   }
@@ -856,8 +835,11 @@ export async function getLowStockProducts(threshold = 5): Promise<Product[]> {
   }
 }
 
-// ✅ Actualizar producto optimizado
-export async function updateProduct(id: string, data: Partial<Omit<Product, "id" | "createdAt">>): Promise<void> {
+// ✅ Actualizar producto — 🔧 FIX: firma corregida para aceptar createdAt
+export async function updateProduct(
+  id: string,
+  data: Partial<Omit<Product, "id">> & { createdAt?: any },
+): Promise<void> {
   try {
     if (data.name || data.price || data.imageUrls) {
       validateProduct({
@@ -884,15 +866,21 @@ export async function updateProduct(id: string, data: Partial<Omit<Product, "id"
 
     const updateData: any = {
       ...data,
-      ...(data.views === undefined && { views: 0 }),
+      // 🔧 FIX: solo poner views: 0 si el producto no tiene vistas registradas
+      ...(data.views === undefined ? {} : { views: data.views }),
       ...(data.category === undefined && { category: "figura" }),
       ...(data.stock !== undefined && { stock: data.stock }),
       ...(data.lowStockThreshold !== undefined && { lowStockThreshold: data.lowStockThreshold }),
-      ...(discountData !== undefined && { discount: discountData }),
+    }
+
+    // 🔧 FIX: manejar createdAt explícitamente — si viene en data, usarlo; si no, no tocarlo
+    if (data.createdAt !== undefined) {
+      updateData.createdAt = data.createdAt
+    } else {
+      delete updateData.createdAt // no sobreescribir el createdAt existente
     }
 
     if (discountData !== undefined) {
-      delete updateData.discount
       updateData.discount = discountData
     }
 
@@ -920,7 +908,7 @@ export async function deleteProductById(productId: string): Promise<void> {
     cache.clear()
   } catch (error) {
     console.error("Error eliminando producto:", error)
-    throw new Error(`Failed to delete product with ID: ${productId}`)
+    throw new Error(`Failed to delete producto with ID: ${productId}`)
   }
 }
 
@@ -1019,7 +1007,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       scoreB += (b.views || 0) * 0.1
 
       if (scoreA !== scoreB) return scoreB - scoreA
-      return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+      return toMs(b.createdAt) - toMs(a.createdAt)
     })
 
     let finalResults = results
@@ -1071,8 +1059,6 @@ export const getProductsByCategory = async (category: string) => searchProducts(
 /**
  * 🔄 Resetea las vistas de todos los productos una vez por semana.
  */
-import { writeBatch } from "firebase/firestore"
-
 export async function resetWeeklyViews() {
   try {
     const snapshot = await getDocs(collection(db, "products"))
@@ -1097,4 +1083,3 @@ export async function resetWeeklyViews() {
     console.error("❌ Error reseteando vistas:", error)
   }
 }
-

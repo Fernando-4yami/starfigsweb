@@ -12,8 +12,14 @@ export default function PromotionBanner() {
         </div>
         <div className="text-center">
           <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-            🎉 <span className="text-green-700 dark:text-green-400">¡ENVÍO GRATIS!</span> en compras de{" "}
-            <span className="text-blue-700 dark:text-blue-400 font-bold">3 figuras o más</span>
+            🎉{" "}
+            <span className="text-green-700 dark:text-green-400">
+              ¡ENVÍO GRATIS!
+            </span>{" "}
+            en compras de{" "}
+            <span className="text-blue-700 dark:text-blue-400 font-bold">
+              S/ 200 o más
+            </span>
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
             Válido a nivel nacional
@@ -22,4 +28,4 @@ export default function PromotionBanner() {
       </div>
     </div>
   )
-}
+} 
