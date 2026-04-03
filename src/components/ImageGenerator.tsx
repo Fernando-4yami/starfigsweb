@@ -309,10 +309,9 @@ function PromoTemplate({
           position: "absolute",
           bottom: 48,
           left: 48,
-          right: 48,
         }}
       >
-        <div style={{ position: "relative", display: "inline-block" }}>
+        <div style={{ position: "relative", display: "block", maxWidth: "max-content" }}>
           {brandLogo && (
             <img
               src={brandLogo}
@@ -339,6 +338,8 @@ function PromoTemplate({
               background: "linear-gradient(135deg, rgba(79,70,229,.9), rgba(34,211,238,.85))",
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
               boxShadow: "0 20px 45px rgba(236,72,153,.5), 0 0 40px rgba(236,72,153,.15)",
+              width: "max-content",
+              minWidth: "100%",
             }}
           >
             <h1
@@ -350,6 +351,7 @@ function PromoTemplate({
                 lineHeight: 1.1,
                 textShadow: "3px 3px 6px rgba(0,0,0,.4)",
                 letterSpacing: "-1px",
+                whiteSpace: "nowrap",
               }}
             >
               {character}
@@ -529,10 +531,9 @@ function PromoTemplateTriple({
           position: "absolute",
           bottom: 48,
           left: 48,
-          right: 48,
         }}
       >
-        <div style={{ position: "relative", display: "inline-block" }}>
+        <div style={{ position: "relative", display: "block", maxWidth: "max-content" }}>
           {brandLogo && (
             <img
               src={brandLogo}
@@ -559,6 +560,8 @@ function PromoTemplateTriple({
               background: "linear-gradient(135deg, rgba(79,70,229,.9), rgba(34,211,238,.85))",
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
               boxShadow: "0 20px 45px rgba(236,72,153,.5), 0 0 40px rgba(236,72,153,.15)",
+              width: "max-content",
+              minWidth: "100%",
             }}
           >
             <h1
@@ -570,6 +573,7 @@ function PromoTemplateTriple({
                 lineHeight: 1.1,
                 textShadow: "3px 3px 6px rgba(0,0,0,.4)",
                 letterSpacing: "-1px",
+                whiteSpace: "nowrap",
               }}
             >
               {character}

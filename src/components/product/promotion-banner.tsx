@@ -18,7 +18,7 @@ export default function PromotionBanner() {
             </span>{" "}
             en compras de{" "}
             <span className="text-blue-700 dark:text-blue-400 font-bold">
-              S/ 200 o más
+              S/ 190 o más
             </span>
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
