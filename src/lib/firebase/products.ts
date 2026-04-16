@@ -322,30 +322,35 @@ export async function getAllProductsForSync(): Promise<Product[]> {
 // 🚀 PAGINACIÓN — ahora usa getAllProductsForSearch para ser consistente
 export async function getProductsPaginated(
   limitCount = 50,
-  lastDoc?: DocumentSnapshot,
+  lastDoc?: DocumentSnapshot | number | null,  // ahora acepta número como cursor
   forceRefresh = false,
-): Promise<{ products: Product[]; lastDoc: DocumentSnapshot | null; hasMore: boolean }> {
+): Promise<{ products: Product[]; lastDoc: number | null; hasMore: boolean }> {
   try {
-    // 🔧 FIX: paginar sobre el caché cliente en vez de usar Firestore pagination con orderBy
     const allProducts = await getAllProductsForSearch(forceRefresh)
-
-    // Encontrar el índice de inicio según lastDoc
+ 
+    // El cursor ahora es un número (índice), no un DocumentSnapshot
     let startIndex = 0
-    if (lastDoc && !forceRefresh) {
-      const idx = allProducts.findIndex((p) => p.id === lastDoc.id)
-      if (idx !== -1) startIndex = idx + 1
+    if (typeof lastDoc === "number" && lastDoc > 0) {
+      startIndex = lastDoc
     }
-
+ 
     const page = allProducts.slice(startIndex, startIndex + limitCount)
-    const hasMore = startIndex + limitCount < allProducts.length
-
-    return { products: page, lastDoc: null, hasMore }
+    const nextIndex = startIndex + page.length
+    const hasMore = nextIndex < allProducts.length
+ 
+    console.log(`📄 Página: startIndex=${startIndex} | devueltos=${page.length} | nextIndex=${nextIndex} | hasMore=${hasMore} | total=${allProducts.length}`)
+ 
+    return {
+      products: page,
+      lastDoc: hasMore ? nextIndex : null,  // cursor = próximo índice a cargar
+      hasMore,
+    }
   } catch (error) {
     console.error("Error obteniendo productos paginados:", error)
     throw new Error("Failed to fetch paginated products")
   }
 }
-
+ 
 // 🚀 FUNCIÓN PRINCIPAL OPTIMIZADA
 export async function getProducts(limitCount = 100, forceRefresh = false): Promise<Product[]> {
   try {
