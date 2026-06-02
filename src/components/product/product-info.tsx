@@ -72,21 +72,21 @@ export default function ProductInfo({
         {isOldRelease && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide 
                          bg-gradient-to-r from-red-700 to-red-500 dark:from-red-600 dark:to-red-400 
-                         text-white px-3 py-1 rounded-full shadow border border-red-300 dark:border-red-700">
+                         text-white px-3 py-1 shadow border border-red-300 dark:border-red-700">
             <span className="mr-0.5">✕</span> Agotado
           </span>
         )}
         {showReleaseTag && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide 
                          bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 
-                         text-white px-3 py-1 rounded-full shadow border border-pink-300 dark:border-pink-700">
+                         text-white px-3 py-1 shadow border border-pink-300 dark:border-pink-700">
             ✨ Pre-venta
           </span>
         )}
         {hasDiscount && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide 
                          bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-500 dark:to-orange-500 
-                         text-white px-3 py-1 rounded-full shadow border border-orange-300 dark:border-orange-700">
+                         text-white px-3 py-1 shadow border border-orange-300 dark:border-orange-700">
             <Tag className="w-3 h-3" />
             {discountPercent}% OFF
           </span>
@@ -94,7 +94,7 @@ export default function ProductInfo({
         {category && (
           <span className="inline-flex items-center gap-1 text-xs font-medium border 
                          border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400 
-                         px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-950/30">
+                         px-2 py-1 bg-blue-50 dark:bg-blue-950/30">
             <Tag className="w-3 h-3" />
             {category}
           </span>
@@ -139,7 +139,7 @@ export default function ProductInfo({
                     onClick={() => setShowPriceTooltip(!showPriceTooltip)}
                     className="flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-gray-800 
                              hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 
-                             hover:text-gray-800 dark:hover:text-gray-200 rounded-full transition-colors duration-200"
+                             hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200"
                     aria-label="Información sobre precios"
                   >
                     <Info className="w-3 h-3" />
@@ -147,7 +147,7 @@ export default function ProductInfo({
 
                   {showPriceTooltip && (
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-10">
-                      <div className="bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-lg py-2 px-3 shadow-lg w-48">
+                      <div className="bg-gray-800 dark:bg-gray-700 text-white text-xs py-2 px-3 shadow-lg w-48">
                         <div className="text-center leading-relaxed">
                           Precio con descuento aplicado.
                           <br />
@@ -172,7 +172,7 @@ export default function ProductInfo({
                   onClick={() => setShowPriceTooltip(!showPriceTooltip)}
                   className="flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-gray-800 
                            hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 
-                           hover:text-gray-800 dark:hover:text-gray-200 rounded-full transition-colors duration-200"
+                           hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200"
                   aria-label="Información sobre precios"
                 >
                   <Info className="w-3 h-3" />
@@ -180,7 +180,7 @@ export default function ProductInfo({
 
                 {showPriceTooltip && (
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-10">
-                    <div className="bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-lg py-2 px-3 shadow-lg w-48">
+                    <div className="bg-gray-800 dark:bg-gray-700 text-white text-xs py-2 px-3 shadow-lg w-48">
                       <div className="text-center leading-relaxed">
                         Precio de fecha de lanzamiento.
                         <br />

@@ -188,9 +188,9 @@ export default function StrictRelatedProducts({ currentProduct, maxProducts = 8 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 aspect-square rounded-lg mb-3"></div>
-            <div className="bg-gray-200 h-4 rounded mb-2"></div>
-            <div className="bg-gray-200 h-3 rounded w-3/4"></div>
+            <div className="bg-gray-200 aspect-square mb-3"></div>
+            <div className="bg-gray-200 h-4 mb-2"></div>
+            <div className="bg-gray-200 h-3 w-3/4"></div>
           </div>
         ))}
       </div>

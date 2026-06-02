@@ -16,7 +16,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="p-2 rounded-md border border-gray-300 bg-gray-100 dark:bg-gray-800 dark:border-gray-700 cursor-wait"
+        className="p-2 border border-gray-300 bg-gray-100 dark:bg-gray-800 dark:border-gray-700 cursor-wait"
         aria-label="Toggle theme"
         disabled
       >
@@ -39,7 +39,7 @@ export function ThemeToggle() {
     <button
       onClick={handleToggle}
       type="button"
-      className="relative p-2 rounded-md border border-gray-300 bg-white hover:bg-gray-100 
+      className="relative p-2 border border-gray-300 bg-white hover:bg-gray-100 
                  dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700
                  transition-colors duration-200 cursor-pointer z-50"
       aria-label="Toggle theme"

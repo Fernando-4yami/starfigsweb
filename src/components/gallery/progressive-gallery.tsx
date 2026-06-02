@@ -80,7 +80,7 @@ export default function ProgressiveGallery({
       <div className="space-y-4">
         {/* 🚀 IMAGEN PRINCIPAL CON DARK MODE */}
         <div className="relative group">
-          <div className="relative w-full h-96 md:h-[500px] bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <div className="relative w-full h-96 md:h-[500px] bg-white dark:bg-gray-800 overflow-hidden border border-gray-200 dark:border-gray-700">
             <Image
               src={imageUrls[selectedIndex] || "/placeholder.svg"}
               alt={`${productName} - Imagen ${selectedIndex + 1}`}
@@ -146,7 +146,7 @@ export default function ProgressiveGallery({
                 <button
                   key={index}
                   onClick={() => handleThumbnailClick(index)}
-                  className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`relative flex-shrink-0 w-16 h-16 overflow-hidden border-2 transition-all ${
                     isSelected 
                       ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800" 
                       : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"

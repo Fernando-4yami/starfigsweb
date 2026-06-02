@@ -1,12 +1,12 @@
 "use client"
-import { Clock, CheckCircle, Info, Ban } from "lucide-react"
+import { Clock, CheckCircle, Info, Ban, AlertTriangle, Lock, Wallet } from "lucide-react"
 import { isReleasedOverAMonth } from "@/lib/serialize-product"
 
 interface ProductActionsProps {
   whatsappUrl: string
   onWhatsAppClick: () => void
   releaseDate?: any
-  stock?: number | boolean
+  price?: number
 }
 
 // 🚀 ICONO REAL DE WHATSAPP
@@ -34,7 +34,7 @@ const parseReleaseDate = (releaseDate: any): Date | null => {
   return new Date(releaseDate)
 }
 
-export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDate, stock }: ProductActionsProps) {
+export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDate, price }: ProductActionsProps) {
   const now = new Date()
 
   // 🔧 PARSEAR FECHA AQUÍ
@@ -45,7 +45,6 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
     (parsedReleaseDate.getFullYear() < now.getFullYear() ||
       (parsedReleaseDate.getFullYear() === now.getFullYear() && parsedReleaseDate.getMonth() <= now.getMonth()))
 
-  const hasStock = typeof stock === "number" ? stock > 0 : Boolean(stock)
   const isOldRelease = isReleasedOverAMonth({ releaseDate: parsedReleaseDate })
 
   const handleWhatsAppClick = () => {
@@ -58,14 +57,8 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
     if (isOldRelease) {
       return "Consultar disponibilidad"
     }
-    // Solo mostrar "Comprar" si está disponible Y hay stock
-    if (isAvailable && hasStock) {
-      return "Comprar"
-    } else if (parsedReleaseDate) {
-      return "Reservar por WhatsApp"
-    } else {
-      return "Consultar por WhatsApp"
-    }
+    // Todos los productos siguen el mismo flujo de importación/pre-venta
+    return "Solicitar / Reservar por WhatsApp"
   }
 
   return (
@@ -73,10 +66,10 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
       {/* 🚀 BOTÓN CON TEXTO DINÁMICO SEGÚN DISPONIBILIDAD Y STOCK */}
       <button
         onClick={handleWhatsAppClick}
-        className={`w-full font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 
+        className={`w-full font-semibold py-4 px-6 flex items-center justify-center gap-3 
                    transition-all duration-200 shadow-lg ${
           isOldRelease
-            ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white"
+            ? "bg-slate-600 hover:bg-slate-700 dark:bg-slate-500 dark:hover:bg-slate-600 text-white"
             : "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white hover:shadow-xl transform hover:-translate-y-0.5"
         }`}
       >
@@ -84,33 +77,82 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
         {getButtonText()}
       </button>
 
+      {!isOldRelease && (
+        <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-3">
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span>Sujeto a disponibilidad en Japón</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+            <span>Confirmación en 24 horas</span>
+          </div>
+
+        </div>
+      )}
+
       {isOldRelease ? (
-        <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 
-                        bg-orange-50 dark:bg-orange-950/30 px-4 py-2 rounded-lg 
-                        border border-orange-200 dark:border-orange-900">
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 
+                        bg-slate-50 dark:bg-slate-950/30 px-4 py-2 border border-slate-200 dark:border-slate-900">
           <Ban className="w-4 h-4" />
           <span className="text-sm font-medium">Lanzamiento anterior - Consulta disponibilidad</span>
         </div>
       ) : isAvailable ? (
         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 
-                        bg-green-50 dark:bg-green-950/30 px-4 py-2 rounded-lg 
-                        border border-green-200 dark:border-green-900">
+                        bg-green-50 dark:bg-green-950/30 px-4 py-2 border border-green-200 dark:border-green-900">
           <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">Disponible para pedido</span>
+          <span className="text-sm font-medium">Disponible para reserva</span>
         </div>
       ) : parsedReleaseDate ? (
         <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 
-                        bg-purple-50 dark:bg-purple-950/30 px-4 py-2 rounded-lg
-                        border border-purple-200 dark:border-purple-900">
+                        bg-purple-50 dark:bg-purple-950/30 px-4 py-2 border border-purple-200 dark:border-purple-900">
           <Clock className="w-4 h-4" />
           <span className="text-sm font-medium">Pre-venta - Próximo lanzamiento</span>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 
-                        bg-blue-50 dark:bg-blue-950/30 px-4 py-2 rounded-lg
-                        border border-blue-200 dark:border-blue-900">
+                        bg-blue-50 dark:bg-blue-950/30 px-4 py-2 border border-blue-200 dark:border-blue-900">
           <Info className="w-4 h-4" />
           <span className="text-sm font-medium">Consulta disponibilidad y precio</span>
+        </div>
+      )}
+
+      {/* 💳 INFO DE RESERVA Y PAGOS */}
+      {!isOldRelease && price !== undefined && (
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-7 h-7 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 shrink-0">
+              <Lock className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Reserva</span>
+          </div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed ml-9">
+            {price < 200
+              ? "Productos menores a S/200 → reserva con S/40"
+              : "Productos mayores a S/200 → reserva con el 50% del valor total"
+            }
+            . El saldo se cancela cuando el producto llegue a Perú.
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-7 h-7 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <Wallet className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Pagos</span>
+          </div>
+          <div className="flex flex-wrap gap-2 ml-9">
+            <span className="inline-flex items-center px-2.5 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-medium border border-blue-200 dark:border-blue-800">
+              Yape
+            </span>
+            <span className="inline-flex items-center px-2.5 py-1 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 text-xs font-medium border border-purple-200 dark:border-purple-800">
+              Plin
+            </span>
+            <span className="inline-flex items-center px-2.5 py-1 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-gray-700">
+              Transferencia bancaria
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-500 italic ml-9">
+            * Disponibles solo en etapa de reserva confirmada
+          </p>
         </div>
       )}
     </div>

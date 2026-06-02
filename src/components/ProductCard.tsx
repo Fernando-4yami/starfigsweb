@@ -66,22 +66,21 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="relative w-full h-0 pb-[100%] bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {isOldRelease && (
             <span
-              className="absolute top-2 left-2 bg-gray-800/80 dark:bg-gray-900/80 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10"
-            >
+              className="absolute top-2 left-2 bg-gray-800/80 dark:bg-gray-900/80 text-white text-xs font-bold px-2 py-1 shadow-md z-10">
               Agotado
             </span>
           )}
 
           {showReleaseTag && (
             <span
-              className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}
+              className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 shadow-md z-10`}
             >
               {releaseMonthYear}
             </span>
           )}
 
           {hasDiscount && (
-            <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+            <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 shadow-md z-10">
               -{discountPercentage}%
             </span>
           )}

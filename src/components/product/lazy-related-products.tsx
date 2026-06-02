@@ -254,11 +254,11 @@ export default function LazyRelatedProducts({
       <div ref={sectionRef} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-gray-100 rounded-xl p-4 animate-pulse">
+            <div key={i} className="bg-gray-100 p-4 animate-pulse">
               <div className="aspect-square bg-gray-200 rounded-lg mb-4" />
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-gray-200 w-3/4" />
+                <div className="h-4 bg-gray-200 w-1/2" />
               </div>
             </div>
           ))}
@@ -293,11 +293,11 @@ export default function LazyRelatedProducts({
               {isVisible && isLoaded ? (
                 <ProductCard product={product} />
               ) : (
-                <div className="bg-gray-100 rounded-xl p-4 animate-pulse">
+                <div className="bg-gray-100 p-4 animate-pulse">
                   <div className="aspect-square bg-gray-200 rounded-lg mb-4" />
                   <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                    <div className="h-4 bg-gray-200 w-3/4" />
+                    <div className="h-4 bg-gray-200 w-1/2" />
                   </div>
                 </div>
               )}
@@ -308,7 +308,7 @@ export default function LazyRelatedProducts({
 
       {/* Información de debug (solo en desarrollo) */}
       {process.env.NODE_ENV === "development" && currentProduct && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800">
+        <div className="mt-4 p-3 bg-blue-50 text-xs text-blue-800">
           <p>
             <strong>Debug:</strong> Productos relacionados para &quot;{currentProduct.name}&quot;
           </p>

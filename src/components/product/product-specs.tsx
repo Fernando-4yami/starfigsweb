@@ -11,7 +11,7 @@ interface ProductSpecsProps {
 
 export default function ProductSpecs({ brand, line, heightCm, scale }: ProductSpecsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900">
       {brand && (
         <div className="flex items-center gap-2">
           <Building2 className="w-4 h-4 text-blue-500 dark:text-blue-400" />

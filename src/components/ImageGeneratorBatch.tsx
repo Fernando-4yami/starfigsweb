@@ -307,14 +307,14 @@ export default function ImageGeneratorBatch({
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-3 items-start">
       {/* PREVIEW */}
-      <div className="w-32 flex-shrink-0">
-        <div className="aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden mb-2">
+      <div className="w-28 flex-shrink-0">
+        <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded border-2 border-gray-300 dark:border-gray-600 overflow-hidden mb-1.5">
           {previews[previewVersion] ? (
             <img src={previews[previewVersion]} alt="Preview" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
               Generando...
             </div>
           )}
@@ -322,97 +322,70 @@ export default function ImageGeneratorBatch({
 
         {/* SELECTOR DE PREVIEW */}
         <div className="flex gap-1">
-          <button
-            onClick={() => setPreviewVersion(1)}
-            className={`flex-1 px-1 py-1 text-xs rounded ${
-              previewVersion === 1 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"
-            }`}
-          >
-            1
-          </button>
-          <button
-            onClick={() => setPreviewVersion(2)}
-            className={`flex-1 px-1 py-1 text-xs rounded ${
-              previewVersion === 2 ? "bg-cyan-600 text-white" : "bg-gray-200 text-gray-700"
-            }`}
-          >
-            2
-          </button>
-          <button
-            onClick={() => setPreviewVersion(3)}
-            className={`flex-1 px-1 py-1 text-xs rounded ${
-              previewVersion === 3 ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-700"
-            }`}
-          >
-            3
-          </button>
+          {([1, 2, 3] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setPreviewVersion(v)}
+              className={`flex-1 py-1 text-[10px] font-bold rounded ${
+                previewVersion === v
+                  ? v === 1 ? "bg-indigo-600 text-white" : v === 2 ? "bg-cyan-600 text-white" : "bg-purple-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+              }`}
+            >
+              {v}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* CONTROLES */}
-      <div className="flex-1 flex flex-col justify-between gap-2">
-        {/* BOTONES DE GENERACIÓN */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => generateImage(1)}
-            disabled={generating !== null}
-            className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 disabled:opacity-50"
-            data-version="1"
-          >
-            {generating === 1 ? "⏳" : "1️⃣"}
-          </button>
-          <button
-            onClick={() => generateImage(2)}
-            disabled={generating !== null}
-            className="flex-1 px-3 py-2 bg-cyan-600 text-white rounded text-xs font-bold hover:bg-cyan-700 disabled:opacity-50"
-            data-version="2"
-          >
-            {generating === 2 ? "⏳" : "2️⃣"}
-          </button>
-          <button
-            onClick={() => generateImage(3)}
-            disabled={generating !== null}
-            className="flex-1 px-3 py-2 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 disabled:opacity-50"
-            data-version="3"
-          >
-            {generating === 3 ? "⏳" : "3️⃣"}
-          </button>
+      <div className="flex-1 min-w-0 grid grid-cols-2 gap-1.5">
+        {/* BOTONES DE GENERACIÓN - fila completa */}
+        <div className="col-span-2 flex gap-1.5">
+          {([1, 2, 3] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => generateImage(v)}
+              disabled={generating !== null}
+              className={`flex-1 py-1.5 rounded text-[11px] font-bold text-white hover:opacity-90 disabled:opacity-50 ${
+                v === 1 ? "bg-indigo-600" : v === 2 ? "bg-cyan-600" : "bg-purple-600"
+              }`}
+              data-version={String(v)}
+            >
+              {generating === v ? "⏳" : `${v}️⃣`}
+            </button>
+          ))}
         </div>
 
         {/* EDITAR NOMBRE */}
         {editingName ? (
-          <div className="flex gap-1">
+          <div className="col-span-2 flex gap-1">
             <input
               autoFocus
               value={tempName}
               onChange={(e) => setTempName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveName(tempName)
-                if (e.key === "Escape") {
-                  setTempName(currentData.name)
-                  setEditingName(false)
-                }
+                if (e.key === "Escape") { setTempName(currentData.name); setEditingName(false) }
               }}
-              className="flex-1 px-2 py-1 border border-indigo-400 rounded text-xs"
+              className="flex-1 min-w-0 px-2 py-1 border border-indigo-400 rounded text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            <button
-              onClick={() => saveName(tempName)}
-              className="px-2 py-1 bg-indigo-600 text-white rounded text-xs"
-            >✓</button>
+            <button onClick={() => saveName(tempName)} className="px-2 py-1 bg-indigo-600 text-white rounded text-xs">✓</button>
           </div>
         ) : (
-          <button
-            onClick={() => { setTempName(currentData.name); setEditingName(true) }}
-            className="w-full px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 text-left truncate"
-            title={currentData.name}
-          >
-            ✏️ {currentData.name}
-          </button>
+          <div className="col-span-2">
+            <button
+              onClick={() => { setTempName(currentData.name); setEditingName(true) }}
+              className="w-full px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-[11px] hover:bg-gray-200 dark:hover:bg-gray-600 text-left break-words leading-tight"
+            >
+              ✏️ {currentData.name}
+            </button>
+          </div>
         )}
 
         {/* EDITAR PRECIO */}
         {editingPrice ? (
-          <div className="flex gap-1">
+          <div className="col-span-2 flex gap-1">
             <input
               autoFocus
               type="number"
@@ -420,29 +393,17 @@ export default function ImageGeneratorBatch({
               value={tempPrice}
               onChange={(e) => setTempPrice(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const parsed = parseFloat(tempPrice)
-                  if (!isNaN(parsed)) savePrice(parsed)
-                }
-                if (e.key === "Escape") {
-                  setTempPrice(String(currentData.price))
-                  setEditingPrice(false)
-                }
+                if (e.key === "Enter") { const p = parseFloat(tempPrice); if (!isNaN(p)) savePrice(p) }
+                if (e.key === "Escape") { setTempPrice(String(currentData.price)); setEditingPrice(false) }
               }}
-              className="flex-1 px-2 py-1 border border-green-400 rounded text-xs"
+              className="flex-1 px-2 py-1 border border-green-400 rounded text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            <button
-              onClick={() => {
-                const parsed = parseFloat(tempPrice)
-                if (!isNaN(parsed)) savePrice(parsed)
-              }}
-              className="px-2 py-1 bg-green-600 text-white rounded text-xs"
-            >✓</button>
+            <button onClick={() => { const p = parseFloat(tempPrice); if (!isNaN(p)) savePrice(p) }} className="px-2 py-1 bg-green-600 text-white rounded text-xs">✓</button>
           </div>
         ) : (
           <button
             onClick={() => { setTempPrice(String(currentData.price)); setEditingPrice(true) }}
-            className="w-full px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200 text-left"
+            className="w-full px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-[11px] hover:bg-gray-200 dark:hover:bg-gray-600 text-left"
           >
             💰 S/ {currentData.price.toFixed(2)}
           </button>
@@ -450,39 +411,37 @@ export default function ImageGeneratorBatch({
 
         {/* FEEDBACK GUARDADO */}
         {saving && (
-          <p className="text-xs text-center text-indigo-500 animate-pulse">💾 Guardando en Firebase...</p>
+          <p className="col-span-2 text-[10px] text-center text-indigo-500 dark:text-indigo-400 animate-pulse">💾 Guardando...</p>
         )}
         {saveError && (
-          <p className="text-xs text-center text-red-500">{saveError}</p>
+          <p className="col-span-2 text-[10px] text-center text-red-500">{saveError}</p>
         )}
 
         {/* COPIAR PLANTILLA */}
         <button
           onClick={handleCopyTemplate}
-          className={`w-full px-2 py-1 rounded text-xs font-medium transition-colors ${
-            copied 
-              ? "bg-green-500 text-white" 
-              : "bg-blue-500 text-white hover:bg-blue-600"
+          className={`px-2 py-1.5 rounded text-[11px] font-medium transition-colors ${
+            copied ? "bg-green-500 text-white" : "bg-blue-500 text-white hover:bg-blue-600"
           }`}
         >
-          {copied ? "✓ Copiado" : "📋 Copiar plantilla"}
-        </button>
-
-        {/* ACTUALIZAR TODOS LOS PRECIOS */}
-        <button
-          onClick={handleRefreshAll}
-          disabled={refreshing || saving}
-          className="w-full px-2 py-1 bg-amber-500 text-white rounded text-xs font-bold hover:bg-amber-600 disabled:opacity-50"
-        >
-          {refreshing ? "🔄 Actualizando..." : "🔄 Actualizar precios"}
+          {copied ? "✓ Copiado" : "📋 Copiar"}
         </button>
 
         {/* BOTÓN REMOVER */}
         <button
           onClick={onRemove}
-          className="w-full px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+          className="px-2 py-1.5 bg-red-500 text-white rounded text-[11px] hover:bg-red-600"
         >
           ✕ Quitar
+        </button>
+
+        {/* ACTUALIZAR TODOS LOS PRECIOS - ocupa toda la fila */}
+        <button
+          onClick={handleRefreshAll}
+          disabled={refreshing || saving}
+          className="col-span-2 px-2 py-1 bg-amber-500 text-white rounded text-[11px] font-bold hover:bg-amber-600 disabled:opacity-50"
+        >
+          {refreshing ? "🔄 Actualizando..." : "🔄 Actualizar precios"}
         </button>
       </div>
 

@@ -242,7 +242,7 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
 
   if (imageUrls.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl">
+      <div className="flex flex-col items-center justify-center h-96 bg-gradient-to-br from-gray-100 to-gray-200 ">
         <ImageIcon className="w-16 h-16 text-gray-400 mb-4" />
         <p className="text-gray-500 text-lg">No hay imágenes disponibles</p>
       </div>
@@ -333,7 +333,7 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
       <div className="relative">
         <div
           ref={containerRef}
-          className="relative w-full h-96 md:h-[500px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group"
+          className="relative w-full h-96 md:h-[500px] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group"
         >
           {/* 🚀 IMAGEN PRINCIPAL OPTIMIZADA PARA LCP */}
           <OptimizedImage
@@ -398,7 +398,7 @@ export default function Gallery({ imageUrls, galleryThumbnailUrls, blurPlacehold
                 setCurrentIndex(index)
               }
             }}
-            className={`relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden transition-all duration-300 ${
+            className={`relative flex-shrink-0 w-24 h-24 overflow-hidden transition-all duration-300 ${
               index === currentIndex ? "ring-3 ring-blue-500 scale-105 shadow-lg" : "ring-1 ring-gray-200"
             }`}
           >

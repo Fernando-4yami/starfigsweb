@@ -31,14 +31,14 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
         value={formData.nombre}
         onChange={handleChange}
         placeholder="Nombre del producto"
-        className="border p-2 w-full"
+        className="border dark:border-gray-600 p-2 w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
       />
       <textarea
         name="descripcion"
         value={formData.descripcion}
         onChange={handleChange}
         placeholder="Descripción"
-        className="border p-2 w-full"
+        className="border dark:border-gray-600 p-2 w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
       />
       <input
         name="precio"
@@ -46,10 +46,10 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
         onChange={handleChange}
         placeholder="Precio"
         type="number"
-        className="border p-2 w-full"
+        className="border dark:border-gray-600 p-2 w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
       />
       {/* ✅ Eliminado: checkbox de 'nuevo lanzamiento' */}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button type="submit" className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-700">
         Guardar producto
       </button>
     </form>

@@ -5,15 +5,16 @@ import { getNewReleases, getNewReleasesByDateRange, type Product, getPopularProd
 import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@/lib/utils"
 import RankingSection from "@/components/sections/ranking-section"
 import ProductCard from "@/components/ProductCard"
+import HowItWorks from "@/components/HowItWorks"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
   const skeletonItems = useMemo(
     () =>
       Array.from({ length: itemCount }).map((_, i) => (
         <div key={i} className="animate-pulse">
-          <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-3"></div>
-          <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2"></div>
-          <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-4 mb-2"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 h-3 w-3/4"></div>
         </div>
       )),
     [itemCount],
@@ -23,7 +24,7 @@ const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: 
     <section className="mb-16">
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
-        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto "></div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-6">{skeletonItems}</div>
     </section>
@@ -48,7 +49,7 @@ const ProductSection = ({
     <section className="mb-16">
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
-        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto "></div>
       </div>
 
       {products.length === 0 ? (
@@ -96,7 +97,7 @@ const ProductSectionWithLoadMore = ({
     <section className="mb-16">
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
-        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+        <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto "></div>
       </div>
 
       {products.length === 0 ? (
@@ -113,7 +114,7 @@ const ProductSectionWithLoadMore = ({
             <div className="flex justify-center mt-10">
               <button
                 onClick={handleLoadMore}
-                className="px-8 py-3 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium rounded-lg hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="px-8 py-3 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 Ver más productos ({products.length - visibleCount} restantes)
               </button>
@@ -155,7 +156,7 @@ export default function HomePage() {
 
     try {
       const [newlyAddedData, weeklyPopularData, currReleasesData, futureReleasesData] = await Promise.all([
-        getNewReleases(60),
+        getNewReleases(200),
         getPopularProducts(10),
         getNewReleasesByDateRange(currStart, currEnd),
         getNewReleasesByDateRange(nextMonthStart, new Date("2100-01-01")),
@@ -203,7 +204,7 @@ export default function HomePage() {
               href="https://api.whatsapp.com/send/?phone=51926951167&text=Hola!%20%C2%BFPrecio%20y%20disponibilidad%20de%20esto%3F%0A%0AAdjunto%20imagen%20si%20tengo%20%F0%9F%91%8D&type=phone_number&app_absent=0"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-8 py-3 bg-emerald-500 dark:bg-emerald-600 text-white font-semibold rounded-full shadow-md hover:bg-emerald-600 dark:hover:bg-emerald-700 hover:shadow-lg transition-all duration-300"
+              className="inline-flex items-center px-8 py-3 bg-emerald-500 dark:bg-emerald-600 text-white font-semibold shadow-md hover:bg-emerald-600 dark:hover:bg-emerald-700 hover:shadow-lg transition-all duration-300"
             >
               Contactar por WhatsApp
             </a>
@@ -254,6 +255,10 @@ export default function HomePage() {
             emptyMessage="No hay lanzamientos futuros programados"
           />
         )}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <HowItWorks />
       </div>
 
       {ctaSection}

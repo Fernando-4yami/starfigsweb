@@ -288,9 +288,9 @@ export default function InfiniteRelatedProducts({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {Array.from({ length: initialBatchSize }).map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-3"></div>
-              <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2"></div>
-              <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 h-4 mb-2"></div>
+              <div className="bg-gray-200 dark:bg-gray-700 h-3 w-3/4"></div>
             </div>
           ))}
         </div>
@@ -300,7 +300,7 @@ export default function InfiniteRelatedProducts({
 
   if (allRelatedProducts.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div className="text-gray-500 dark:text-gray-400">
           <p className="text-lg font-medium mb-2">No hay productos relacionados</p>
         </div>
@@ -345,8 +345,7 @@ export default function InfiniteRelatedProducts({
           ) : (
             <button
               onClick={loadMoreProducts}
-              className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg 
-                       hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors 
+              className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors 
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
                        dark:focus:ring-offset-gray-900"
             >

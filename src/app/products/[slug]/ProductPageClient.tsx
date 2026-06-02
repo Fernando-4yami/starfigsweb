@@ -2,7 +2,7 @@
 
 import { getProductBySlug, incrementProductViews } from "@/lib/firebase/products"
 import { trackProductView, trackWhatsAppClick } from "@/lib/analytics"
-import { notFound } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { useEffect, useState, useMemo, useCallback } from "react"
@@ -15,6 +15,7 @@ import ProductSpecs from "@/components/product/product-specs"
 import ProductActions from "@/components/product/product-actions"
 import ShareButtons from "@/components/product/share-buttons"
 import ProgressiveGallery from "@/components/gallery/progressive-gallery"
+import { ArrowLeft } from "lucide-react"
 import PromotionBanner from "@/components/product/promotion-banner"
 import InfiniteRelatedProducts from "@/components/product/infinite-related-products"
 
@@ -46,14 +47,14 @@ function CriticalProductImage({
 
   if (imageError) {
     return (
-      <div className="w-full h-96 md:h-[500px] bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+      <div className="w-full h-96 md:h-[500px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
         <div className="text-gray-400 dark:text-gray-600">Imagen no disponible</div>
       </div>
     )
   }
 
   return (
-    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden">
+    <div className="relative w-full h-96 md:h-[500px] bg-gray-50 dark:bg-gray-900 overflow-hidden">
       <Image
         src={src || "/placeholder.svg"}
         alt={alt}
@@ -76,6 +77,7 @@ function CriticalProductImage({
 }
 
 export default function ProductPageClient({ params, initialProduct }: ProductPageClientProps) {
+  const router = useRouter()
   const [product, setProduct] = useState<SerializedProduct | null>(initialProduct || null)
   const [loading, setLoading] = useState(!initialProduct)
   const [criticalImageLoaded, setCriticalImageLoaded] = useState(false)
@@ -159,7 +161,18 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
-        <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
+        {/* Botón Volver - línea separada del breadcrumb */}
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit py-1"
+            title="Volver a la página anterior"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Volver</span>
+          </button>
+          <ProductBreadcrumbs category={product.category || "figura"} productName={product.name} />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           <div className="space-y-4">
@@ -178,7 +191,7 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
               />
             )}
 
-            <div className="text-xs text-gray-500 dark:text-gray-400 italic text-center px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded border-l-2 border-gray-300 dark:border-gray-700">
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic text-center px-2 py-1 bg-gray-50 dark:bg-gray-800 border-l-2 border-gray-300 dark:border-gray-700">
               <span className="opacity-75">
                 Las imágenes mostradas son de carácter referencial y pueden no corresponder exactamente al producto final.
               </span>
@@ -222,7 +235,7 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
               whatsappUrl={productData.whatsappUrl}
               onWhatsAppClick={handleWhatsAppClick}
               releaseDate={product.releaseDate}
-              stock={product.stock}
+              price={product.price}
             />
           </div>
         </div>

@@ -23,9 +23,9 @@ function RankingSection({ products }: RankingSectionProps) {
               Ranking
             </h2>
           </div>
-          <div className="w-16 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto rounded-full"></div>
+          <div className="w-16 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto "></div>
         </div>
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <p className="text-gray-500 dark:text-gray-400 text-lg">
             {!products
               ? "Cargando ranking..."
@@ -77,7 +77,7 @@ function RankingSection({ products }: RankingSectionProps) {
             Ranking
           </h2>
         </div>
-        <div className="w-16 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto rounded-full"></div>
+        <div className="w-16 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto "></div>
       </div>
 
       <div className="relative">
@@ -93,8 +93,7 @@ function RankingSection({ products }: RankingSectionProps) {
                 onClick={() => handleRankingClick(product)}
               >
                 {/* Card container */}
-                <div className={`relative w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg 
-                              hover:shadow-2xl transition-all duration-300 overflow-hidden
+                <div className={`relative w-40 bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden
                               border-2 ${getMedalBorder(i)} group-hover:scale-105`}>
                   
                   {/* Número de ranking con diseño mejorado */}
@@ -150,8 +149,7 @@ function RankingSection({ products }: RankingSectionProps) {
               onClick={() => handleRankingClick(product)}
             >
               {/* Card container */}
-              <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-lg 
-                            hover:shadow-2xl transition-all duration-300 overflow-hidden
+              <div className={`relative bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden
                             border-2 ${getMedalBorder(i)} group-hover:scale-105`}>
                 
                 {/* Número de ranking */}

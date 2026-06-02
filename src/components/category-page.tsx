@@ -4,6 +4,7 @@ import { ChevronRight, Home, Package, Calendar, Filter, X } from 'lucide-react'
 import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import DynamicIcon from "@/components/dynamic-icon"
+
 import { Pagination } from "@/components/ui/pagination"
 import { useCategoryProducts } from "@/hooks/use-category-products"
 import type { CategoryConfig } from "@/types/category"
@@ -47,9 +48,9 @@ export default function CategoryPage({ config }: CategoryPageProps) {
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-3"></div>
-                    <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2"></div>
-                    <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4"></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3"></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 h-4 mb-2"></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 h-3 w-3/4"></div>
                   </div>
                 ))}
               </div>
@@ -91,15 +92,14 @@ export default function CategoryPage({ config }: CategoryPageProps) {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md/5 border border-gray-200 dark:border-gray-700">
+          <div className="flex-1 bg-white dark:bg-gray-800 p-4 shadow-md/5 border border-gray-200 dark:border-gray-700">
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 
-                            p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md/5 border border-gray-200 dark:border-gray-700">
+                            p-4 bg-white dark:bg-gray-800 shadow-md/5 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setShowMobileFilters(true)}
-                  className="lg:hidden flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300"
-                >
+                  className="lg:hidden flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300">
                   <Filter className="w-4 h-4" />
                   Filtros {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </button>
@@ -125,8 +125,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                   id="sort"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                            focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="newest">Más recientes</option>
@@ -139,7 +138,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
 
             {/* Products Grid */}
             {paginatedProducts.length === 0 ? (
-              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md/5 border border-gray-200 dark:border-gray-700">
+              <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-md/5 border border-gray-200 dark:border-gray-700">
                 <DynamicIcon name={config.iconName} className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
                   No se encontraron productos {config.name}
@@ -147,8 +146,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                 <p className="text-gray-600 dark:text-gray-400 mb-6">Intenta ajustar los filtros para ver más resultados</p>
                 <button
                   onClick={clearAllFilters}
-                  className="px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white font-medium rounded-lg 
-                           hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+                  className="px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                 >
                   Limpiar filtros
                 </button>
@@ -181,7 +179,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Filtros</h3>
                 <button 
                   onClick={() => setShowMobileFilters(false)} 
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 </button>
@@ -227,7 +225,7 @@ function FiltersContent({
   products,
 }: FiltersContentProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md/5 border border-gray-200 dark:border-gray-700 p-4">
+    <div className="bg-white dark:bg-gray-800 shadow-md/5 border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Filtros</h3>
         {activeFiltersCount > 0 && (

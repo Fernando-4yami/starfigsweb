@@ -58,9 +58,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 
-                   bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md 
-                   hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-colors"
+                   bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeft className="w-4 h-4" />
         <span className="hidden sm:inline">Anterior</span>
@@ -85,7 +83,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
               key={`page-${pageNumber}`}
               type="button"
               onClick={() => onPageChange(pageNumber)}
-              className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`min-w-[40px] px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
                   : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -103,9 +101,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 
-                   bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md 
-                   hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-colors"
+                   bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <span className="hidden sm:inline">Siguiente</span>
         <ChevronRight className="w-4 h-4" />

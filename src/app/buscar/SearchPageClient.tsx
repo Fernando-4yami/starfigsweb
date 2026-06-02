@@ -235,7 +235,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
 
         {/* Results */}
         {!query ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
             <Search className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Realiza una búsqueda</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -263,12 +263,12 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
             </div>
           </div>
         ) : loading ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">Buscando productos...</p>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
             <Search className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No se encontraron resultados</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -285,7 +285,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
           </div>
         ) : (
           <>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 p-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                   <Package className="w-5 h-5" />
