@@ -19,10 +19,10 @@ import {
   writeBatch,
 } from "firebase/firestore"
 
-// 🚀 CACHÉ MÁS AGRESIVO
-const CACHE_DURATION = 1 * 60 * 1000 // 🔧 Bajado a 1 minuto para ver productos nuevos más rápido
+// 🚀 CACHÉ
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 const POPULAR_CACHE_DURATION = 3 * 60 * 1000 // 3 minutos
-const SEARCH_CACHE_DURATION = 5 * 60 * 1000 // 5 minutos para búsquedas
+const SEARCH_CACHE_DURATION = 30 * 60 * 1000 // 30 minutos para búsquedas
 
 interface CacheEntry {
   data: any
@@ -277,88 +277,123 @@ export interface SearchFilters {
 
 const productsCollection = collection(db, "products")
 
-// 🚀 CACHÉ DE TODOS LOS PRODUCTOS PARA BÚSQUEDA RÁPIDA
-let allProductsCache: Product[] | null = null
-let allProductsCacheTime = 0
-const ALL_PRODUCTS_CACHE_DURATION = 1 * 60 * 1000 // 🔧 1 minuto
+// ──────────────────────────────────────────────
+// 🚀 POOL COMPLETO DE PRODUCTOS — SOLO PARA BÚSQUEDA Y ADMIN
+// 🔒 NO USAR EN PÁGINAS PÚBLICAS
+// ──────────────────────────────────────────────
+let searchProductPool: Product[] | null = null
+let searchProductPoolTime = 0
+const SEARCH_POOL_DURATION = 30 * 60 * 1000 // 30 minutos
 
-// 🔧 FIX PRINCIPAL: traer TODOS los productos SIN orderBy
-// orderBy("createdAt") en Firestore excluye silenciosamente documentos
-// que no tienen ese campo o lo tienen con un tipo diferente (ej: Python datetime vs serverTimestamp)
-async function getAllProductsForSearch(forceRefresh = false): Promise<Product[]> {
+async function getProductPoolForSearch(forceRefresh = false): Promise<Product[]> {
   const now = Date.now()
 
-  if (!forceRefresh && allProductsCache && now - allProductsCacheTime < ALL_PRODUCTS_CACHE_DURATION) {
-    return allProductsCache
+  if (!forceRefresh && searchProductPool && now - searchProductPoolTime < SEARCH_POOL_DURATION) {
+    return searchProductPool
   }
 
-  console.log("🔄 Cargando todos los productos sin filtro de orderBy...")
+  console.log("🔄 Cargando pool completo para búsqueda (cache 30min)...")
 
   try {
-    // 🔧 Sin orderBy ni limit — trae absolutamente TODOS los documentos
     const snapshot = await getDocs(productsCollection)
     const allProducts = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-
-    // 🔧 Ordenar en cliente: más recientes primero, sin fecha al final
     allProducts.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt))
 
-    console.log(`✅ Total productos cargados: ${allProducts.length}`)
+    console.log(`✅ Pool de búsqueda cargado: ${allProducts.length} productos`)
 
-    allProductsCache = allProducts
-    allProductsCacheTime = now
+    searchProductPool = allProducts
+    searchProductPoolTime = now
 
     return allProducts
   } catch (error) {
-    console.error("Error cargando todos los productos:", error)
-    return allProductsCache || []
+    console.error("Error cargando pool de búsqueda:", error)
+    return searchProductPool || []
   }
 }
 
-// 🚀 FUNCIÓN PARA OBTENER TODOS LOS PRODUCTOS (PARA SINCRONIZACIÓN)
+// 🚀 EXPORT para sincronización admin
 export async function getAllProductsForSync(): Promise<Product[]> {
-  return getAllProductsForSearch()
+  return getProductPoolForSearch(true)
 }
 
-// 🚀 PAGINACIÓN — ahora usa getAllProductsForSearch para ser consistente
+// ──────────────────────────────────────────────
+// 🚀 NUEVOS LANZAMIENTOS — Query real
+// ──────────────────────────────────────────────
+export async function getNewReleases(limitCount = 20): Promise<Product[]> {
+  try {
+    const cacheKey = `new-releases-${limitCount}`
+    const cached = getCachedData<Product[]>(cacheKey)
+    if (cached) return cached
+
+    const q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
+    const snapshot = await getDocs(q)
+    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
+
+    setCachedData(cacheKey, products, CACHE_DURATION)
+    return products
+  } catch (error) {
+    console.error("Error obteniendo nuevos lanzamientos:", error)
+    return []
+  }
+}
+
+// ──────────────────────────────────────────────
+// 🚀 PRODUCTOS PRINCIPAL — Query real con límite
+// ──────────────────────────────────────────────
+export async function getProducts(limitCount = 100, forceRefresh = false): Promise<Product[]> {
+  try {
+    const cacheKey = `products-${limitCount}`
+    if (!forceRefresh) {
+      const cached = getCachedData<Product[]>(cacheKey)
+      if (cached) return cached
+    }
+
+    const q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
+    const snapshot = await getDocs(q)
+    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
+
+    setCachedData(cacheKey, products, CACHE_DURATION)
+    return products
+  } catch (error) {
+    console.error("Error obteniendo productos:", error)
+    throw new Error("Failed to fetch products")
+  }
+}
+
+// ──────────────────────────────────────────────
+// 🚀 PAGINACIÓN REAL — Cursor Firestore nativo
+// ──────────────────────────────────────────────
 export async function getProductsPaginated(
   limitCount = 50,
-  lastDoc?: DocumentSnapshot | number | null,  // ahora acepta número como cursor
+  lastDoc?: DocumentSnapshot | null,
   forceRefresh = false,
-): Promise<{ products: Product[]; lastDoc: number | null; hasMore: boolean }> {
+): Promise<{ products: Product[]; lastDoc: DocumentSnapshot | null; hasMore: boolean }> {
   try {
-    const allProducts = await getAllProductsForSearch(forceRefresh)
- 
-    // El cursor ahora es un número (índice), no un DocumentSnapshot
-    let startIndex = 0
-    if (typeof lastDoc === "number" && lastDoc > 0) {
-      startIndex = lastDoc
+    let q
+    if (lastDoc) {
+      q = query(
+        productsCollection,
+        orderBy("createdAt", "desc"),
+        startAfter(lastDoc),
+        limit(limitCount),
+      )
+    } else {
+      q = query(productsCollection, orderBy("createdAt", "desc"), limit(limitCount))
     }
- 
-    const page = allProducts.slice(startIndex, startIndex + limitCount)
-    const nextIndex = startIndex + page.length
-    const hasMore = nextIndex < allProducts.length
- 
-    console.log(`📄 Página: startIndex=${startIndex} | devueltos=${page.length} | nextIndex=${nextIndex} | hasMore=${hasMore} | total=${allProducts.length}`)
- 
+
+    const snapshot = await getDocs(q)
+    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
+    const newLastDoc = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null
+    const hasMore = snapshot.docs.length === limitCount
+
     return {
-      products: page,
-      lastDoc: hasMore ? nextIndex : null,  // cursor = próximo índice a cargar
+      products,
+      lastDoc: newLastDoc,
       hasMore,
     }
   } catch (error) {
     console.error("Error obteniendo productos paginados:", error)
     throw new Error("Failed to fetch paginated products")
-  }
-}
- 
-// 🚀 FUNCIÓN PRINCIPAL OPTIMIZADA
-export async function getProducts(limitCount = 100, forceRefresh = false): Promise<Product[]> {
-  try {
-    const allProducts = await getAllProductsForSearch(forceRefresh)
-    return allProducts.slice(0, limitCount)
-  } catch (error) {
-    console.error("Error obteniendo productos:", error)
-    throw new Error("Failed to fetch products")
   }
 }
 
@@ -452,24 +487,13 @@ export async function addProduct(
 
     console.log(`🎉 Nuevo producto agregado: "${product.name}" (ID: ${docRef.id})`)
 
-    allProductsCache = null
+    searchProductPool = null
     cache.clear()
 
     return docRef.id
   } catch (error) {
     console.error("Error agregando producto:", error)
     throw error
-  }
-}
-
-// 🚀 NUEVOS LANZAMIENTOS OPTIMIZADO
-export async function getNewReleases(limitCount = 20): Promise<Product[]> {
-  try {
-    const allProducts = await getAllProductsForSearch()
-    return allProducts.slice(0, limitCount)
-  } catch (error) {
-    console.error("Error obteniendo nuevos lanzamientos:", error)
-    return []
   }
 }
 
@@ -588,7 +612,7 @@ export async function getNewReleasesByDateRange(startDate: Date, endDate: Date):
   }
 }
 
-// 🚀 BÚSQUEDA POR LÍNEA COMPLETAMENTE REESCRITA
+// 🚀 BÚSQUEDA POR LÍNEA — Query Firestore + fuzzy fallback
 export async function getProductsByLine(lineToSearch: string, forceRefresh = false): Promise<Product[]> {
   try {
     const cacheKey = `line-enhanced-${lineToSearch.toLowerCase().trim()}`
@@ -598,86 +622,64 @@ export async function getProductsByLine(lineToSearch: string, forceRefresh = fal
       if (cached) return cached
     }
 
-    console.log(`🔍 BÚSQUEDA MEJORADA para línea: "${lineToSearch}"`)
-
-    const allProducts = await getAllProductsForSearch()
-    console.log(`📦 Buscando en ${allProducts.length} productos totales...`)
+    console.log(`🔍 BÚSQUEDA POR LÍNEA: "${lineToSearch}"`)
 
     const searchTerm = normalizeForComparison(lineToSearch)
-    const searchWords = searchTerm.split(/\s+/).filter((word) => word.length > 1)
 
-    console.log(`🎯 Término normalizado: "${searchTerm}"`)
-    console.log(`🔤 Palabras clave: [${searchWords.join(", ")}]`)
+    // 🔥 Query exacta en Firestore (barato)
+    const exactQ = query(productsCollection, where("line", "==", lineToSearch), limit(200))
+    const exactSnapshot = await getDocs(exactQ)
+    let matchedProducts = exactSnapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
+    const matchedIds = new Set(matchedProducts.map((p) => p.id))
 
-    const foundProducts = allProducts.filter((product) => {
-      if (product.line) {
-        const productLine = normalizeForComparison(product.line)
-
-        if (productLine === searchTerm) return true
-        if (productLine.includes(searchTerm)) return true
-        if (searchTerm.includes(productLine)) return true
-        if (searchWords.some((word) => productLine.includes(word))) return true
+    // 🔥 Query por prefijo para variaciones
+    const prefixQ = query(
+      productsCollection,
+      where("line", ">=", lineToSearch),
+      where("line", "<=", lineToSearch + "\uf8ff"),
+      limit(200),
+    )
+    const prefixSnapshot = await getDocs(prefixQ)
+    prefixSnapshot.docs.forEach((doc) => {
+      if (!matchedIds.has(doc.id)) {
+        matchedProducts.push(normalizeProduct(doc.data(), doc.id))
+        matchedIds.add(doc.id)
       }
-
-      const productName = normalizeForComparison(product.name)
-
-      if (productName.includes(searchTerm)) return true
-
-      if (searchWords.length > 1) {
-        const matchingWords = searchWords.filter((word) => productName.includes(word))
-        if (matchingWords.length >= Math.ceil(searchWords.length * 0.5)) return true
-      }
-
-      const searchableText = [product.brand || "", product.category || "", product.description || ""]
-        .join(" ")
-        .toLowerCase()
-
-      if (searchableText.includes(searchTerm)) return true
-
-      return false
     })
 
-    foundProducts.sort((a, b) => {
-      let scoreA = 0,
-        scoreB = 0
+    // Si pocos resultados, fuzzy match sobre pool reducido
+    if (matchedProducts.length < 10) {
+      const fallbackProducts = await getProducts(200)
+      const searchWords = searchTerm.split(/\s+/).filter((w) => w.length > 1)
+      const fuzzyMatches = fallbackProducts.filter((p) => {
+        if (matchedIds.has(p.id)) return false
+        const line = normalizeForComparison(p.line || "")
+        return line.includes(searchTerm) || searchTerm.includes(line) ||
+          searchWords.some((w) => line.includes(w))
+      })
+      matchedProducts = [...matchedProducts, ...fuzzyMatches]
+    }
 
-      if (a.line) {
-        const lineA = normalizeForComparison(a.line)
-        if (lineA === searchTerm) scoreA += 1000
-        else if (lineA.includes(searchTerm)) scoreA += 500
-        else if (searchTerm.includes(lineA)) scoreA += 300
-      }
-
-      if (b.line) {
-        const lineB = normalizeForComparison(b.line)
-        if (lineB === searchTerm) scoreB += 1000
-        else if (lineB.includes(searchTerm)) scoreB += 500
-        else if (searchTerm.includes(lineB)) scoreB += 300
-      }
-
-      const nameA = normalizeForComparison(a.name)
-      const nameB = normalizeForComparison(b.name)
-
-      if (nameA.includes(searchTerm)) scoreA += 200
-      if (nameB.includes(searchTerm)) scoreB += 200
-
-      scoreA += (a.views || 0) * 0.1
-      scoreB += (b.views || 0) * 0.1
-
-      if (scoreA !== scoreB) return scoreB - scoreA
+    // Ordenar por relevancia
+    matchedProducts.sort((a, b) => {
+      let sa = 0, sb = 0
+      const la = normalizeForComparison(a.line || "")
+      const lb = normalizeForComparison(b.line || "")
+      if (la === searchTerm) sa += 1000
+      if (lb === searchTerm) sb += 1000
+      if (la.includes(searchTerm)) sa += 500
+      if (lb.includes(searchTerm)) sb += 500
+      sa += (a.views || 0) * 0.1
+      sb += (b.views || 0) * 0.1
+      if (sa !== sb) return sb - sa
       return toMs(b.createdAt) - toMs(a.createdAt)
     })
 
-    console.log(`✅ ENCONTRADOS ${foundProducts.length} productos para "${lineToSearch}"`)
-
-    foundProducts.slice(0, 5).forEach((product, index) => {
-      console.log(`  ${index + 1}. ${product.name} (línea: "${product.line || "N/A"}")`)
-    })
-
-    setCachedData(cacheKey, foundProducts, CACHE_DURATION)
-    return foundProducts
+    console.log(`✅ ${matchedProducts.length} productos para "${lineToSearch}"`)
+    setCachedData(cacheKey, matchedProducts, CACHE_DURATION)
+    return matchedProducts
   } catch (error) {
-    console.error("Error en getProductsByLine mejorado:", error)
+    console.error("Error en getProductsByLine:", error)
     return []
   }
 }
@@ -698,7 +700,7 @@ export async function incrementProductViews(productId: string): Promise<void> {
     )
 
     keysToDelete.forEach((key) => cache.delete(key))
-    allProductsCache = null
+    // ❌ YA NO invalidamos el pool de búsqueda
   } catch (error) {
     console.error("Error incrementando views:", error)
   }
@@ -723,9 +725,8 @@ export async function decreaseStock(productId: string, quantity = 1): Promise<bo
 
     console.log(`✅ Stock actualizado para producto ${productId}: -${quantity}`)
 
-    allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
-      (key) => key.includes(productId) || key.startsWith("products-"),
+      (key) => key.includes(productId),
     )
     keysToDelete.forEach((key) => cache.delete(key))
 
@@ -745,9 +746,8 @@ export async function increaseStock(productId: string, quantity = 1): Promise<vo
 
     console.log(`✅ Stock aumentado para producto ${productId}: +${quantity}`)
 
-    allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
-      (key) => key.includes(productId) || key.startsWith("products-"),
+      (key) => key.includes(productId),
     )
     keysToDelete.forEach((key) => cache.delete(key))
   } catch (error) {
@@ -776,9 +776,8 @@ export async function updateProductDiscount(productId: string, discount: Discoun
 
     console.log(`✅ Descuento actualizado para producto ${productId}`)
 
-    allProductsCache = null
     const keysToDelete = Array.from(cache.keys()).filter(
-      (key) => key.includes(productId) || key.startsWith("products-"),
+      (key) => key.includes(productId),
     )
     keysToDelete.forEach((key) => cache.delete(key))
   } catch (error) {
@@ -795,14 +794,10 @@ export async function getProductsOnSale(limitCount = 20): Promise<Product[]> {
 
     console.log("🔍 Obteniendo productos en oferta...")
 
-    const allProducts = await getAllProductsForSearch()
-    const productsOnSale = allProducts.filter((product) => hasActiveDiscount(product))
+    const pool = await getProducts(limitCount * 5)
+    const productsOnSale = pool.filter((product) => hasActiveDiscount(product))
 
-    productsOnSale.sort((a, b) => {
-      const discountA = getDiscountPercentage(a)
-      const discountB = getDiscountPercentage(b)
-      return discountB - discountA
-    })
+    productsOnSale.sort((a, b) => getDiscountPercentage(b) - getDiscountPercentage(a))
 
     const limitedProducts = productsOnSale.slice(0, limitCount)
     console.log(`✅ ${limitedProducts.length} productos en oferta obtenidos`)
@@ -823,12 +818,13 @@ export async function getLowStockProducts(threshold = 5): Promise<Product[]> {
 
     console.log(`🔍 Obteniendo productos con stock bajo (< ${threshold})...`)
 
-    const allProducts = await getAllProductsForSearch()
-    const lowStockProducts = allProducts.filter(
-      (product) => product.stock !== undefined && product.stock > 0 && product.stock <= threshold,
-    )
+    const q = query(productsCollection, where("stock", ">", 0), limit(100))
+    const snapshot = await getDocs(q)
+    const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
 
-    lowStockProducts.sort((a, b) => (a.stock || 0) - (b.stock || 0))
+    const lowStockProducts = products
+      .filter((p) => p.stock !== undefined && p.stock <= threshold)
+      .sort((a, b) => (a.stock || 0) - (b.stock || 0))
 
     console.log(`✅ ${lowStockProducts.length} productos con stock bajo`)
 
@@ -892,7 +888,7 @@ export async function updateProduct(
     const docRef = doc(db, "products", id)
     await updateDoc(docRef, updateData)
 
-    allProductsCache = null
+    searchProductPool = null
     const keysToDelete = Array.from(cache.keys()).filter(
       (key) => key.includes(id) || key.startsWith("products-") || key.startsWith("popular-"),
     )
@@ -909,7 +905,7 @@ export async function deleteProductById(productId: string): Promise<void> {
     const docRef = doc(db, "products", productId)
     await deleteDoc(docRef)
 
-    allProductsCache = null
+    searchProductPool = null
     cache.clear()
   } catch (error) {
     console.error("Error eliminando producto:", error)
@@ -917,7 +913,7 @@ export async function deleteProductById(productId: string): Promise<void> {
   }
 }
 
-// 🚀 BÚSQUEDA SÚPER AGRESIVA - ENCUENTRA TODO
+// 🚀 BÚSQUEDA — Usa pool cacheado de 10 min
 export async function searchProducts(searchTerm: string, filters?: SearchFilters): Promise<Product[]> {
   try {
     const startTime = Date.now()
@@ -928,14 +924,13 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
       return cached
     }
 
-    console.log(`🔍 Búsqueda agresiva: "${searchTerm}"`)
+    console.log(`🔍 Búsqueda: "${searchTerm}"`)
 
     if (!searchTerm.trim()) {
-      const recent = await getProducts(50)
-      return recent
+      return getProducts(50)
     }
 
-    const allProducts = await getAllProductsForSearch()
+    const allProducts = await getProductPoolForSearch()
     console.log(`📦 Buscando en ${allProducts.length} productos...`)
 
     const term = searchTerm.toLowerCase().trim()
@@ -1041,7 +1036,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
 
 // 🧹 Utilidades de caché optimizadas
 export function clearProductsCache(): void {
-  allProductsCache = null
+  searchProductPool = null
   cache.clear()
   console.log("🧹 Caché limpiado completamente")
 }
@@ -1054,6 +1049,83 @@ export function getCacheInfo(): { size: number; keys: string[]; duration: number
     duration: CACHE_DURATION,
     memoryUsage,
   }
+}
+
+// ──────────────────────────────────────────────
+// 🚀 PRODUCTOS RELACIONADOS — Queries por línea/marca/categoría
+// ──────────────────────────────────────────────
+export async function getRelatedProducts(
+  currentProductId: string,
+  currentSlug: string,
+  line?: string,
+  brand?: string,
+  category?: string,
+): Promise<Product[]> {
+  const productsMap = new Map<string, { product: Product; weight: number }>()
+
+  async function queryAndAdd(q: any, weight: number) {
+    const snapshot = await getDocs(q)
+    snapshot.docs.forEach((doc) => {
+      if (doc.id !== currentProductId) {
+        const existing = productsMap.get(doc.id)
+        if (existing) {
+          existing.weight = Math.max(existing.weight, weight)
+        } else {
+          productsMap.set(doc.id, {
+            product: normalizeProduct(doc.data(), doc.id),
+            weight,
+          })
+        }
+      }
+    })
+  }
+
+  const promises: Promise<any>[] = []
+
+  if (line) {
+    promises.push(
+      queryAndAdd(
+        query(productsCollection, where("line", "==", line), limit(25)),
+        1000,
+      ),
+    )
+  }
+  if (brand) {
+    promises.push(
+      queryAndAdd(
+        query(productsCollection, where("brand", "==", brand), limit(15)),
+        500,
+      ),
+    )
+  }
+  if (category) {
+    promises.push(
+      queryAndAdd(
+        query(productsCollection, where("category", "==", category), limit(15)),
+        100,
+      ),
+    )
+  }
+
+  await Promise.all(promises)
+
+  const results = Array.from(productsMap.values())
+
+  // Si no hay resultados, fallback a últimos productos
+  if (results.length === 0) {
+    const fallback = await getProducts(20)
+    return fallback.filter((p) => p.slug !== currentSlug)
+  }
+
+  return results
+    .sort(
+      (a, b) =>
+        b.weight - a.weight ||
+        (b.product.views || 0) - (a.product.views || 0) ||
+        toMs(b.product.createdAt) - toMs(a.product.createdAt),
+    )
+    .slice(0, 50)
+    .map((entry) => entry.product)
 }
 
 // Aliases para compatibilidad

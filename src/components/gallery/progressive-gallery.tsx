@@ -152,7 +152,7 @@ export default function ProgressiveGallery({
                       : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  <div className="w-full h-full bg-white dark:bg-gray-800">
+                  <div className="relative w-full h-full bg-white dark:bg-gray-800">
                     <Image
                       src={thumbnailUrl || "/placeholder.svg"}
                       alt={`${productName} miniatura ${index + 1}`}

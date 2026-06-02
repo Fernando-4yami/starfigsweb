@@ -1,6 +1,6 @@
 "use client"
 
-import { getProducts, type Product } from "@/lib/firebase/products"
+import { getRelatedProducts, type Product } from "@/lib/firebase/products"
 import { useState, useEffect, useRef, useCallback } from "react"
 import ProductCard from "@/components/ProductCard"
 import type { SerializedProduct } from "@/lib/serialize-product"
@@ -174,7 +174,13 @@ export default function InfiniteRelatedProducts({
         }
 
         console.log(`🔍 No hay cache, consultando base de datos...`)
-        const allProducts = await getProducts(300)
+        const allProducts = await getRelatedProducts(
+          currentProduct.id,
+          currentProduct.slug,
+          currentProduct.line,
+          currentProduct.brand,
+          currentProduct.category,
+        )
 
         console.log(`📋 Producto actual:`)
         console.log(`  - Nombre: "${currentProduct.name}"`)
