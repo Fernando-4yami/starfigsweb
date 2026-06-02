@@ -54,9 +54,9 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
   }
 
   const getButtonText = () => {
-    // Mostrar "Agotado" si fue lanzado hace más de 1 mes
+    // Si es lanzamiento anterior, igual pueden consultar
     if (isOldRelease) {
-      return "Agotado"
+      return "Consultar disponibilidad"
     }
     // Solo mostrar "Comprar" si está disponible Y hay stock
     if (isAvailable && hasStock) {
@@ -72,25 +72,24 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
     <div className="space-y-4">
       {/* 🚀 BOTÓN CON TEXTO DINÁMICO SEGÚN DISPONIBILIDAD Y STOCK */}
       <button
-        onClick={isOldRelease ? undefined : handleWhatsAppClick}
-        disabled={isOldRelease}
+        onClick={handleWhatsAppClick}
         className={`w-full font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 
                    transition-all duration-200 shadow-lg ${
           isOldRelease
-            ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white"
+            ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white"
             : "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white hover:shadow-xl transform hover:-translate-y-0.5"
         }`}
       >
-        {isOldRelease ? <Ban className="w-5 h-5" /> : <WhatsAppIcon className="w-5 h-5" />}
+        <WhatsAppIcon className="w-5 h-5" />
         {getButtonText()}
       </button>
 
       {isOldRelease ? (
-        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 
-                        bg-red-50 dark:bg-red-950/30 px-4 py-2 rounded-lg 
-                        border border-red-200 dark:border-red-900">
+        <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 
+                        bg-orange-50 dark:bg-orange-950/30 px-4 py-2 rounded-lg 
+                        border border-orange-200 dark:border-orange-900">
           <Ban className="w-4 h-4" />
-          <span className="text-sm font-medium">Producto agotado - Lanzamiento anterior</span>
+          <span className="text-sm font-medium">Lanzamiento anterior - Consulta disponibilidad</span>
         </div>
       ) : isAvailable ? (
         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 
