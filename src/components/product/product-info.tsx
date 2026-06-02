@@ -48,7 +48,7 @@ export default function ProductInfo({
   const hasDiscount = hasActiveDiscount(productForCalc)
   const discountPercent = getDiscountPercentage(productForCalc)
   const inStock = isInStock(productForCalc)
-  const isOldRelease = isReleasedOverAMonth({ releaseDate: productForCalc.releaseDate || releaseDate })
+  const isOldRelease = isReleasedOverAMonth({ releaseDate })
   const isLowStock = stock !== undefined && stock > 0 && stock <= lowStockThreshold
 
   const shouldShowStock = stock !== undefined && stock !== null && stock > 0
