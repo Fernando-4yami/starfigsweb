@@ -36,9 +36,16 @@ yarn-error.log*
 # vercel
 .vercel
 
+# backup de node_modules (copia local)
+node_modules - Copy/
+
+# Windows reserved device names
+nul
+NUL
+Nul
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 lib/firebase/serviceAccountKey.json
-src/app/admin/products/
 **/serviceAccountKey.json

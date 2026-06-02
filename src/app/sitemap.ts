@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { db } from "@/lib/firebase/admin"
+import { getDb } from "@/lib/firebase/admin"
 
 const BASE_URL = "https://starfigsperu.com"
 
@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Obtener slugs de todos los productos desde Firestore
   let productSlugs: string[] = []
   try {
-    const snapshot = await db.collection("products").select("slug").get()
+    const snapshot = await getDb().collection("products").select("slug").get()
     productSlugs = snapshot.docs
       .map((doc) => doc.data().slug as string)
       .filter((slug): slug is string => !!slug)

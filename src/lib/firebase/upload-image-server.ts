@@ -1,5 +1,5 @@
 // src/lib/firebase/upload-image-server.ts
-import { storage as adminStorage } from "./admin"
+import { getStorage } from "./admin"
 import axios from "axios"
 import { v4 as uuidv4 } from "uuid"
 import sharp from "sharp"
@@ -16,9 +16,7 @@ function getPublicUrl(bucketName: string, filename: string): string {
  * Uploads an image from a URL, converts it to WebP, and saves it to Firebase Storage.
  */
 export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "products") {
-  if (!adminStorage) {
-    throw new Error("Firebase Admin Storage not initialized")
-  }
+  const adminStorage = getStorage()
 
   try {
     const response = await axios.get(imageUrl, { responseType: "arraybuffer" })
@@ -58,9 +56,7 @@ export async function uploadImageBufferAsWebP(
   originalFileName: string, 
   folder = "products"
 ) {
-  if (!adminStorage) {
-    throw new Error("Firebase Admin Storage not initialized")
-  }
+  const adminStorage = getStorage()
 
   try {
     console.log(`Processing ${originalFileName} for WebP conversion and upload.`)
@@ -97,9 +93,7 @@ export async function uploadProcessedImageBuffer(
   originalFileName: string,
   folder = "products",
 ) {
-  if (!adminStorage) {
-    throw new Error("Firebase Admin Storage not initialized")
-  }
+  const adminStorage = getStorage()
 
   try {
     console.log(`📤 Uploading already processed: ${originalFileName}`)

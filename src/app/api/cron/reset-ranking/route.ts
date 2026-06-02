@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import admin, { db } from "@/lib/firebase/admin"
+import admin, { getDb } from "@/lib/firebase/admin"
 
 export const dynamic = "force-dynamic"
 export const maxDuration = 300 // 5 min timeout para 20k+ productos
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Leer todos los productos
-    const snapshot = await db.collection("products").get()
+    const snapshot = await getDb().collection("products").get()
 
     if (snapshot.empty) {
       console.log("⚠️ No hay productos para resetear")
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const docs = snapshot.docs
     for (let i = 0; i < docs.length; i += batchSize) {
-      const batch = db.batch()
+      const batch = getDb().batch()
       const chunk = docs.slice(i, i + batchSize)
 
       chunk.forEach((doc) => {
