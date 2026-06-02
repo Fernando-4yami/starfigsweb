@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Calendar, Tag, Info, Package } from "lucide-react"
-import { calculateFinalPrice, hasActiveDiscount, getDiscountPercentage, isInStock } from "@/lib/serialize-product"
+import { calculateFinalPrice, hasActiveDiscount, getDiscountPercentage, isInStock, isReleasedOverAMonth } from "@/lib/serialize-product"
 
 interface ProductInfoProps {
   name: string
@@ -48,6 +48,7 @@ export default function ProductInfo({
   const hasDiscount = hasActiveDiscount(productForCalc)
   const discountPercent = getDiscountPercentage(productForCalc)
   const inStock = isInStock(productForCalc)
+  const isOldRelease = isReleasedOverAMonth({ releaseDate: productForCalc.releaseDate || releaseDate })
   const isLowStock = stock !== undefined && stock > 0 && stock <= lowStockThreshold
 
   const shouldShowStock = stock !== undefined && stock !== null && stock > 0
@@ -68,6 +69,13 @@ export default function ProductInfo({
 
       {/* Badges y fecha */}
       <div className="flex flex-wrap items-center gap-3">
+        {isOldRelease && (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide 
+                         bg-gradient-to-r from-red-700 to-red-500 dark:from-red-600 dark:to-red-400 
+                         text-white px-3 py-1 rounded-full shadow border border-red-300 dark:border-red-700">
+            <span className="mr-0.5">✕</span> Agotado
+          </span>
+        )}
         {showReleaseTag && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide 
                          bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 

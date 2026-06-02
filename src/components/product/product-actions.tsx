@@ -1,5 +1,6 @@
 "use client"
-import { Clock, CheckCircle, Info } from "lucide-react"
+import { Clock, CheckCircle, Info, Ban } from "lucide-react"
+import { isReleasedOverAMonth } from "@/lib/serialize-product"
 
 interface ProductActionsProps {
   whatsappUrl: string
@@ -45,6 +46,7 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
       (parsedReleaseDate.getFullYear() === now.getFullYear() && parsedReleaseDate.getMonth() <= now.getMonth()))
 
   const hasStock = typeof stock === "number" ? stock > 0 : Boolean(stock)
+  const isOldRelease = isReleasedOverAMonth({ releaseDate: parsedReleaseDate })
 
   const handleWhatsAppClick = () => {
     onWhatsAppClick() // Para tracking
@@ -52,6 +54,10 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
   }
 
   const getButtonText = () => {
+    // Mostrar "Agotado" si fue lanzado hace más de 1 mes
+    if (isOldRelease) {
+      return "Agotado"
+    }
     // Solo mostrar "Comprar" si está disponible Y hay stock
     if (isAvailable && hasStock) {
       return "Comprar"
@@ -66,16 +72,27 @@ export default function ProductActions({ whatsappUrl, onWhatsAppClick, releaseDa
     <div className="space-y-4">
       {/* 🚀 BOTÓN CON TEXTO DINÁMICO SEGÚN DISPONIBILIDAD Y STOCK */}
       <button
-        onClick={handleWhatsAppClick}
-        className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 
-                   text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 
-                   transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        onClick={isOldRelease ? undefined : handleWhatsAppClick}
+        disabled={isOldRelease}
+        className={`w-full font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 
+                   transition-all duration-200 shadow-lg ${
+          isOldRelease
+            ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white"
+            : "bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white hover:shadow-xl transform hover:-translate-y-0.5"
+        }`}
       >
-        <WhatsAppIcon className="w-5 h-5" />
+        {isOldRelease ? <Ban className="w-5 h-5" /> : <WhatsAppIcon className="w-5 h-5" />}
         {getButtonText()}
       </button>
 
-      {isAvailable ? (
+      {isOldRelease ? (
+        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 
+                        bg-red-50 dark:bg-red-950/30 px-4 py-2 rounded-lg 
+                        border border-red-200 dark:border-red-900">
+          <Ban className="w-4 h-4" />
+          <span className="text-sm font-medium">Producto agotado - Lanzamiento anterior</span>
+        </div>
+      ) : isAvailable ? (
         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 
                         bg-green-50 dark:bg-green-950/30 px-4 py-2 rounded-lg 
                         border border-green-200 dark:border-green-900">

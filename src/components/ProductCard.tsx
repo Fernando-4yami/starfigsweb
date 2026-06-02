@@ -11,6 +11,7 @@ import {
   hasActiveDiscount,
   calculateFinalPrice,
   getDiscountPercentage,
+  isReleasedOverAMonth,
 } from "@/lib/serialize-product"
 
 interface ProductCardProps {
@@ -30,6 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       (releaseDate.getFullYear() === now.getFullYear() && releaseDate.getMonth() > now.getMonth()))
 
   const showReleaseTag = !!releaseDate && (isCurrentMonth || isFutureRelease)
+  const isOldRelease = isReleasedOverAMonth({ releaseDate: product.releaseDate })
 
   const releaseMonthYear = releaseDate
     ? format(releaseDate, "MMMM yyyy", { locale: es }).replace(/^./, (str) => str.toUpperCase())
@@ -62,6 +64,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="bg-white dark:bg-gray-800 shadow-md hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-blue-500/10 transition-shadow duration-300 overflow-hidden flex flex-col border border-transparent dark:border-gray-700">
         {/* Imagen */}
         <div className="relative w-full h-0 pb-[100%] bg-gray-50 dark:bg-gray-900 overflow-hidden">
+          {isOldRelease && (
+            <span
+              className="absolute top-2 left-2 bg-gray-800/80 dark:bg-gray-900/80 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10"
+            >
+              Agotado
+            </span>
+          )}
+
           {showReleaseTag && (
             <span
               className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 rounded shadow-md z-10`}

@@ -101,6 +101,19 @@ export function isInStock(product: SerializedProduct | any): boolean {
   return (product.stock ?? 0) > 0
 }
 
+// 🔧 VERIFICAR SI EL PRODUCTO FUE LANZADO HACE MÁS DE 1 MES (para mostrar como agotado)
+export function isReleasedOverAMonth(product: SerializedProduct | any): boolean {
+  if (!product.releaseDate) return false
+
+  const releaseDate = parseSerializedDate(product.releaseDate)
+  if (!releaseDate) return false
+
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+
+  return releaseDate < oneMonthAgo
+}
+
 // 🔧 VERIFICAR SI EL PRODUCTO TIENE DESCUENTO ACTIVO
 export function hasActiveDiscount(product: SerializedProduct | any): boolean {
   if (!product.discount || !product.discount.isActive) return false
