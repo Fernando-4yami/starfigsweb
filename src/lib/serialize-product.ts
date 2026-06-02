@@ -103,15 +103,17 @@ export function isInStock(product: SerializedProduct | any): boolean {
 
 // 🔧 VERIFICAR SI EL PRODUCTO FUE LANZADO HACE MÁS DE 1 MES (para mostrar como agotado)
 export function isReleasedOverAMonth(product: SerializedProduct | any): boolean {
-  if (!product.releaseDate) return false
+  // Si no tiene releaseDate, usamos createdAt como fallback
+  const dateStr = product.releaseDate || product.createdAt
+  if (!dateStr) return false
 
-  const releaseDate = parseSerializedDate(product.releaseDate)
-  if (!releaseDate) return false
+  const date = parseSerializedDate(dateStr)
+  if (!date) return false
 
   const oneMonthAgo = new Date()
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 
-  return releaseDate < oneMonthAgo
+  return date < oneMonthAgo
 }
 
 // 🔧 VERIFICAR SI EL PRODUCTO TIENE DESCUENTO ACTIVO
