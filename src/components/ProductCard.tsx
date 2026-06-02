@@ -46,11 +46,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleClick = async (e: React.MouseEvent) => {
     try {
-      console.log(`🔍 Incrementando views para producto: ${product.id} - ${product.name}`)
       incrementProductViews(product.id)
-        .then(() => {
-          console.log(`✅ Views incrementadas para: ${product.name}`)
-        })
         .catch((error) => {
           console.error(`❌ Error incrementando views para ${product.name}:`, error)
         })

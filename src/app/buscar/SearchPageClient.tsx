@@ -121,8 +121,10 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
   const [rawProducts, setRawProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [pageTransitioning, setPageTransitioning] = useState(false)
 
   const resultsRef = useRef<HTMLDivElement>(null)
+  const pageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -130,7 +132,11 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
     }
     updateItemsPerPage()
     window.addEventListener("resize", updateItemsPerPage)
-    return () => window.removeEventListener("resize", updateItemsPerPage)
+    return () => {
+      window.removeEventListener("resize", updateItemsPerPage)
+      pageTimersRef.current.forEach(t => clearTimeout(t))
+      pageTimersRef.current = []
+    }
   }, [])
 
   useEffect(() => {
@@ -192,6 +198,13 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
   }, [currentPage, itemsPerPage, products.length, totalPages])
 
   const handlePageChange = (newPage: number) => {
+    // Limpiar timers previos
+    pageTimersRef.current.forEach(t => clearTimeout(t))
+    pageTimersRef.current = []
+
+    // Fade out
+    setPageTransitioning(true)
+
     if (resultsRef.current) {
       resultsRef.current.scrollIntoView({
         behavior: "smooth",
@@ -210,6 +223,12 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
     const newUrl = `/buscar?${params.toString()}`
     router.push(newUrl, { scroll: false })
     setCurrentPage(newPage)
+
+    // Fade in después de que React haya renderizado el nuevo contenido
+    const timer = setTimeout(() => {
+      setPageTransitioning(false)
+    }, 200)
+    pageTimersRef.current.push(timer)
   }
 
   return (
@@ -302,7 +321,9 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-200 ${
+              pageTransitioning ? "opacity-0" : "opacity-100"
+            }`}>
               {paginatedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

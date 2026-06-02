@@ -1,28 +1,27 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { usePathname, useSearchParams } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+import { usePathname } from "next/navigation"
 import Image from "next/image"
 
 export default function PageTransitionProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const prevPathRef = useRef(pathname)
 
   useEffect(() => {
-    // Mostrar loading
+    // Solo mostrar loading cuando cambia la ruta real, no por hash/searchParams
+    if (prevPathRef.current === pathname) return
+    prevPathRef.current = pathname
+
     setIsLoading(true)
 
-    // Scroll to top
-    window.scrollTo(0, 0)
-
-    // Ocultar después de un delay
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 600)
+    }, 300)
 
     return () => clearTimeout(timer)
-  }, [pathname, searchParams])
+  }, [pathname])
 
   return (
     <>

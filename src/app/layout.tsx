@@ -15,6 +15,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://starfigsperu.com"),
   title: "Starfigs - Figuras de Colección",
   description: "Tienda de figuras de colección, nendoroids, plushies y más",
 }
@@ -28,7 +29,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <ThemeProvider>
             <PageTransitionProvider>
               <ScrollToTop />
               <Navbar />

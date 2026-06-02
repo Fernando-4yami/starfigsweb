@@ -3,7 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { useState, useRef, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -17,6 +17,8 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const skipDebounceRef = useRef(false)
@@ -28,7 +30,9 @@ export default function Navbar() {
     if (searchTerm.trim() !== "") {
       router.push(`/buscar?q=${encodeURIComponent(searchTerm.trim())}`)
       setSearchTerm("")
+      setSuggestions([])
       setShowSuggestions(false)
+      typedTermRef.current = ""
       searchInputRef.current?.blur()
     }
   }
@@ -36,7 +40,9 @@ export default function Navbar() {
   const handleSuggestionClick = (label: string) => {
     router.push(`/buscar?q=${encodeURIComponent(label)}`)
     setSearchTerm("")
+    setSuggestions([])
     setShowSuggestions(false)
+    typedTermRef.current = ""
     searchInputRef.current?.blur()
   }
 
@@ -149,6 +155,13 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [closeSuggestions])
 
+  // Cerrar sugerencias en cualquier cambio de ruta (navegación, paginación, etc.)
+  useEffect(() => {
+    setShowSuggestions(false)
+    setSuggestions([])
+    setSelectedIndex(-1)
+  }, [pathname, searchParams])
+
   // Escape → cerrar sugerencias / Flechas → navegar
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -222,13 +235,17 @@ export default function Navbar() {
 
   useEffect(() => {
     if (mobileMenuOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       document.body.style.overflow = "hidden"
+      document.body.style.paddingRight = `${scrollbarWidth}px`
       setIsNavbarVisible(true)
     } else {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = ""
+      document.body.style.paddingRight = ""
     }
     return () => {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = ""
+      document.body.style.paddingRight = ""
     }
   }, [mobileMenuOpen])
 
@@ -264,6 +281,7 @@ export default function Navbar() {
           href={`/buscar?q=${encodeURIComponent(searchTerm.trim())}`}
           onClick={() => {
             setSearchTerm("")
+            setSuggestions([])
             setShowSuggestions(false)
           }}
           className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/10 hover:bg-amber-100 dark:hover:bg-amber-950/30 transition-colors border-t border-gray-100 dark:border-gray-700"
@@ -276,7 +294,7 @@ export default function Navbar() {
   }
 
   const categories = [
-    { name: "Cómo funciona", path: "/#como-funciona" },
+    { name: "Cómo funciona", path: "/#como-funciona", isHighlight: true },
     { name: "Ichiban Kuji", path: "/categorias/ichiban-kuji" },
     { name: "Pop Up Parade", path: "/categorias/pop-up-parade" },
     { name: "Nendoroid", path: "/categorias/nendoroid" },
@@ -335,14 +353,16 @@ export default function Navbar() {
               </form>
             </div>
 
-            <ThemeToggle />
-            <button
-              className="ml-auto p-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Abrir menú"
-            >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            <div className="flex items-center gap-1 ml-auto">
+              <ThemeToggle />
+              <button
+                className="p-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors lg:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Abrir menú"
+              >
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
 
           {/* Fila 2: Navegación de categorías */}
@@ -362,12 +382,16 @@ export default function Navbar() {
                 </Link>
               ))}
             </div>
-            <Link
-              href={categories[0].path}
-              className="px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-200 border border-amber-200 dark:border-amber-800 flex-shrink-0"
+            <button
+              onClick={() => {
+                const el = document.getElementById("como-funciona")
+                if (el) el.scrollIntoView({ behavior: "smooth" })
+                else window.location.href = "/#como-funciona"
+              }}
+              className="px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-200 border border-amber-200 dark:border-amber-800 flex-shrink-0 cursor-pointer"
             >
               {categories[0].name}
-            </Link>
+            </button>
           </div>
 
           {/* Buscador Móvil */}
@@ -439,13 +463,19 @@ export default function Navbar() {
             ))}
             {/* Cómo funciona al final */}
             <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800">
-              <Link
-                href={categories[0].path}
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  setTimeout(() => {
+                    const el = document.getElementById("como-funciona")
+                    if (el) el.scrollIntoView({ behavior: "smooth" })
+                    else window.location.href = "/#como-funciona"
+                  }, 150)
+                }}
                 className="block px-4 py-3 text-base font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20"
               >
                 {categories[0].name}
-              </Link>
+              </button>
             </div>
           </div>
 

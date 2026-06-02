@@ -39,11 +39,7 @@ function RankingSection({ products }: RankingSectionProps) {
   // 🚀 Click handler
   const handleRankingClick = (product: Product) => {
     try {
-      console.log(`🏆 Click en ranking para: ${product.id} - ${product.name}`)
       incrementProductViews(product.id)
-        .then(() => {
-          console.log(`✅ Views incrementadas desde ranking: ${product.name}`)
-        })
         .catch((error) => {
           console.error(`❌ Error incrementando views desde ranking:`, error)
         })

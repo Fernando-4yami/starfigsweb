@@ -6,7 +6,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark" // ✅ DARK MODE POR DEFAULT
+      defaultTheme="light" // ✅ LIGHT MODE POR DEFAULT (usuario puede cambiar, se guarda)
       enableSystem={false}
     >
       {children}

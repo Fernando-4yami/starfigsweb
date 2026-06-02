@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 🌐 URL base para redes sociales (Open Graph)
+  env: {
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || "https://starfigsperu.com",
+  },
+
   eslint: {
     ignoreDuringBuilds: true,
   },
