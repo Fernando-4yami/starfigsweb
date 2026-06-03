@@ -102,6 +102,16 @@ export async function POST(request: NextRequest) {
       await batch.commit();
     }
 
+    // Extraer altura numerica (heightCm) desde el texto de size
+    // Ej: "Approx. 16 cm" → heightCm = 16
+    let heightCm: number | null = null;
+    if (data.size) {
+      const numMatch = String(data.size).match(/([\d.]+)/);
+      if (numMatch) {
+        heightCm = parseFloat(numMatch[1]);
+      }
+    }
+
     // Guardar en Firestore (releaseDate = createdAt para que tenga 1 mes antes de mostrar "Agotado")
     const docRef = await db.collection("products").add({
       name,
@@ -112,6 +122,7 @@ export async function POST(request: NextRequest) {
       brand: data.manufacturer || "",
       line: data.productLine || "",
       size: data.size || "",
+      heightCm,
       category,
       views: 0,
       stock: 0,
