@@ -102,15 +102,20 @@ export async function POST(request: NextRequest) {
       await batch.commit();
     }
 
-    // Extraer altura numerica y formatear size como "X cm aprox."
-    // Ej: "Approx. 16 cm" → heightCm = 16, size = "16 cm aprox."
+    // Extraer altura numerica y formatear size como "Xcm aprox."
+    // Ej: "Approx. 16 cm" → heightCm = 16, size = "16cm aprox."
     let heightCm: number | null = null;
     let size = "";
     if (data.size) {
-      const numMatch = String(data.size).match(/([\d.]+)/);
+      // Requiere al menos un digito ANTES del punto decimal opcional
+      // Asi evitamos capturar el punto solitario de palabras como "Approx."
+      const numMatch = String(data.size).match(/(\d+(?:\.\d+)?)/);
       if (numMatch) {
-        heightCm = parseFloat(numMatch[1]);
-        size = `${heightCm}cm aprox.`;
+        const parsed = parseFloat(numMatch[1]);
+        if (!isNaN(parsed)) {
+          heightCm = parsed;
+          size = `${heightCm}cm aprox.`;
+        }
       }
     }
 
