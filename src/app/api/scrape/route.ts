@@ -56,14 +56,6 @@ function generateSlug(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function parsePrice(raw: unknown): number {
-  if (!raw) return 0;
-  if (typeof raw === "number") return Math.round(raw * 100) / 100;
-  const cleaned = String(raw).replace(/[^0-9.,]/g, "").replace(",", ".");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? 0 : Math.round(num * 100) / 100;
-}
-
 function determineCategory(data: Record<string, unknown>): string {
   const text = `${data.mediaType || ""} ${data.productLine || ""} ${data.name || ""}`.toLowerCase();
   if (text.includes("plush") || text.includes("peluche")) return "plush";
@@ -88,7 +80,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "El nombre del producto es requerido" }, { status: 400 });
     }
 
-    const price = parsePrice(data.price) || 109.00;
+    const price = 109.00;
 
     const slug = generateSlug(name);
     const imageUrls = Array.isArray(data.images) ? data.images : [];
@@ -110,7 +102,7 @@ export async function POST(request: NextRequest) {
       await batch.commit();
     }
 
-    // Guardar en Firestore (sin releaseDate para que use createdAt como fallback y tenga 1 mes de gracia)
+    // Guardar en Firestore (releaseDate = createdAt para que tenga 1 mes antes de mostrar "Agotado")
     const docRef = await db.collection("products").add({
       name,
       slug,
@@ -122,6 +114,7 @@ export async function POST(request: NextRequest) {
       category,
       views: 0,
       stock: 0,
+      releaseDate: admin.firestore.FieldValue.serverTimestamp(),
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
