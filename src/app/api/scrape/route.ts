@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import admin from "@/lib/firebase/admin";
-
-const db = admin.firestore();
 
 // ─── HELPERS ─────────────────────────────────────
 
@@ -64,6 +61,12 @@ export async function POST(request: NextRequest) {
     const category = determineCategory(data);
     const releaseDate = parseReleaseDate(data.releaseDate);
 
+    // Inicializar Firebase Admin solo cuando se necesita (evita errores en build)
+    const admin = await import("@/lib/firebase/admin").then((m) => m.default);
+    const db = admin.firestore();
+    const Timestamp = admin.firestore.Timestamp;
+    const FieldValue = admin.firestore.FieldValue;
+
     // Verificar duplicados por slug y eliminar
     const existingQuery = await db
       .collection("products")
@@ -87,10 +90,10 @@ export async function POST(request: NextRequest) {
       brand: data.manufacturer || "",
       line: data.productLine || "",
       category,
-      releaseDate: releaseDate ? admin.firestore.Timestamp.fromDate(releaseDate) : null,
+      releaseDate: releaseDate ? Timestamp.fromDate(releaseDate) : null,
       views: 0,
       stock: 0,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     });
 
     console.log(`✅ Producto guardado desde scraper: "${name}" (${docRef.id})`);
