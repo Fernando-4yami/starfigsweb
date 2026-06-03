@@ -88,10 +88,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "El nombre del producto es requerido" }, { status: 400 });
     }
 
-    const price = parsePrice(data.price);
-    if (price <= 0) {
-      return NextResponse.json({ error: "El precio debe ser mayor a 0" }, { status: 400 });
-    }
+    const price = parsePrice(data.price) || 109.00;
 
     const slug = generateSlug(name);
     const imageUrls = Array.isArray(data.images) ? data.images : [];
