@@ -1,5 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import * as admin from "firebase-admin";
+import { getApps } from "firebase-admin/app";
+
+// Lazy getter para Firebase — solo se inicializa cuando se llama al endpoint
+let _db: admin.firestore.Firestore | null = null;
+
+function getDb(): admin.firestore.Firestore {
+  if (!_db) {
+    if (!getApps().length) {
+      const projectId = process.env.FIREBASE_PROJECT_ID;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+
+      if (projectId && clientEmail && privateKey) {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId,
+            clientEmail,
+            privateKey: privateKey.replace(/\\n/g, "\n"),
+          }),
+          storageBucket: storageBucket || undefined,
+        });
+      } else {
+        throw new Error("Firebase Admin env vars not configured on server");
+      }
+    }
+    _db = admin.firestore();
+  }
+  return _db;
+}
+
 // ─── HELPERS ─────────────────────────────────────
 
 function generateSlug(name: string): string {
@@ -61,11 +93,8 @@ export async function POST(request: NextRequest) {
     const category = determineCategory(data);
     const releaseDate = parseReleaseDate(data.releaseDate);
 
-    // Inicializar Firebase Admin solo cuando se necesita (evita errores en build)
-    const admin = await import("@/lib/firebase/admin").then((m) => m.default);
-    const db = admin.firestore();
-    const Timestamp = admin.firestore.Timestamp;
-    const FieldValue = admin.firestore.FieldValue;
+    // Inicializar Firebase solo cuando se necesita
+    const db = getDb();
 
     // Verificar duplicados por slug y eliminar
     const existingQuery = await db
@@ -90,10 +119,10 @@ export async function POST(request: NextRequest) {
       brand: data.manufacturer || "",
       line: data.productLine || "",
       category,
-      releaseDate: releaseDate ? Timestamp.fromDate(releaseDate) : null,
+      releaseDate: releaseDate ? admin.firestore.Timestamp.fromDate(releaseDate) : null,
       views: 0,
       stock: 0,
-      createdAt: FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     console.log(`✅ Producto guardado desde scraper: "${name}" (${docRef.id})`);
