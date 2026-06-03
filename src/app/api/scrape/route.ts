@@ -76,12 +76,6 @@ function determineCategory(data: Record<string, unknown>): string {
   return "figura";
 }
 
-function parseReleaseDate(raw: unknown): Date | null {
-  if (!raw) return null;
-  const d = new Date(String(raw));
-  return isNaN(d.getTime()) ? null : d;
-}
-
 // ─── API ROUTE ───────────────────────────────────
 
 export async function POST(request: NextRequest) {
@@ -102,7 +96,6 @@ export async function POST(request: NextRequest) {
     const slug = generateSlug(name);
     const imageUrls = Array.isArray(data.images) ? data.images : [];
     const category = determineCategory(data);
-    const releaseDate = parseReleaseDate(data.releaseDate);
 
     // Inicializar Firebase solo cuando se necesita
     const db = getDb();
@@ -120,7 +113,7 @@ export async function POST(request: NextRequest) {
       await batch.commit();
     }
 
-    // Guardar en Firestore
+    // Guardar en Firestore (sin releaseDate para que use createdAt como fallback y tenga 1 mes de gracia)
     const docRef = await db.collection("products").add({
       name,
       slug,
@@ -130,7 +123,6 @@ export async function POST(request: NextRequest) {
       brand: data.manufacturer || "",
       line: data.productLine || "",
       category,
-      releaseDate: releaseDate ? admin.firestore.Timestamp.fromDate(releaseDate) : null,
       views: 0,
       stock: 0,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
