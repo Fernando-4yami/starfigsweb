@@ -102,13 +102,15 @@ export async function POST(request: NextRequest) {
       await batch.commit();
     }
 
-    // Extraer altura numerica (heightCm) desde el texto de size
-    // Ej: "Approx. 16 cm" → heightCm = 16
+    // Extraer altura numerica y formatear size como "X cm aprox."
+    // Ej: "Approx. 16 cm" → heightCm = 16, size = "16 cm aprox."
     let heightCm: number | null = null;
+    let size = "";
     if (data.size) {
       const numMatch = String(data.size).match(/([\d.]+)/);
       if (numMatch) {
         heightCm = parseFloat(numMatch[1]);
+        size = `${heightCm}cm aprox.`;
       }
     }
 
@@ -121,7 +123,7 @@ export async function POST(request: NextRequest) {
       imageUrls,
       brand: data.manufacturer || "",
       line: data.productLine || "",
-      size: data.size || "",
+      size,
       heightCm,
       category,
       views: 0,
