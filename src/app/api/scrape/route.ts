@@ -9,17 +9,28 @@ let _db: admin.firestore.Firestore | null = null;
 function getDb(): admin.firestore.Firestore {
   if (!_db) {
     if (!getApps().length) {
-      const projectId = process.env.FIREBASE_PROJECT_ID;
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-      const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+      const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
-      if (projectId && clientEmail && privateKey) {
+      // Soporta ambos formatos: base64 o vars individuales
+      const base64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+
+      if (base64) {
+        const decoded = Buffer.from(base64, "base64").toString("utf-8");
+        const serviceAccount = JSON.parse(decoded);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          storageBucket: storageBucket || undefined,
+        });
+      } else if (
+        process.env.FIREBASE_PROJECT_ID &&
+        process.env.FIREBASE_CLIENT_EMAIL &&
+        process.env.FIREBASE_PRIVATE_KEY
+      ) {
         admin.initializeApp({
           credential: admin.credential.cert({
-            projectId,
-            clientEmail,
-            privateKey: privateKey.replace(/\\n/g, "\n"),
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
           }),
           storageBucket: storageBucket || undefined,
         });
