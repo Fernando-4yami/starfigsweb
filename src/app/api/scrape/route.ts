@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
       imageUrls,
       brand: data.manufacturer || "",
       line: data.productLine || "",
+      size: data.size || "",
       category,
       views: 0,
       stock: 0,
