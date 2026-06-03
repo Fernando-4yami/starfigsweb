@@ -7,6 +7,8 @@ import {
   doc,
   deleteDoc,
   updateDoc,
+  setDoc,
+  deleteField,
   query,
   orderBy,
   limit,
@@ -383,7 +385,7 @@ export async function getProductsPaginated(
 
     const snapshot = await getDocs(q)
     const products = snapshot.docs.map((doc) => normalizeProduct(doc.data(), doc.id))
-    const newLastDoc = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null
+    const newLastDoc: DocumentSnapshot | null = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] as DocumentSnapshot : null
     const hasMore = snapshot.docs.length === limitCount
 
     return {
@@ -869,7 +871,6 @@ export async function updateProduct(
       ...data,
       // 🔧 FIX: solo poner views: 0 si el producto no tiene vistas registradas
       ...(data.views === undefined ? {} : { views: data.views }),
-      ...(data.category === undefined && { category: "figura" }),
       ...(data.stock !== undefined && { stock: data.stock }),
       ...(data.lowStockThreshold !== undefined && { lowStockThreshold: data.lowStockThreshold }),
     }
@@ -886,7 +887,32 @@ export async function updateProduct(
     }
 
     const docRef = doc(db, "products", id)
-    await updateDoc(docRef, updateData)
+
+    // 🔥 Verificar que el producto existe antes de actualizar
+    const existingSnap = await getDoc(docRef)
+    if (!existingSnap.exists()) {
+      throw new Error(`Producto no encontrado (fue eliminado). Refresca la lista de productos. ID: ${id}`)
+    }
+
+    // 🔍 Validar que los campos requeridos por isValidProductData() tengan tipos correctos
+    const existingData = existingSnap.data()!
+
+    // 🔥 FIX: heightCm está como object en algunos productos → isValidProductData() lo rechaza
+    // Si no es number válido, lo eliminamos del documento para que pase la regla:
+    //   (!data.keys().hasAny(['heightCm']) || data.heightCm is number)
+    let cleanHeightCm: any = existingData.heightCm
+    if (cleanHeightCm !== undefined && (typeof cleanHeightCm !== 'number' || isNaN(cleanHeightCm))) {
+      console.log("🔧 Fix: heightCm no es número válido, se eliminará")
+      cleanHeightCm = deleteField()
+    }
+
+    await setDoc(docRef, {
+      ...updateData,
+      name: existingData.name,
+      price: updateData.price ?? existingData.price,
+      imageUrls: existingData.imageUrls,
+      heightCm: cleanHeightCm,
+    }, { merge: true })
 
     searchProductPool = null
     const keysToDelete = Array.from(cache.keys()).filter(
@@ -895,7 +921,8 @@ export async function updateProduct(
     keysToDelete.forEach((key) => cache.delete(key))
   } catch (error) {
     console.error("Error actualizando producto:", error)
-    throw new Error(`Failed to update product with ID: ${id}`)
+    const originalMsg = error instanceof Error ? error.message : "Error desconocido"
+    throw new Error(`Failed to update product with ID: ${id} — ${originalMsg}`)
   }
 }
 

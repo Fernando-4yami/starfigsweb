@@ -35,6 +35,9 @@ const brandLogos: Record<string, string> = {
   taito: "/fabricantes/taito.png",
   furyu: "/fabricantes/furyu.png",
   vivit: "/fabricantes/vivit.png",
+  konami: "/fabricantes/konami.png",
+  gigo: "/fabricantes/gigo.png",
+  "system-service": "/fabricantes/system-service.png",
 }
 
 function normalizeBrand(brand?: string): string | null {
@@ -45,6 +48,9 @@ function normalizeBrand(brand?: string): string | null {
   if (b.includes("furyu")) return "furyu"
   if (b.includes("sega")) return "sega"
   if (b.includes("vivit")) return "vivit"
+  if (b.includes("konami")) return "konami"
+  if (b.includes("gigo")) return "gigo"
+  if (b.includes("system service") || b.includes("systemservice")) return "system-service"
   return null
 }
 
@@ -254,7 +260,7 @@ function PromoTemplate({
         height: 1080,
         position: "relative",
         overflow: "hidden",
-        background: "#EEF2FF",
+        background: "#FFF7ED",
       }}
     >
       <img
@@ -275,9 +281,9 @@ function PromoTemplate({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 24,
+          top: 92,
           left: 24,
-          width: 150,
+          width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,
         }}
@@ -287,15 +293,15 @@ function PromoTemplate({
       <div
         style={{
           position: "absolute",
-          bottom: 28,
-          right: 28,
+          bottom: 16,
+          right: 16,
           padding: "12px 28px",
-          background: "linear-gradient(135deg, #22D3EE, #4F46E5)",
+          background: "linear-gradient(135deg, #F97316, #DC2626)",
           color: "#fff",
           fontSize: 42,
           fontWeight: 900,
           clipPath: "polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%, 4% 50%)",
-          boxShadow: "0 12px 35px rgba(16,185,129,.5), 0 0 30px rgba(16,185,129,.2)",
+          boxShadow: "0 12px 35px rgba(234,88,12,.5), 0 0 30px rgba(234,88,12,.2)",
           zIndex: 50,
           letterSpacing: "-0.5px",
         }}
@@ -335,10 +341,11 @@ function PromoTemplate({
           <div
             style={{
               padding: "20px 32px 18px",
-              background: "linear-gradient(135deg, rgba(79,70,229,.9), rgba(34,211,238,.85))",
+              background: "linear-gradient(135deg, rgba(234,88,12,.9), rgba(249,115,22,.85))",
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
-              boxShadow: "0 20px 45px rgba(236,72,153,.5), 0 0 40px rgba(236,72,153,.15)",
+              boxShadow: "0 20px 45px rgba(234,88,12,.5), 0 0 40px rgba(234,88,12,.15)",
               width: "max-content",
+              maxWidth: "100%",
               minWidth: "100%",
             }}
           >
@@ -351,7 +358,8 @@ function PromoTemplate({
                 lineHeight: 1.1,
                 textShadow: "3px 3px 6px rgba(0,0,0,.4)",
                 letterSpacing: "-1px",
-                whiteSpace: "nowrap",
+                wordBreak: "break-word",
+                maxWidth: "100%",
               }}
             >
               {character}
@@ -404,7 +412,7 @@ function PromoTemplateTriple({
         height: 1080,
         position: "relative",
         overflow: "hidden",
-        background: "#EEF2FF",
+        background: "#FFF7ED",
       }}
     >
       {/* LAYOUT: 1 GRANDE IZQUIERDA (65%) + 2 PEQUEÑAS DERECHA (35%) */}
@@ -497,9 +505,9 @@ function PromoTemplateTriple({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 24,
+          top: 92,
           left: 24,
-          width: 150,
+          width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,
         }}
@@ -509,15 +517,15 @@ function PromoTemplateTriple({
       <div
         style={{
           position: "absolute",
-          bottom: 28,
-          right: 28,
+          bottom: 16,
+          right: 16,
           padding: "12px 28px",
-          background: "linear-gradient(135deg, #22D3EE, #4F46E5)",
+          background: "linear-gradient(135deg, #F97316, #DC2626)",
           color: "#fff",
           fontSize: 42,
           fontWeight: 900,
           clipPath: "polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%, 4% 50%)",
-          boxShadow: "0 12px 35px rgba(16,185,129,.5), 0 0 30px rgba(16,185,129,.2)",
+          boxShadow: "0 12px 35px rgba(234,88,12,.5), 0 0 30px rgba(234,88,12,.2)",
           zIndex: 50,
           letterSpacing: "-0.5px",
         }}
@@ -557,10 +565,11 @@ function PromoTemplateTriple({
           <div
             style={{
               padding: "20px 32px 18px",
-              background: "linear-gradient(135deg, rgba(79,70,229,.9), rgba(34,211,238,.85))",
+              background: "linear-gradient(135deg, rgba(234,88,12,.9), rgba(249,115,22,.85))",
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
-              boxShadow: "0 20px 45px rgba(236,72,153,.5), 0 0 40px rgba(236,72,153,.15)",
+              boxShadow: "0 20px 45px rgba(234,88,12,.5), 0 0 40px rgba(234,88,12,.15)",
               width: "max-content",
+              maxWidth: "100%",
               minWidth: "100%",
             }}
           >
@@ -573,7 +582,8 @@ function PromoTemplateTriple({
                 lineHeight: 1.1,
                 textShadow: "3px 3px 6px rgba(0,0,0,.4)",
                 letterSpacing: "-1px",
-                whiteSpace: "nowrap",
+                wordBreak: "break-word",
+                maxWidth: "100%",
               }}
             >
               {character}
