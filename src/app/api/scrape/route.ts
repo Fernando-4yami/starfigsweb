@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import * as admin from "firebase-admin";
 import { getApps } from "firebase-admin/app";
-import { uploadImageFromUrlAsWebP } from "@/lib/firebase/upload-image-server";
 
 // Lazy getter para Firebase — solo se inicializa cuando se llama al endpoint
 let _db: admin.firestore.Firestore | null = null;
@@ -84,23 +83,8 @@ export async function POST(request: NextRequest) {
     const price = 109.00;
 
     const slug = generateSlug(name);
-    const rawImageUrls: string[] = Array.isArray(data.images) ? data.images : [];
+    const imageUrls = Array.isArray(data.images) ? data.images : [];
     const category = determineCategory(data);
-
-    // 🖼️ Convertir imágenes externas a WebP y subirlas a Firebase Storage
-    let imageUrls: string[] = [];
-    for (const imgUrl of rawImageUrls) {
-      if (!imgUrl || typeof imgUrl !== "string") continue;
-      try {
-        const webpUrl = await uploadImageFromUrlAsWebP(imgUrl, "products");
-        imageUrls.push(webpUrl);
-        console.log(`✅ Imagen convertida a WebP: ${webpUrl.slice(0, 80)}...`);
-      } catch (err) {
-        // Fallback: si falla la conversión, usar la URL original
-        console.warn(`⚠️ No se pudo convertir a WebP, usando original: ${imgUrl.slice(0, 80)}...`, err instanceof Error ? err.message : "");
-        imageUrls.push(imgUrl);
-      }
-    }
 
     // Inicializar Firebase solo cuando se necesita
     const db = getDb();
