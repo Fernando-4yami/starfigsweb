@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
         await file.save(thumbBuffer, {
           metadata: {
             contentType: "image/webp",
-            cacheControl: "public, max-age=31536000",
+            cacheControl: "public, max-age=31536000, immutable",
           },
         })
         await file.makePublic()

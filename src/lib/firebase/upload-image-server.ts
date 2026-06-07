@@ -32,7 +32,7 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
     await file.save(webpBuffer, {
       metadata: { 
         contentType: "image/webp",
-        cacheControl: 'public, max-age=31536000',
+        cacheControl: 'public, max-age=31536000, immutable',
       },
     })
 
@@ -69,7 +69,7 @@ export async function uploadImageBufferAsWebP(
     await file.save(webpBuffer, {
       metadata: { 
         contentType: "image/webp",
-        cacheControl: 'public, max-age=31536000',
+        cacheControl: 'public, max-age=31536000, immutable',
       },
     })
 
@@ -105,7 +105,7 @@ export async function uploadProcessedImageBuffer(
     await file.save(processedBuffer, {
       metadata: { 
         contentType: "image/webp",
-        cacheControl: 'public, max-age=31536000',
+        cacheControl: 'public, max-age=31536000, immutable',
       },
     })
 
