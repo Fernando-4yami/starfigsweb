@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar/Navbar"
 import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/scroll-to-top"
 import PageTransitionProvider from "@/components/PageTransitionProvider"
+import RoutePrefetcher from "@/components/RoutePrefetcher"
 import { Suspense } from "react"
 import "../styles/globals.css"
 
@@ -77,6 +78,7 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <ThemeProvider>
             <PageTransitionProvider>
+              <RoutePrefetcher />
               <ScrollToTop />
               <Navbar />
               <main className="min-h-screen">
