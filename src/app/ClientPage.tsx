@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { getNewReleases, getNewReleasesByDateRange, type Product, getPopularProducts } from "@/lib/firebase/products"
 import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@/lib/utils"
 import RankingSection from "@/components/sections/ranking-section"
@@ -140,13 +140,13 @@ interface HomePageData {
   error: Error | null
 }
 
-export default function HomePage() {
+export default function HomePage({ initialProducts = [] }: { initialProducts?: Product[] }) {
   const [data, setData] = useState<HomePageData>({
     weeklyPopular: [],
-    newlyAdded: [],
+    newlyAdded: initialProducts,
     currReleases: [],
     futureReleases: [],
-    loading: true,
+    loading: initialProducts.length === 0,
     error: null,
   })
 
