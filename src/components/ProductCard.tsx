@@ -16,9 +16,14 @@ import {
 
 interface ProductCardProps {
   product: Product
+  /**
+   * Si es true, la imagen se carga con priority (no lazy).
+   * Útil para los primeros productos visibles en homepage/categorías (mejora LCP).
+   */
+  priority?: boolean
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const now = new Date()
   const releaseDate = parseSerializedDate(product.releaseDate)
 
@@ -85,6 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
             alt={product.name}
             fill
+            priority={priority}
             className="object-contain transition-transform duration-300 bg-white dark:bg-gray-800"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
           />

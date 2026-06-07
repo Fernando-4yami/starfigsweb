@@ -314,8 +314,10 @@ async function getProductPoolForSearch(forceRefresh = false): Promise<Product[]>
 }
 
 // 🚀 EXPORT para sincronización admin
-export async function getAllProductsForSync(): Promise<Product[]> {
-  return getProductPoolForSearch(true)
+// forceRefresh = true: ignora caché, descarga todo directo de Firestore
+// forceRefresh = false (default): usa la caché de 30 min si existe
+export async function getAllProductsForSync(forceRefresh = false): Promise<Product[]> {
+  return getProductPoolForSearch(forceRefresh)
 }
 
 // ──────────────────────────────────────────────
@@ -908,7 +910,7 @@ export async function updateProduct(
 
     await setDoc(docRef, {
       ...updateData,
-      name: existingData.name,
+      name: updateData.name ?? existingData.name,
       price: updateData.price ?? existingData.price,
       imageUrls: existingData.imageUrls,
       heightCm: cleanHeightCm,

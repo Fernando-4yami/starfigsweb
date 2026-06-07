@@ -116,8 +116,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   ichiban: {
     name: "Ichiban Kuji",
     slug: "ichiban",
-    description: "",
-    badge: " ",
+    description: "Figuras de lotería japonesa con premios exclusivos de tus series favoritas",
+    badge: "🎰 Premios exclusivos • Series limitadas",
     iconName: "Gift",
     colors: {
       primary: "text-orange-800",

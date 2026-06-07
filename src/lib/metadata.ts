@@ -7,7 +7,8 @@ const siteName = "Starfigs"
 
 // 🚀 FUNCIÓN PARA PRODUCTOS NORMALES (Product interface)
 export function generateProductMetadata(product: Product): Metadata {
-  const title = `${product.name} - ${siteName}`
+  // El title NO incluye siteName porque el template %s | Starfigs Perú lo agrega automáticamente
+  const title = `${product.name} en Preventa Perú`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
   }. Precio: S/. ${product.price.toFixed(2)}. ${product.description || "Figura de anime de alta calidad."}`
@@ -17,6 +18,9 @@ export function generateProductMetadata(product: Product): Metadata {
   return {
     title,
     description: description.slice(0, 160),
+    alternates: {
+      canonical: `${baseUrl}/products/${product.slug}`,
+    },
     openGraph: {
       title,
       description,
@@ -46,7 +50,7 @@ export function generateProductMetadata(product: Product): Metadata {
 
 // 🆕 FUNCIÓN PARA PRODUCTOS SERIALIZADOS (SerializedProduct interface)
 export function generateSerializedProductMetadata(product: SerializedProduct): Metadata {
-  const title = `${product.name} - ${siteName}`
+  const title = `${product.name} en Preventa Perú`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
   }. Precio: S/. ${product.price.toFixed(2)}. ${product.description || "Figura de anime de alta calidad."}`
@@ -56,6 +60,9 @@ export function generateSerializedProductMetadata(product: SerializedProduct): M
   return {
     title,
     description: description.slice(0, 160),
+    alternates: {
+      canonical: `${baseUrl}/products/${product.slug}`,
+    },
     openGraph: {
       title,
       description,
@@ -79,6 +86,46 @@ export function generateSerializedProductMetadata(product: SerializedProduct): M
       title,
       description,
       images: imageUrl ? [imageUrl] : [],
+    },
+  }
+}
+
+// 🚀 NUEVA: Metadata para páginas de categoría (Figma, Nendoroid, etc.)
+export function generateCategoryMetadata(
+  categoryName: string,
+  categorySlug: string,
+  description: string,
+  badge: string,
+  productCount?: number,
+): Metadata {
+  // El title NO incluye "Starfigs" porque el template %s | Starfigs Perú lo agrega automáticamente
+  const title = `${categoryName} en Preventa Perú`
+  const badgeText = badge?.trim() || ""
+  const descParts = [`Compra figuras ${categoryName} en preventa en Perú.`]
+  if (badgeText) descParts.push(badgeText + ".")
+  if (productCount) descParts.push(`${productCount} modelos disponibles.`)
+  if (description?.trim()) descParts.push(description.trim())
+  descParts.push("Envío gratis por Agencias Shalom.")
+  const desc = descParts.join(" ")
+
+  return {
+    title,
+    description: desc.slice(0, 160),
+    alternates: {
+      canonical: `${baseUrl}/categorias/${categorySlug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/categorias/${categorySlug}`,
+      siteName,
+      locale: "es_PE",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   }
 }
@@ -164,6 +211,26 @@ export function generateSerializedProductJsonLd(product: SerializedProduct) {
         value: `${product.heightCm} cm`,
       },
     }),
+  }
+}
+
+// 🚀 NUEVA: JSON-LD CollectionPage para categorías
+export function generateCategoryJsonLd(
+  categoryName: string,
+  categorySlug: string,
+  description: string,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${categoryName} en Preventa Perú`,
+    description: description.slice(0, 160),
+    url: `${baseUrl}/categorias/${categorySlug}`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteName,
+      url: baseUrl,
+    },
   }
 }
 

@@ -49,7 +49,7 @@ export default function Footer() {
             </h3>
             <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <p className="font-medium text-green-700 dark:text-green-400">🎁 Envío gratis a todo el Perú</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">Por Agencias Shalom - Sin mínimo de compra</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">Por Agencias Shalom — Beneficio de pre-venta</p>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
                 <div className="flex items-start gap-2">
                   <span className="font-medium text-green-700 dark:text-green-400 shrink-0">✅ Shalom:</span>
@@ -90,6 +90,12 @@ export default function Footer() {
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <span>En caso de no cancelar el saldo a tiempo, la figura se incorpora al inventario sin reembolso de la reserva.</span>
               </div>
+              <Link
+                href="/condiciones-preventa"
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                📋 Ver condiciones de preventa →
+              </Link>
               <p className="text-xs text-gray-500 dark:text-gray-500 italic pt-2">
                 Al realizar una reserva, aceptas estos términos.
               </p>

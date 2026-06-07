@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/firebase"
 import { getProductsPaginated, searchProducts, deleteProductById, type Product } from "@/lib/firebase/products"
+import { type DocumentSnapshot } from "firebase/firestore"
 import Link from "next/link"
 import ImageGenerator from "@/components/ImageGenerator"
-import ImageGeneratorBatch from "@/components/ImageGeneratorBatch"
+import ImageGeneratorBatch, { type ImageGeneratorBatchHandle } from "@/components/ImageGeneratorBatch"
+import JSZip from "jszip"
 import { useState as useGlobalState } from "react"
 
 // ========== BATCH STORAGE ==========
@@ -125,8 +127,8 @@ export default function ProductsPage() {
     setSelectedIds(new Set())
   }
 
-  // cursor es un número (índice en el array del caché de products.ts)
-  const cursorRef = useRef<number | null>(null)
+  // cursor es un DocumentSnapshot para paginación Firestore
+  const cursorRef = useRef<DocumentSnapshot | null>(null)
   const isFetchingRef = useRef(false)
   const hasMoreRef = useRef(true)
 
@@ -166,7 +168,7 @@ export default function ProductsPage() {
         console.log(`✅ Recibidos: ${newProds.length} | nextCursor: ${nextCursor} | hasMore: ${more}`)
 
         // Guardar cursor para la siguiente página
-        cursorRef.current = nextCursor as number | null
+        cursorRef.current = nextCursor as DocumentSnapshot | null
         hasMoreRef.current = more
 
         if (reset) {
@@ -307,9 +309,14 @@ export default function ProductsPage() {
               {hasMore && <span className="text-blue-500 dark:text-blue-400"> · hay más</span>}
             </p>
           </div>
-          <Link href="/admin/products/add" className="bg-blue-500 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 font-medium">
-            ➕ Nuevo Producto
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin/products/duplicates" className="bg-orange-500 dark:bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 font-medium text-sm flex items-center gap-1.5">
+              🔍 Duplicados
+            </Link>
+            <Link href="/admin/products/add" className="bg-blue-500 dark:bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 font-medium">
+              ➕ Nuevo Producto
+            </Link>
+          </div>
         </div>
 
         <BatchActionBar
@@ -374,18 +381,52 @@ function BatchGeneratorModal() {
   const [generatingAll, setGeneratingAll] = useState(false)
   const [generatingVersion, setGeneratingVersion] = useState<1 | 2 | 3>(1)
   const { products: batchProds } = useBatchState()
+  const batchRefs = useRef<Record<string, ImageGeneratorBatchHandle | null>>({})
+  const getBatchRefCallback = useCallback((productId: string) => (handle: ImageGeneratorBatchHandle | null) => {
+    batchRefs.current[productId] = handle
+  }, [])
 
   const generateAll = async (version: 1 | 2 | 3) => {
     if (!confirm(`¿Generar versión ${version} de todos los ${batchProds.length} productos?`)) return
     setGeneratingAll(true)
+
+    const zip = new JSZip()
+    const versionName = version === 1 ? "single" : version === 2 ? "triple-123" : "triple-234"
+    const results: { name: string; dataUrl: string }[] = []
+
     for (const product of batchProds) {
       try {
-        const btn = document.querySelector(`[data-product-id="${product.id}"] button[data-version="${version}"]`)
-        if (btn instanceof HTMLElement && !btn.hasAttribute('disabled')) { btn.click(); await new Promise(r => setTimeout(r, 2000)) }
-      } catch (err) { console.error(`Error generando ${product.name}:`, err) }
+        const handle = batchRefs.current[product.id]
+        if (handle) {
+          const dataUrl = await handle.generatePng(version)
+          results.push({ name: product.name, dataUrl })
+        }
+      } catch (err) {
+        console.error(`Error generando ${product.name}:`, err)
+      }
     }
+
+    // Agregar todas las imágenes al ZIP con números secuenciales (1, 2, 3...)
+    results.forEach((result, idx) => {
+      const base64 = result.dataUrl.split(",")[1]
+      const num = String(idx + 1).padStart(2, "0")
+      zip.file(`${num}-v${version}-${versionName}.png`, base64, { base64: true })
+    })
+
+    // Descargar ZIP único
+    const zipBlob = await zip.generateAsync({ type: "blob" })
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(zipBlob)
+    link.download = `starfigs-v${version}-${versionName}.zip`
+    link.click()
+    URL.revokeObjectURL(link.href)
+
     setGeneratingAll(false)
-    alert('✅ Generación completada')
+    if (results.length === 0) {
+      alert("❌ No se pudo generar ninguna imagen. Revisa la consola para más detalles.")
+    } else {
+      alert(`✅ ${results.length} imágenes generadas y descargadas en un solo ZIP`)
+    }
   }
 
   if (!isOpen && batchProds.length === 0) return null
@@ -441,6 +482,7 @@ function BatchGeneratorModal() {
                   </div>
                   <div className="flex-shrink-0 w-[340px]">
                     <ImageGeneratorBatch
+                      ref={getBatchRefCallback(product.id)}
                       productName={product.name} productPrice={product.price} productBrand={product.brand}
                       imageUrl={product.imageUrls?.[0]} imageUrls={product.imageUrls}
                       onRemove={() => removeFromBatch(product.id)} productId={product.id} productSlug={product.slug}

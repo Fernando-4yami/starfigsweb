@@ -1,10 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react"
 import { toPng } from "html-to-image"
 import { updateProduct } from "@/lib/firebase/products"
 import { db } from "@/lib/firebase/firebase"
 import { doc, getDoc } from "firebase/firestore"
+
+export interface ImageGeneratorBatchHandle {
+  generatePng: (version: 1 | 2 | 3) => Promise<string>
+}
 
 interface ImageGeneratorBatchProps {
   productName: string
@@ -106,7 +110,7 @@ const copyToClipboard = async (text: string): Promise<boolean> => {
 
 /* ================= COMPONENTE CON PREVIEW ================= */
 
-export default function ImageGeneratorBatch({
+const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGeneratorBatchProps>(function ImageGeneratorBatch({
   productName,
   productPrice,
   productBrand,
@@ -115,7 +119,7 @@ export default function ImageGeneratorBatch({
   onRemove,
   productId,
   productSlug,
-}: ImageGeneratorBatchProps) {
+}, ref) {
   const [generating, setGenerating] = useState<number | null>(null)
   const [previewVersion, setPreviewVersion] = useState<1 | 2 | 3>(1)
   const [previews, setPreviews] = useState<Record<number, string>>({})
@@ -302,6 +306,39 @@ export default function ImageGeneratorBatch({
     }
   }
 
+  /* ================= GENERAR PNG PARA ZIP (desde el padre) ================= */
+
+  useImperativeHandle(ref, () => ({
+    generatePng: async (version: 1 | 2 | 3): Promise<string> => {
+      const element = document.getElementById(`${componentId}-${version}`)
+      if (!element) throw new Error("Template no encontrado")
+
+      const images = element.querySelectorAll("img")
+      await Promise.all(
+        Array.from(images).map(
+          (img) =>
+            new Promise<void>((res) => {
+              if (img.complete && img.naturalHeight !== 0) return res()
+              const timeout = setTimeout(() => {
+                img.style.display = "none"
+                res()
+              }, 3000)
+              img.onload = () => { clearTimeout(timeout); res() }
+              img.onerror = () => { clearTimeout(timeout); img.style.display = "none"; res() }
+            })
+        )
+      )
+
+      const dataUrl = await toPng(element, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#EEF2FF",
+      })
+
+      return dataUrl
+    },
+  }))
+
   const images123 = currentData.images.slice(0, 3)
   while (images123.length < 3) {
     images123.push(currentData.image)
@@ -485,7 +522,9 @@ export default function ImageGeneratorBatch({
       </div>
     </div>
   )
-}
+})
+
+export default ImageGeneratorBatch
 
 /* ================= TEMPLATE SINGLE (SOLO COLORES CAMBIADOS) ================= */
 
@@ -535,8 +574,8 @@ function PromoTemplate({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 92,
-          left: 24,
+          top: 128,
+          right: 24,
           width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,
@@ -753,8 +792,8 @@ function PromoTemplateTriple({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 92,
-          left: 24,
+          top: 128,
+          right: 24,
           width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,

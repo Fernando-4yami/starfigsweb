@@ -16,8 +16,49 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://starfigsperu.com"),
-  title: "Starfigs - Figuras de Colección",
-  description: "Tienda de figuras de colección, nendoroids, plushies y más",
+  title: {
+    default: "Starfigs Perú - Figuras de Anime en Preventa | Envío Gratis",
+    template: "%s | Starfigs Perú",
+  },
+  description:
+    "Las mejores figuras de anime en preventa en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom. Compra figuras originales importadas.",
+  keywords: [
+    "figuras anime",
+    "figuras anime perú",
+    "figuras de anime en preventa",
+    "nendoroid perú",
+    "figma perú",
+    "figuras de colección",
+    "preventa anime",
+    "starfigs",
+    "figuras originales perú",
+    "envío gratis figuras",
+  ],
+  alternates: {
+    canonical: "https://starfigsperu.com",
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_PE",
+    siteName: "Starfigs Perú",
+    title: "Starfigs Perú - Figuras de Anime en Preventa | Envío Gratis",
+    description:
+      "Las mejores figuras de anime en preventa en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom.",
+    url: "https://starfigsperu.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Starfigs Perú - Figuras de Anime en Preventa",
+    description:
+      "Las mejores figuras de anime en preventa en Perú. Envío gratis.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: "google6d9754cddb1d9457",
+  },
 }
 
 export default function RootLayout({

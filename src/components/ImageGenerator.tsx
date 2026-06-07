@@ -281,8 +281,8 @@ function PromoTemplate({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 92,
-          left: 24,
+          top: 128,
+          right: 24,
           width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,
@@ -505,8 +505,8 @@ function PromoTemplateTriple({
         crossOrigin="anonymous"
         style={{
           position: "absolute",
-          top: 92,
-          left: 24,
+          top: 128,
+          right: 24,
           width: 130,
           filter: "invert(1) brightness(2) drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
           zIndex: 60,

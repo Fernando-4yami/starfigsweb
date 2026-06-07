@@ -40,8 +40,11 @@ const ProductSection = ({
   products: Product[]
   emptyMessage?: string
 }) => {
+  /** Los primeros 6 productos cargan con priority para mejorar LCP */
   const productCards = useMemo(
-    () => products.map((product) => <ProductCard key={product.id} product={product} />),
+    () => products.map((product, i) => (
+      <ProductCard key={product.id} product={product} priority={i < 6} />
+    )),
     [products],
   )
 
@@ -89,7 +92,9 @@ const ProductSectionWithLoadMore = ({
   }
 
   const productCards = useMemo(
-    () => visibleProducts.map((product) => <ProductCard key={product.id} product={product} />),
+    () => visibleProducts.map((product, i) => (
+      <ProductCard key={product.id} product={product} priority={i < 6} />
+    )),
     [visibleProducts],
   )
 
