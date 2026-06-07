@@ -84,7 +84,7 @@ export default function Footer() {
               </div>
               <div className="flex items-start gap-2">
                 <Clock className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                <span>Plazo máximo de 30 días desde el ingreso a almacén para cancelar el saldo restante.</span>
+                <span>Plazo máximo de 45 días desde el ingreso a almacén para cancelar el saldo restante.</span>
               </div>
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />

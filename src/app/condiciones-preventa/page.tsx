@@ -251,7 +251,7 @@ export default function CondicionesPreventaPage() {
             </p>
             <p>
               El cliente dispone de hasta{" "}
-              <Highlight>30 días calendario</Highlight> para cancelar el saldo
+              <Highlight>45 días calendario</Highlight> para cancelar el saldo
               restante.
             </p>
             <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-4 text-xs sm:text-sm">
