@@ -3,6 +3,16 @@ import { getDb } from "@/lib/firebase/admin"
 
 const BASE_URL = "https://starfigsperu.com"
 
+// Líneas que YA son categorías (no duplicar en /lines/)
+const CATEGORY_LINE_NAMES = new Set([
+  "nendoroid",
+  "figma",
+  "s.h.figuarts",
+  "ichiban kuji",
+  "pop up parade",
+  "pop-up parade",
+])
+
 const CATEGORY_SLUGS = [
   "nendoroid",
   "figma",
@@ -13,6 +23,14 @@ const CATEGORY_SLUGS = [
   "scale",
   "pricing",
 ]
+
+// Convierte nombre de línea a slug URL
+function lineToSlug(lineName: string): string {
+  return lineName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
@@ -36,31 +54,54 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]
 
-  // Obtener slugs de todos los productos desde Firestore
-  // 🔥 Cache en memoria por 30 min para evitar 10k+ reads por crawl
+  // Cache en memoria por 30 min para evitar 10k+ reads por crawl
   let productSlugs: string[] = []
-  const CACHE_KEY = "sitemap-product-slugs"
+  let lineSlugs: string[] = []
+  const CACHE_KEY = "sitemap-data"
   const CACHE_TTL = 30 * 60 * 1000 // 30 min
 
   const cachedData = (globalThis as any)[CACHE_KEY]
   if (cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
     productSlugs = cachedData.slugs
+    lineSlugs = cachedData.lineSlugs
   } else {
     try {
-      const snapshot = await getDb().collection("products").select("slug").get()
-      productSlugs = snapshot.docs
-        .map((doc) => doc.data().slug as string)
-        .filter((slug): slug is string => !!slug)
+      // Traer slug + line de todos los productos (no cuesta más reads, solo un campo extra)
+      const snapshot = await getDb().collection("products").select("slug", "line").get()
+
+      productSlugs = []
+      const uniqueLines = new Set<string>()
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data()
+        const slug = data.slug as string
+        if (slug) productSlugs.push(slug)
+
+        const line = data.line as string
+        if (line && line.trim()) {
+          const lowerLine = line.trim().toLowerCase()
+          // Solo líneas que NO sean categorías
+          if (!CATEGORY_LINE_NAMES.has(lowerLine)) {
+            uniqueLines.add(line.trim())
+          }
+        }
+      })
+
+      // Convertir nombres de línea a slugs
+      lineSlugs = Array.from(uniqueLines)
+        .map(lineToSlug)
+        .filter((slug) => slug.length > 0)
 
       // Cachear en memoria global
       ;(globalThis as any)[CACHE_KEY] = {
         slugs: productSlugs,
+        lineSlugs,
         timestamp: Date.now(),
       }
 
-      console.log(`🗺️ Sitemap: ${productSlugs.length} slugs cargados (cache 30 min)`)
+      console.log(`🗺️ Sitemap: ${productSlugs.length} slugs, ${lineSlugs.length} líneas (cache 30 min)`)
     } catch (error) {
-      console.error("Error fetching product slugs for sitemap:", error)
+      console.error("Error fetching products for sitemap:", error)
     }
   }
 
@@ -71,5 +112,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...staticPages, ...productPages]
+  const linePages: MetadataRoute.Sitemap = lineSlugs.map((slug) => ({
+    url: `${BASE_URL}/lines/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }))
+
+  console.log(`🗺️ Sitemap total: ${staticPages.length} estáticas + ${productPages.length} productos + ${linePages.length} líneas = ${staticPages.length + productPages.length + linePages.length} URLs`)
+
+  return [...staticPages, ...productPages, ...linePages]
 }

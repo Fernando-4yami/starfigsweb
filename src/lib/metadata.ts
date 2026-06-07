@@ -130,20 +130,30 @@ export function generateCategoryMetadata(
   }
 }
 
-export function generateLineMetadata(lineName: string, products: Product[]): Metadata {
-  const title = `${lineName} - Figuras y Coleccionables | ${siteName}`
-  const description = `Descubre todas las figuras de la línea ${lineName}. ${products.length} productos disponibles. Las mejores figuras de anime y coleccionables.`
+export function generateLineMetadata(lineName: string, productCount: number): Metadata {
+  // El title NO incluye siteName porque el template %s | Starfigs Perú lo agrega automáticamente
+  const title = `${lineName} en Preventa Perú`
+  const slug = lineName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+  const description = `Compra figuras de la línea ${lineName} en preventa en Perú. ${productCount} productos disponibles. Envío gratis por Agencias Shalom.`
 
   return {
     title,
-    description,
+    description: description.slice(0, 160),
+    alternates: {
+      canonical: `${baseUrl}/lines/${slug}`,
+    },
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/lines/${encodeURIComponent(lineName.toLowerCase().replace(/\s+/g, "-"))}`,
+      url: `${baseUrl}/lines/${slug}`,
       siteName,
       locale: "es_PE",
       type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   }
 }
