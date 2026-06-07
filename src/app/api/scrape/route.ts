@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp"
 
 import * as admin from "firebase-admin";
 import { getApps } from "firebase-admin/app";
@@ -138,6 +139,39 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(`✅ Producto guardado desde scraper: "${name}" (${docRef.id})`);
+
+    // ========== GENERAR THUMBNAIL (200px WebP) ==========
+    if (imageUrls.length > 0) {
+      try {
+        const response = await fetch(imageUrls[0])
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const arrayBuffer = await response.arrayBuffer()
+        const originalBuffer = Buffer.from(arrayBuffer)
+
+        const thumbBuffer = await sharp(originalBuffer)
+          .resize(200, 200, { fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 90 })
+          .toBuffer()
+
+        const bucket = admin.storage().bucket("starfigs-29d31")
+        const filename = `products/thumb_${docRef.id}_scrape.webp`
+        const file = bucket.file(filename)
+
+        await file.save(thumbBuffer, {
+          metadata: {
+            contentType: "image/webp",
+            cacheControl: "public, max-age=31536000",
+          },
+        })
+        await file.makePublic()
+
+        const thumbnailUrl = `https://storage.googleapis.com/starfigs-29d31/${encodeURIComponent(filename)}`
+        await docRef.update({ thumbnailUrl })
+        console.log(`✅ Thumbnail generado: ${thumbnailUrl}`)
+      } catch (err) {
+        console.warn(`⚠️ No se pudo generar thumbnail para "${name}":`, err instanceof Error ? err.message : err)
+      }
+    }
 
     return NextResponse.json({
       success: true,
