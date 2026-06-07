@@ -22,19 +22,11 @@ export default function IchibanKujiPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* 🌍 CONTENIDO ESTÁTICO — visible para Google */}
-      <section className="bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-8 md:py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-rose-800 dark:text-rose-200 mb-3">
-            {config.name} en Preventa Perú
-          </h1>
-          <p className="text-base text-gray-600 dark:text-gray-400 mb-2">
-            {config.badge}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 max-w-2xl mx-auto">
-            {config.description}
-          </p>
-        </div>
+      {/* 🌍 CONTENIDO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
+      <section className="sr-only">
+        <h1>{config.name} en Preventa Perú</h1>
+        <p>{config.badge}</p>
+        <p>{config.description}</p>
       </section>
 
       <CategoryPage config={categoryConfigs.ichiban} />
