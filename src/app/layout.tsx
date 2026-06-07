@@ -68,6 +68,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Preconnect a Firebase Storage para carga rápida de imágenes */}
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+        <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Suspense fallback={<div>Loading...</div>}>
           <ThemeProvider>

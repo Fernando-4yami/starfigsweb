@@ -17,7 +17,27 @@ import ShareButtons from "@/components/product/share-buttons"
 import ProgressiveGallery from "@/components/gallery/progressive-gallery"
 import { ArrowLeft } from "lucide-react"
 import PromotionBanner from "@/components/product/promotion-banner"
-import InfiniteRelatedProducts from "@/components/product/infinite-related-products"
+import dynamic from "next/dynamic"
+
+const InfiniteRelatedProducts = dynamic(
+  () => import("@/components/product/infinite-related-products"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3" />
+              <div className="bg-gray-200 dark:bg-gray-700 h-4 mb-2" />
+              <div className="bg-gray-200 dark:bg-gray-700 h-3 w-3/4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+)
 
 interface ProductPageClientProps {
   params: { slug: string }

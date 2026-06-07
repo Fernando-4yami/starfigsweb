@@ -8,6 +8,7 @@ import { Pagination } from "@/components/ui/pagination"
 import { ChevronRight, Home, Search, Package } from "lucide-react"
 import Link from "next/link"
 
+
 interface Product {
   id: string
   slug: string
@@ -324,8 +325,8 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
             <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-200 ${
               pageTransitioning ? "opacity-0" : "opacity-100"
             }`}>
-              {paginatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {paginatedProducts.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 12} />
               ))}
             </div>
 
