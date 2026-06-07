@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/lib/firebase/firebase"
+import { auth } from "@/lib/firebase/auth-client"
 import { getProductsPaginated, searchProducts, deleteProductById, type Product } from "@/lib/firebase/products"
 import { type DocumentSnapshot } from "firebase/firestore"
 import Link from "next/link"

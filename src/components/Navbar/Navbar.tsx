@@ -319,7 +319,7 @@ export default function Navbar() {
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center">
                 <Image
-                  src="/starfigs.png"
+                  src="/starfigs.webp"
                   alt="Starfigs Logo"
                   width={120}
                   height={32}
