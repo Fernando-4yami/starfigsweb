@@ -26,7 +26,7 @@ async function processImage(file: File, isFirstImage: boolean) {
     const [originalWebP, thumbnailWebP, galleryThumbWebP] = await Promise.all([
       sharp(originalBuffer).webp({ quality: 90 }).toBuffer(),
       sharp(originalBuffer)
-        .resize(300, null, { withoutEnlargement: true, fit: "inside" })
+        .resize(200, null, { withoutEnlargement: true, fit: "inside" })
         .webp({ quality: 85 })
         .toBuffer(),
       sharp(originalBuffer)

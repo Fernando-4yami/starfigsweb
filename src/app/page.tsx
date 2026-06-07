@@ -15,10 +15,18 @@ export default async function Page() {
     console.error("Error pre-fetching homepage products:", err)
   }
 
+  // 🚀 Preload de la primera imagen para mejorar LCP
+  const firstProductImage = initialProducts[0]?.thumbnailUrl || initialProducts[0]?.imageUrls?.[0]
+
   const categories = Object.values(categoryConfigs)
 
   return (
     <>
+      {/* 🚀 Preload de la primera imagen para mejorar LCP */}
+      {firstProductImage && (
+        <link rel="preload" href={firstProductImage} as="image" />
+      )}
+
       {/* 🌍 HERO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
       <section className="sr-only">
         <h1>Figuras de Anime en Preventa — Perú</h1>

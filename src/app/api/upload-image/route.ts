@@ -15,10 +15,10 @@ const IMAGE_CONFIG = {
     targetSizeKB: 70,
   },
   thumbnail: {
-    width: 300,
-    height: 300,
-    quality: 70,
-    targetSizeKB: 15,
+    width: 200,
+    height: 200,
+    quality: 65,
+    targetSizeKB: 12,
   },
   galleryThumbnail: {
     width: 100,
