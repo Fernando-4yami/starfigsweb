@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { getNewReleases, getNewReleasesByDateRange, type Product, getPopularProducts } from "@/lib/firebase/products"
 import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@/lib/utils"
 import ProductCard from "@/components/ProductCard"
-import dynamic from "next/dynamic"
+import RankingSection from "@/components/sections/ranking-section"
+import HowItWorks from "@/components/HowItWorks"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
   const skeletonItems = useMemo(
@@ -29,15 +30,6 @@ const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: 
     </section>
   )
 }
-
-// 🚀 Dynamic imports para componentes que no están en el primer viewport
-const RankingSection = dynamic(() => import("@/components/sections/ranking-section"), {
-  loading: () => <SectionSkeleton title="Ranking" itemCount={10} />,
-})
-
-const HowItWorks = dynamic(() => import("@/components/HowItWorks"), {
-  loading: () => <div className="h-64 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-lg" />,
-})
 
 const ProductSection = ({
   title,
