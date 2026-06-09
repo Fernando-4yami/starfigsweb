@@ -899,22 +899,30 @@ export async function updateProduct(
     // 🔍 Validar que los campos requeridos por isValidProductData() tengan tipos correctos
     const existingData = existingSnap.data()!
 
-    // 🔥 FIX: heightCm está como object en algunos productos → isValidProductData() lo rechaza
-    // Si no es number válido, lo eliminamos del documento para que pase la regla:
-    //   (!data.keys().hasAny(['heightCm']) || data.heightCm is number)
-    let cleanHeightCm: any = existingData.heightCm
-    if (cleanHeightCm !== undefined && (typeof cleanHeightCm !== 'number' || isNaN(cleanHeightCm))) {
-      console.log("🔧 Fix: heightCm no es número válido, se eliminará")
-      cleanHeightCm = deleteField()
-    }
+    // 🔥 FIX: heightCm solo se incluye si hay un valor válido o hay que limpiar uno corrupto
+    // Firebase rechaza setDoc() con undefined, así que no debemos incluirlo si no está definido
+    const existingHeightCm = existingData.heightCm
+    const hasExistingHeightCm = existingHeightCm !== undefined
+    const userProvidedHeightCm = updateData.heightCm !== undefined
 
-    await setDoc(docRef, {
+    const setData: any = {
       ...updateData,
       name: updateData.name ?? existingData.name,
       price: updateData.price ?? existingData.price,
       imageUrls: existingData.imageUrls,
-      heightCm: cleanHeightCm,
-    }, { merge: true })
+    }
+
+    if (userProvidedHeightCm) {
+      // El usuario envió un valor → usarlo
+      setData.heightCm = updateData.heightCm
+    } else if (hasExistingHeightCm && (typeof existingHeightCm !== 'number' || isNaN(existingHeightCm))) {
+      // El valor existente está corrupto → eliminarlo
+      console.log("🔧 Fix: heightCm no es número válido, se eliminará")
+      setData.heightCm = deleteField()
+    }
+    // Si no hay heightCm ni del usuario ni existente, no lo incluimos en setData
+
+    await setDoc(docRef, setData, { merge: true })
 
     searchProductPool = null
     const keysToDelete = Array.from(cache.keys()).filter(
