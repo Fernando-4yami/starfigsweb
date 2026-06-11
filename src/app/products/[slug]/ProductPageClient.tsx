@@ -242,11 +242,11 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
               scale={product.scale}
             />
 
-            {product.description && (
+            {product.description_es && (
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-400">Descripción</h3>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {product.description}
+                  {product.description_es}
                 </p>
               </div>
             )}

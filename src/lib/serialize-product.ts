@@ -6,6 +6,7 @@ export interface SerializedProduct {
   slug: string
   price: number
   description?: string
+  description_es?: string
   imageUrls: string[]
   thumbnailUrl?: string
   galleryThumbnailUrls?: string[]
@@ -37,6 +38,7 @@ export function serializeProduct(product: any): SerializedProduct {
     slug: product.slug || "",
     price: product.price || 0,
     description: product.description,
+    description_es: product.description_es,
     imageUrls: product.imageUrls || [],
     thumbnailUrl: product.thumbnailUrl,
     galleryThumbnailUrls: product.galleryThumbnailUrls,
