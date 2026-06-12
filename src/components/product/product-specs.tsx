@@ -1,15 +1,16 @@
 "use client"
 
-import { Building2, Package, Ruler, Tag } from "lucide-react"
+import { Building2, Package, Ruler, Tag, Barcode } from "lucide-react"
 
 interface ProductSpecsProps {
   brand?: string
   line?: string
   heightCm?: number
   scale?: string
+  gtin?: string
 }
 
-export default function ProductSpecs({ brand, line, heightCm, scale }: ProductSpecsProps) {
+export default function ProductSpecs({ brand, line, heightCm, scale, gtin }: ProductSpecsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900">
       {brand && (
@@ -48,6 +49,16 @@ export default function ProductSpecs({ brand, line, heightCm, scale }: ProductSp
           <span className="text-sm">
             <span className="text-blue-600 dark:text-blue-400">Escala:</span>
             <span className="font-medium ml-1 text-blue-800 dark:text-blue-300">{scale}</span>
+          </span>
+        </div>
+      )}
+
+      {gtin && (
+        <div className="flex items-center gap-2">
+          <Barcode className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+          <span className="text-sm">
+            <span className="text-blue-600 dark:text-blue-400">GTIN:</span>
+            <span className="font-medium ml-1 text-blue-800 dark:text-blue-300">{gtin}</span>
           </span>
         </div>
       )}

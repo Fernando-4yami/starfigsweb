@@ -11,7 +11,7 @@ export function generateProductMetadata(product: Product): Metadata {
   const title = `${product.name} en Preventa Perú`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description || "Figura de anime de alta calidad."}`
+  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 
@@ -53,7 +53,7 @@ export function generateSerializedProductMetadata(product: SerializedProduct): M
   const title = `${product.name} en Preventa Perú`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description || "Figura de anime de alta calidad."}`
+  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 
@@ -164,7 +164,7 @@ export function generateProductJsonLd(product: Product) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description || `${product.name} - Figura de anime de alta calidad`,
+    description: product.description_es || product.description || `${product.name} - Figura de anime de alta calidad`,
     image: product.thumbnailUrl || product.imageUrls?.[0],
     brand: {
       "@type": "Brand",
@@ -197,7 +197,7 @@ export function generateSerializedProductJsonLd(product: SerializedProduct) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description || `${product.name} - Figura de anime de alta calidad`,
+    description: product.description_es || product.description || `${product.name} - Figura de anime de alta calidad`,
     image: product.thumbnailUrl || product.imageUrls?.[0],
     brand: {
       "@type": "Brand",

@@ -114,6 +114,8 @@ interface FirebaseProductData {
   slug?: string
   price?: number
   description?: string
+  description_es?: string
+  gtin?: string
   imageUrls?: string[]
   thumbnailUrl?: string
   galleryThumbnailUrls?: string[]
@@ -144,6 +146,8 @@ export interface Product {
   slug: string
   price: number
   description?: string
+  description_es?: string
+  gtin?: string
   imageUrls: string[]
   thumbnailUrl?: string
   galleryThumbnailUrls?: string[]
@@ -195,6 +199,8 @@ function normalizeProduct(docData: any, docId: string): Product {
     slug: data.slug || generateSlug(data.name || ""),
     price: data.price || 0,
     description: data.description || "",
+    description_es: data.description_es || "",
+    gtin: data.gtin || "",
     imageUrls: data.imageUrls || [],
     thumbnailUrl: data.thumbnailUrl,
     galleryThumbnailUrls: data.galleryThumbnailUrls,
@@ -977,7 +983,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
     const results = allProducts.filter((product) => {
       const searchableText = [
         product.name || "",
-        product.description || "",
+        product.description_es || product.description || "",
         product.brand || "",
         product.line || "",
         product.scale || "",
@@ -1003,7 +1009,7 @@ export async function searchProducts(searchTerm: string, filters?: SearchFilters
           (product.brand || "").toLowerCase().includes(word) ||
           (product.line || "").toLowerCase().includes(word) ||
           (product.scale || "").toLowerCase().includes(word) ||
-          (product.description || "").toLowerCase().includes(word)
+          (product.description_es || product.description || "").toLowerCase().includes(word)
         )
       })
     })

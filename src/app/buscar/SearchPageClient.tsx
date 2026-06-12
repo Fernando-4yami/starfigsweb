@@ -22,6 +22,7 @@ interface Product {
   category?: string
   scale?: string
   description?: string
+  description_es?: string
   createdAt?: Date | null
   views?: number
 }
@@ -56,7 +57,7 @@ function strictSearchFilter(products: Product[], query: string): Product[] {
       product.line || "",
       product.category || "",
       product.scale || "",
-      product.description || "",
+      product.description_es || product.description || "",
     ]
       .join(" ")
       .toLowerCase()

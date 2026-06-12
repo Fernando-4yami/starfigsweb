@@ -96,6 +96,24 @@ function CriticalProductImage({
   )
 }
 
+function FormattedDescription({ text }: { text: string }) {
+  // Convertir texto entre comillas dobles a negrita
+  const parts = text.split(/"/g)
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <strong key={i} className="font-semibold text-blue-700 dark:text-blue-300">
+            {part}
+          </strong>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  )
+}
+
 export default function ProductPageClient({ params, initialProduct }: ProductPageClientProps) {
   const router = useRouter()
   const [product, setProduct] = useState<SerializedProduct | null>(initialProduct || null)
@@ -240,13 +258,14 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
               line={product.line}
               heightCm={product.heightCm}
               scale={product.scale}
+              gtin={product.gtin}
             />
 
             {product.description_es && (
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-400">Descripción</h3>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {product.description_es}
+                  <FormattedDescription text={product.description_es} />
                 </p>
               </div>
             )}

@@ -1,0 +1,56 @@
+name: 🤖 Scraper Automático (Descripciones + GTIN)
+
+on:
+  schedule:
+    # Corre cada 12 horas (3am y 3pm UTC = 10pm/10am Perú)
+    - cron: "0 3 */1 * *"
+    - cron: "0 15 */1 * *"
+  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
+    inputs:
+      mode:
+        description: "Modo: backfill-all o solo nuevos"
+        required: true
+        default: "backfill-all"
+        type: choice
+        options:
+          - backfill-all
+          - nuevos
+
+jobs:
+  scrape:
+    name: Scrapear tsoto.net y actualizar Firebase
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 Instalar dependencias
+        run: |
+          pip install requests beautifulsoup4 firebase-admin python-dateutil deep-translator lxml
+
+      - name: 🔑 Setup Firebase credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          mkdir -p secrets
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > secrets/serviceAccountKey.json
+
+      - name: 🏃 Ejecutar scraper
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ./secrets/serviceAccountKey.json
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "nuevos" ]; then
+            python auto_scraper.py --backfill-all
+          else
+            python auto_scraper.py --backfill-all
+          fi
+
+      - name: 🧹 Limpiar
+        if: always()
+        run: rm -f secrets/serviceAccountKey.json
