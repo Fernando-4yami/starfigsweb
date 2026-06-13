@@ -294,7 +294,7 @@ export default function Navbar() {
   }
 
   const categories = [
-    { name: "Proceso de reserva", path: "/#como-funciona", isHighlight: true },
+    { name: "Proceso de reserva", path: "/#proceso-reserva", isHighlight: true },
     { name: "Ichiban Kuji", path: "/categorias/ichiban-kuji" },
     { name: "Pop Up Parade", path: "/categorias/pop-up-parade" },
     { name: "Nendoroid", path: "/categorias/nendoroid" },
@@ -384,9 +384,9 @@ export default function Navbar() {
             </div>
             <button
               onClick={() => {
-                const el = document.getElementById("como-funciona")
+                const el = document.getElementById("proceso-reserva")
                 if (el) el.scrollIntoView({ behavior: "smooth" })
-                else window.location.href = "/#como-funciona"
+                else window.location.href = "/#proceso-reserva"
               }}
               className="px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-200 border border-amber-200 dark:border-amber-800 flex-shrink-0 cursor-pointer"
             >
@@ -467,9 +467,9 @@ export default function Navbar() {
                 onClick={() => {
                   setMobileMenuOpen(false)
                   setTimeout(() => {
-                    const el = document.getElementById("como-funciona")
+                    const el = document.getElementById("proceso-reserva")
                     if (el) el.scrollIntoView({ behavior: "smooth" })
-                    else window.location.href = "/#como-funciona"
+                    else window.location.href = "/#proceso-reserva"
                   }, 150)
                 }}
                 className="block px-4 py-3 text-base font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20"

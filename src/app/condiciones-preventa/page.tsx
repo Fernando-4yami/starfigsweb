@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 }
 
 const sections = [
-  { id: "como-funciona", label: "¿Cómo funciona una reserva?", emoji: "💎" },
+  { id: "proceso-reserva", label: "¿Cómo funciona una reserva?", emoji: "💎" },
   { id: "tiempos", label: "Tiempos de llegada", emoji: "⏱️" },
   { id: "disponibilidad", label: "Disponibilidad del producto", emoji: "📦" },
   { id: "cancelaciones", label: "Cancelaciones y cambios", emoji: "🚫" },
@@ -127,7 +127,7 @@ export default function CondicionesPreventaPage() {
         {/* Secciones */}
         <div className="space-y-6">
           <SectionCard
-            id="como-funciona"
+            id="proceso-reserva"
             title="¿Cómo funciona una reserva?"
             emoji="💎"
           >

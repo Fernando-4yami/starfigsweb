@@ -73,7 +73,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" className="mb-12 lg:mb-0">
+    <section id="proceso-reserva" className="mb-12 lg:mb-0">
       <div className="mb-8 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
           Proceso de reserva
