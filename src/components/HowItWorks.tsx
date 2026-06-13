@@ -76,12 +76,12 @@ export default function HowItWorks() {
     <section id="como-funciona" className="mb-12 lg:mb-0">
       <div className="mb-8 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-          Cómo funciona Starfigs
+          Proceso de reserva
         </h2>
         <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-4" />
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Somos un servicio de importación y pre-venta de figuras originales desde Japón.
-          Así de fácil es conseguir la figura que quieres:
+          Así de fácil es reservar la figura que quieres:
         </p>
       </div>
 

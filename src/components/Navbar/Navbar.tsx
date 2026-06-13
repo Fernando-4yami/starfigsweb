@@ -294,7 +294,7 @@ export default function Navbar() {
   }
 
   const categories = [
-    { name: "Cómo funciona", path: "/#como-funciona", isHighlight: true },
+    { name: "Proceso de reserva", path: "/#como-funciona", isHighlight: true },
     { name: "Ichiban Kuji", path: "/categorias/ichiban-kuji" },
     { name: "Pop Up Parade", path: "/categorias/pop-up-parade" },
     { name: "Nendoroid", path: "/categorias/nendoroid" },
