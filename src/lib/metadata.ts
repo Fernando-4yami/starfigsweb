@@ -2,12 +2,11 @@ import type { Metadata } from "next"
 import type { Product } from "@/lib/firebase/products"
 import type { SerializedProduct } from "@/lib/serialize-product"
 
-const baseUrl = "https://starfigsperu.com" // 🔧 Cambia por tu dominio real
+const baseUrl = "https://starfigsperu.com"
 const siteName = "Starfigs"
 
 // 🚀 FUNCIÓN PARA PRODUCTOS NORMALES (Product interface)
 export function generateProductMetadata(product: Product): Metadata {
-  // El title NO incluye siteName porque el template %s | Starfigs Perú lo agrega automáticamente
   const title = `${product.name} en Preventa Perú`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
@@ -30,8 +29,8 @@ export function generateProductMetadata(product: Product): Metadata {
         ? [
             {
               url: imageUrl,
-              width: 300,
-              height: 300,
+              width: 800,
+              height: 800,
               alt: product.name,
             },
           ]
@@ -72,8 +71,8 @@ export function generateSerializedProductMetadata(product: SerializedProduct): M
         ? [
             {
               url: imageUrl,
-              width: 300,
-              height: 300,
+              width: 800,
+              height: 800,
               alt: product.name,
             },
           ]
@@ -98,7 +97,6 @@ export function generateCategoryMetadata(
   badge: string,
   productCount?: number,
 ): Metadata {
-  // El title NO incluye "Starfigs" porque el template %s | Starfigs Perú lo agrega automáticamente
   const title = `${categoryName} en Preventa Perú`
   const badgeText = badge?.trim() || ""
   const descParts = [`Compra figuras ${categoryName} en preventa en Perú.`]
@@ -131,7 +129,6 @@ export function generateCategoryMetadata(
 }
 
 export function generateLineMetadata(lineName: string, productCount: number): Metadata {
-  // El title NO incluye siteName porque el template %s | Starfigs Perú lo agrega automáticamente
   const title = `${lineName} en Preventa Perú`
   const slug = lineName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
   const description = `Compra figuras de la línea ${lineName} en preventa en Perú. ${productCount} productos disponibles. Envío gratis por Agencias Shalom.`
@@ -158,14 +155,26 @@ export function generateLineMetadata(lineName: string, productCount: number): Me
   }
 }
 
+// 🔧 Helper para determinar disponibilidad según stock
+function getAvailability(stock?: number): string {
+  if (stock !== undefined && stock <= 0) {
+    return "https://schema.org/OutOfStock"
+  }
+  return "https://schema.org/InStock"
+}
+
 // 🚀 JSON-LD PARA PRODUCTOS NORMALES (Product interface)
 export function generateProductJsonLd(product: Product) {
+  const imageUrl = product.imageUrls?.[0] || product.thumbnailUrl || ""
+
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description_es || product.description || `${product.name} - Figura de anime de alta calidad`,
-    image: product.thumbnailUrl || product.imageUrls?.[0],
+    sku: product.slug,
+    ...(imageUrl ? { image: [imageUrl] } : {}),
+    ...(product.gtin ? { gtin: product.gtin } : {}),
     brand: {
       "@type": "Brand",
       name: product.brand || "Sin marca",
@@ -174,7 +183,9 @@ export function generateProductJsonLd(product: Product) {
       "@type": "Offer",
       price: product.price.toString(),
       priceCurrency: "PEN",
-      availability: "https://schema.org/InStock",
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      availability: getAvailability(product.stock),
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
         name: siteName,
@@ -193,12 +204,16 @@ export function generateProductJsonLd(product: Product) {
 
 // 🆕 JSON-LD PARA PRODUCTOS SERIALIZADOS (SerializedProduct interface)
 export function generateSerializedProductJsonLd(product: SerializedProduct) {
+  const imageUrl = product.imageUrls?.[0] || product.thumbnailUrl || ""
+
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description_es || product.description || `${product.name} - Figura de anime de alta calidad`,
-    image: product.thumbnailUrl || product.imageUrls?.[0],
+    sku: product.slug,
+    ...(imageUrl ? { image: [imageUrl] } : {}),
+    ...(product.gtin ? { gtin: product.gtin } : {}),
     brand: {
       "@type": "Brand",
       name: product.brand || "Sin marca",
@@ -207,7 +222,9 @@ export function generateSerializedProductJsonLd(product: SerializedProduct) {
       "@type": "Offer",
       price: product.price.toString(),
       priceCurrency: "PEN",
-      availability: "https://schema.org/InStock",
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      availability: getAvailability(product.stock),
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
         name: siteName,
@@ -263,19 +280,15 @@ export function generateOrganizationJsonLd() {
 
 // 🆕 FUNCIONES DE CONVENIENCIA - Auto-detectan el tipo
 export function generateAnyProductMetadata(product: Product | SerializedProduct): Metadata {
-  // Si tiene createdAt como Date, es Product normal
   if (product.createdAt instanceof Date || product.createdAt === null || product.createdAt === undefined) {
     return generateProductMetadata(product as Product)
   }
-  // Si createdAt es string, es SerializedProduct
   return generateSerializedProductMetadata(product as SerializedProduct)
 }
 
 export function generateAnyProductJsonLd(product: Product | SerializedProduct) {
-  // Si tiene createdAt como Date, es Product normal
   if (product.createdAt instanceof Date || product.createdAt === null || product.createdAt === undefined) {
     return generateProductJsonLd(product as Product)
   }
-  // Si createdAt es string, es SerializedProduct
   return generateSerializedProductJsonLd(product as SerializedProduct)
 }

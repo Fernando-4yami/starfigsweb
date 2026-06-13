@@ -367,15 +367,11 @@ Pongamos un ejemplo con una figura que cuesta S/200 en preventa:
 
 La preventa sale más cara que el precio japonés, pero incluye todo: importación, aduana, envío local y garantía de que es original.
 
-## Mi Recomendación
+## ¿Por Qué Comprar en una Tienda Peruana?
 
-Si es tu primera figura, ve por preventa en una tienda peruana con referencias. Es más caro que comprar directo de Japón, pero es más seguro y no tienes que preocuparte por aduanas ni devoluciones.
+Comprar figuras desde Japón puede ser complicado: barreras de idioma, costos de envío variables, riesgo de productos falsificados y trámites de importación.
 
-Si ya tienes experiencia y sabes lo que haces, dale nomás con proxy services. Pero siempre ten en cuenta que si algo sale mal, el reclamo es mucho más complicado.
-
-Y si ves una oferta demasiado buena en Facebook, primero haz tu tarea y verifica que sea real. Las estafas con bootlegs están a la orden del día.
-
-¿Tienes dudas sobre alguna figura o tienda en específico? Escríbenos por WhatsApp y te damos nuestra opinión sincera.`,
+En **Starfigs** nos encargamos de todo el proceso para que puedas reservar con tranquilidad. Trabajamos únicamente con productos originales y proveedores verificados, manteniéndote informado durante cada etapa de la importación hasta la entrega de tu pedido.`,
   },
 ]
 
