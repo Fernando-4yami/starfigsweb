@@ -1,28 +1,3 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-
-export const metadata: Metadata = {
-  title: "Condiciones de Preventa | Starfigs",
-  description:
-    "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
-  openGraph: {
-    title: "Condiciones de Preventa | Starfigs",
-    description:
-      "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
-  },
-}
-
-const sections = [
-  { id: "como-funciona", label: "¿Cómo funciona una reserva?", emoji: "💎" },
-  { id: "tiempos", label: "Tiempos de llegada", emoji: "⏱️" },
-  { id: "disponibilidad", label: "Disponibilidad del producto", emoji: "📦" },
-  { id: "cancelaciones", label: "Cancelaciones y cambios", emoji: "🚫" },
-  { id: "saldo", label: "Pago del saldo restante", emoji: "💰" },
-  { id: "envios", label: "Envíos", emoji: "🚚" },
-  { id: "pagos", label: "Métodos de pago", emoji: "💳" },
-  { id: "contacto", label: "Contacto", emoji: "📲" },
-]
-
 function SectionCard({
   id,
   title,
@@ -67,6 +42,33 @@ function Highlight({ children }: { children: React.ReactNode }) {
     </span>
   )
 }
+
+import type { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Condiciones de Preventa | Starfigs",
+  description:
+    "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
+  openGraph: {
+    title: "Condiciones de Preventa | Starfigs",
+    description:
+      "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
+  },
+}
+
+const sections = [
+  { id: "como-funciona", label: "¿Cómo funciona una reserva?", emoji: "💎" },
+  { id: "tiempos", label: "Tiempos de llegada", emoji: "⏱️" },
+  { id: "disponibilidad", label: "Disponibilidad del producto", emoji: "📦" },
+  { id: "cancelaciones", label: "Cancelaciones y cambios", emoji: "🚫" },
+  { id: "saldo", label: "Pago del saldo restante", emoji: "💰" },
+  { id: "envios", label: "Envíos", emoji: "🚚" },
+  { id: "pagos", label: "Métodos de pago", emoji: "💳" },
+  { id: "contacto", label: "Contacto", emoji: "📲" },
+]
+
+
 
 export default function CondicionesPreventaPage() {
   return (

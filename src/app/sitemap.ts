@@ -46,6 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...CATEGORY_SLUGS.map((slug) => ({
       url: `${BASE_URL}/categorias/${slug}`,
       lastModified: new Date(),
@@ -53,6 +59,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
   ]
+
+  // Blog pages
+  const blogSlugs = [
+    "como-identificar-figuras-anime-originales-peru",
+    "nendoroid-vs-figma-vs-escala-diferencias",
+    "guia-completa-tipos-figuras-anime",
+    "donde-comprar-figuras-anime-originales-peru",
+    "como-funciona-preventa-figuras-anime",
+    "top-10-figuras-anime-coleccionistas-2025",
+  ]
+
+  const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${BASE_URL}/blog/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }))
 
   // Cache en memoria por 30 min para evitar 10k+ reads por crawl
   let productSlugs: string[] = []
@@ -119,7 +142,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  console.log(`🗺️ Sitemap total: ${staticPages.length} estáticas + ${productPages.length} productos + ${linePages.length} líneas = ${staticPages.length + productPages.length + linePages.length} URLs`)
+  console.log(`🗺️ Sitemap total: ${staticPages.length} estáticas + ${blogPages.length} blog + ${productPages.length} productos + ${linePages.length} líneas = ${staticPages.length + blogPages.length + productPages.length + linePages.length} URLs`)
 
-  return [...staticPages, ...productPages, ...linePages]
+  return [...staticPages, ...blogPages, ...productPages, ...linePages]
 }
