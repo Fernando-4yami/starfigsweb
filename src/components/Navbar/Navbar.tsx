@@ -294,7 +294,6 @@ export default function Navbar() {
   }
 
   const categories = [
-    { name: "Blog", path: "/blog", isHighlight: false },
     { name: "Cómo funciona", path: "/#como-funciona", isHighlight: true },
     { name: "Ichiban Kuji", path: "/categorias/ichiban-kuji" },
     { name: "Pop Up Parade", path: "/categorias/pop-up-parade" },
