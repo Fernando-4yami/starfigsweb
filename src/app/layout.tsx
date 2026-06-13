@@ -7,6 +7,8 @@ import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/scroll-to-top"
 import PageTransitionProvider from "@/components/PageTransitionProvider"
 import RoutePrefetcher from "@/components/RoutePrefetcher"
+import GoogleAnalytics from "@/components/GoogleAnalytics"
+import CookieBanner from "@/components/CookieBanner"
 import { Suspense } from "react"
 import "../styles/globals.css"
 
@@ -75,6 +77,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <GoogleAnalytics />
+        <CookieBanner />
         <Suspense fallback={<div>Loading...</div>}>
           <ThemeProvider>
             <PageTransitionProvider>

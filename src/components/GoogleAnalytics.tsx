@@ -3,7 +3,7 @@
 import Script from "next/script"
 import { useEffect, useState } from "react"
 
-const GA_MEASUREMENT_ID = "G-6SN6FZ4XSZ" // Tu ID de Google Analytics
+const GA_MEASUREMENT_ID = "G-0FVT4PR6B1" // Tu ID de Google Analytics
 
 export default function GoogleAnalytics() {
   const [cookiesAccepted, setCookiesAccepted] = useState<boolean | null>(null)
