@@ -156,11 +156,13 @@ export function generateLineMetadata(lineName: string, productCount: number): Me
 }
 
 // 🔧 Helper para determinar disponibilidad según stock
+// - stock > 0 → InStock (disponible para envío)
+// - stock <= 0 o undefined → PreOrder (preventa, se aceptan pedidos)
 function getAvailability(stock?: number): string {
-  if (stock !== undefined && stock <= 0) {
-    return "https://schema.org/OutOfStock"
+  if (stock !== undefined && stock > 0) {
+    return "https://schema.org/InStock"
   }
-  return "https://schema.org/InStock"
+  return "https://schema.org/PreOrder"
 }
 
 // 🚀 JSON-LD PARA PRODUCTOS NORMALES (Product interface)

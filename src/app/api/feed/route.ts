@@ -91,7 +91,28 @@ export async function GET() {
       const slug = product.slug || ""
       const price = product.price || 0
       const stock = product.stock
-      const availability = stock !== undefined && stock <= 0 ? "out_of_stock" : "in_stock"
+      const releaseDate = product.releaseDate
+
+      // Determinar disponibilidad:
+      // - stock > 0 → in_stock (disponible para envío inmediato)
+      // - stock <= 0 o undefined → preorder (preventa, se aceptan pedidos)
+      const availability = stock !== undefined && stock > 0 ? "in_stock" : "preorder"
+
+      // Formatear availability_date si existe releaseDate
+      let availabilityDate = ""
+      if (releaseDate) {
+        try {
+          const date = typeof releaseDate.toDate === "function"
+            ? releaseDate.toDate()
+            : new Date(releaseDate)
+          if (!isNaN(date.getTime())) {
+            availabilityDate = date.toISOString().split("T")[0]
+          }
+        } catch {
+          // ignorar fechas inválidas
+        }
+      }
+
       const description = product.description_es || product.description || `${name} - Figura de anime`
       const brand = product.brand || "Sin marca"
       const category = product.category || "figura"
@@ -102,7 +123,8 @@ export async function GET() {
       <g:description>${xmlEscape(description.substring(0, 5000))}</g:description>
       <g:link>${BASE_URL}/products/${xmlEscape(slug)}</g:link>
       <g:image_link>${xmlEscape(imageUrl)}</g:image_link>
-      <g:availability>${availability}</g:availability>
+      <g:availability>${availability}</g:availability>${availabilityDate && availability === "preorder" ? `
+      <g:availability_date>${availabilityDate}</g:availability_date>` : ""}
       <g:price>${formatPrice(price)}</g:price>
       <g:condition>new</g:condition>
       <g:brand>${xmlEscape(brand)}</g:brand>
