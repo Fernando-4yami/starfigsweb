@@ -1,5 +1,6 @@
 import { getProductBySlug, getProducts } from "@/lib/firebase/products"
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 import ProductPageClient from "./ProductPageClient"
 import { generateAnyProductMetadata, generateAnyProductJsonLd } from "@/lib/metadata"
 import { serializeProduct } from "@/lib/serialize-product"
@@ -11,7 +12,7 @@ interface ProductPageProps {
 export const revalidate = 600
 
 export async function generateStaticParams() {
-  const products = await getProducts(1000) // Límite para build (más páginas estáticas para Google)
+  const products = await getProducts(2000) // Límite para build (más páginas estáticas para Google)
   return products.map((product) => ({
     slug: product.slug,
   }))
@@ -33,17 +34,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const rawProduct = await getProductBySlug(params.slug)
 
   if (!rawProduct) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Producto no encontrado</h1>
-          <p className="text-gray-600 mb-8">El producto que buscas no está disponible.</p>
-          <a href="/" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Volver al inicio
-          </a>
-        </div>
-      </div>
-    )
+    notFound()
   }
 
   const product = serializeProduct(rawProduct)
