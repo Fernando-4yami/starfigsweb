@@ -7,10 +7,11 @@ const siteName = "Starfigs"
 
 // 🚀 FUNCIÓN PARA PRODUCTOS NORMALES (Product interface)
 export function generateProductMetadata(product: Product): Metadata {
-  const title = `${product.name} en Preventa Perú`
+  // El nombre del producto va primero para que Google lo use como título exacto
+  const title = `${product.name} | Starfigs`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad."}`
+  }. Precio en preventa: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad, importada desde Japón."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 
@@ -49,10 +50,11 @@ export function generateProductMetadata(product: Product): Metadata {
 
 // 🆕 FUNCIÓN PARA PRODUCTOS SERIALIZADOS (SerializedProduct interface)
 export function generateSerializedProductMetadata(product: SerializedProduct): Metadata {
-  const title = `${product.name} en Preventa Perú`
+  // El nombre del producto va primero para que Google lo use como título exacto
+  const title = `${product.name} | Starfigs`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad."}`
+  }. Precio en preventa: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad, importada desde Japón."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 

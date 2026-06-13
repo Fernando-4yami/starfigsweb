@@ -11,7 +11,7 @@ interface ProductPageProps {
 export const revalidate = 600
 
 export async function generateStaticParams() {
-  const products = await getProducts(500) // Límite para build (más páginas estáticas para Google)
+  const products = await getProducts(1000) // Límite para build (más páginas estáticas para Google)
   return products.map((product) => ({
     slug: product.slug,
   }))
