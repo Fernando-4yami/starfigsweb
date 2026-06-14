@@ -6,15 +6,6 @@ on:
     - cron: "0 3 */1 * *"
     - cron: "0 15 */1 * *"
   workflow_dispatch: # Permite ejecutar manualmente desde GitHub
-    inputs:
-      mode:
-        description: "Modo: backfill-all o solo nuevos"
-        required: true
-        default: "backfill-all"
-        type: choice
-        options:
-          - backfill-all
-          - nuevos
 
 jobs:
   scrape:
@@ -50,11 +41,7 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ./secrets/serviceAccountKey.json
         run: |
-          if [ "${{ github.event.inputs.mode }}" = "nuevos" ]; then
-            python auto_scraper.py --backfill-all
-          else
-            python auto_scraper.py --backfill-all
-          fi
+          python auto_scraper.py
 
       - name: 🧹 Limpiar
         if: always()
