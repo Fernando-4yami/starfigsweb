@@ -348,7 +348,8 @@ def extract_image_urls(soup) -> list:
             full = "https://www.tsoto.net" + href
         else:
             full = href
-        if full.lower().endswith(".jpg"):
+        # Aceptar .jpg, .png, .webp (tsoto usa diferentes formatos)
+        if any(full.lower().endswith(ext) for ext in (".jpg", ".png", ".webp")):
             urls.append(full)
     return urls
 
@@ -800,30 +801,31 @@ async def process_product_async(tsoto_id: int, save: bool = True) -> dict:
 
 def save_to_firestore(tsoto_id: int, name: str, product_data: dict):
     """Guarda o actualiza el producto en Firestore usando tsotoId como ID."""
-    # Verificar duplicados por nombre
-    existing = find_existing_product_by_name(name)
-    if existing and existing["data"].get("tsotoId") != tsoto_id:
-        print(f"\n  [DUP] Ya existe '{name}' con tsotoId {existing['data'].get('tsotoId')}, saltando")
-        return
-
-    # Buscar por tsotoId
+    # Buscar por tsotoId PRIMERO (asi podemos actualizar aunque haya duplicado por nombre)
     docs = list(db.collection("products").where("tsotoId", "==", tsoto_id).limit(1).stream())
 
     if docs:
-        # Actualizar producto existente
+        # Ya existe con este tsotoId -> actualizar
         doc_id = docs[0].id
         update_data = {k: v for k, v in product_data.items()
                        if v is not None and k != "createdAt"}
         update_data["updatedAt"] = firestore.SERVER_TIMESTAMP
         db.collection("products").document(doc_id).update(update_data)
         print(f"[UPDATE] {doc_id[:8]}...")
-    else:
-        # Crear nuevo producto
-        data = {k: v for k, v in product_data.items() if v is not None}
-        data["createdAt"] = firestore.SERVER_TIMESTAMP
-        doc_ref = db.collection("products").document(str(tsoto_id))
-        doc_ref.set(data)
-        print(f"[CREATE] {doc_ref.id[:8]}...")
+        return
+
+    # No existe con este tsotoId -> verificar duplicados por nombre antes de crear
+    existing = find_existing_product_by_name(name)
+    if existing and existing["data"].get("tsotoId") != tsoto_id:
+        print(f"\n  [DUP] Ya existe '{name}' con tsotoId {existing['data'].get('tsotoId')}, saltando")
+        return
+
+    # Crear nuevo producto
+    data = {k: v for k, v in product_data.items() if v is not None}
+    data["createdAt"] = firestore.SERVER_TIMESTAMP
+    doc_ref = db.collection("products").document(str(tsoto_id))
+    doc_ref.set(data)
+    print(f"[CREATE] {doc_ref.id[:8]}...")
 
 
 def process_product(tsoto_id: int, save: bool = True) -> dict:
