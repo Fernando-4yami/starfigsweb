@@ -22,7 +22,7 @@ jobs:
 
       - name: 📦 Instalar dependencias
         run: |
-          pip install requests beautifulsoup4 firebase-admin python-dateutil deep-translator lxml
+          pip install requests beautifulsoup4 firebase-admin python-dateutil deep-translator lxml aiohttp Pillow
 
       - name: 🔑 Setup Firebase credentials
         env:
