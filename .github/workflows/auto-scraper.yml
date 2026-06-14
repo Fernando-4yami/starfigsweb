@@ -34,18 +34,20 @@ jobs:
           pip install requests beautifulsoup4 firebase-admin python-dateutil deep-translator lxml
 
       - name: 🔑 Setup Firebase credentials
-        shell: bash
+        env:
+          GH_SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
           mkdir -p secrets
-          cat > secrets/serviceAccountKey.json << 'EOF'
-${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-EOF
-          # Verificar que el archivo no está vacío
-          if [ ! -s secrets/serviceAccountKey.json ]; then
-            echo "[ERR] El archivo serviceAccountKey.json está vacío. Revisa el secreto FIREBASE_SERVICE_ACCOUNT_JSON"
-            exit 1
-          fi
-          echo "[OK] serviceAccountKey.json creado ($(wc -c < secrets/serviceAccountKey.json) bytes)"
+          python3 -c "
+import os, sys
+data = os.environ.get('GH_SA_JSON', '')
+if not data:
+    print('[ERR] FIREBASE_SERVICE_ACCOUNT_JSON esta vacio o no configurado')
+    sys.exit(1)
+with open('secrets/serviceAccountKey.json', 'w') as f:
+    f.write(data)
+print(f'[OK] serviceAccountKey.json creado ({len(data)} bytes)')
+"
 
       - name: 🏃 Ejecutar scraper
         env:
