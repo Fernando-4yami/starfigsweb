@@ -93,14 +93,16 @@ export async function GET() {
       const stock = product.stock
       const releaseDate = product.releaseDate
 
-      // Determinar disponibilidad:
-      // - stock > 0 → in_stock (disponible para envío inmediato)
-      // - stock <= 0 o undefined → preorder (preventa, se aceptan pedidos)
-      const availability = stock !== undefined && stock > 0 ? "in_stock" : "preorder"
-
-      // Formatear availability_date si existe releaseDate
+      // Determinar disponibilidad según las reglas de Google:
+      // - stock > 0 → in_stock (disponible para envío inmediato) — no requiere availability_date
+      // - stock ≤ 0 + releaseDate → preorder + availability_date (obligatorio)
+      // - stock ≤ 0 sin releaseDate → backorder (preventa sin fecha) — no requiere availability_date
+      let availability: string
       let availabilityDate = ""
-      if (releaseDate) {
+      if (stock !== undefined && stock > 0) {
+        availability = "in_stock"
+      } else if (releaseDate) {
+        availability = "preorder"
         try {
           const date = typeof releaseDate.toDate === "function"
             ? releaseDate.toDate()
@@ -111,6 +113,8 @@ export async function GET() {
         } catch {
           // ignorar fechas inválidas
         }
+      } else {
+        availability = "backorder"
       }
 
       const description = product.description_es || product.description || `${name} - Figura de anime`
