@@ -58,6 +58,95 @@ const generateProductTemplate = (product: Product): string => {
   const productUrl = `${baseUrl}/products/${product.slug || product.id}`
   return `🔖 ${product.name}\nPrecio: s/${(product.price || 0).toFixed(2)}\nReserva min: s/40.00\n🌟 Mas detalles: ${productUrl}`
 }
+
+const formatDateDDMMYYYY = (date: Date | null | undefined): string => {
+  if (!date) return "Por confirmar"
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return "Por confirmar"
+  const day = String(d.getDate()).padStart(2, "0")
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
+const calculateReserva = (price: number): number => {
+  if (price > 200) {
+    // 50% redondeado hacia arriba
+    return Math.ceil(price * 0.5)
+  }
+  return 40
+}
+
+const generateFacebookPostTemplate = (product: Product): string => {
+  const baseUrl = "https://starfigsperu.com"
+  const productUrl = `${baseUrl}/products/${product.slug || product.id}`
+  const releaseDateFormatted = formatDateDDMMYYYY(product.releaseDate)
+  const price = product.price || 0
+  const reserva = calculateReserva(price)
+
+  return [
+    "⭐ PREVENTA / BAJO PEDIDO",
+    "",
+    `🔹 ${product.name}`,
+    "",
+    `💰 Precio: S/${price.toFixed(2)}`,
+    `💸 Reserva: S/${reserva} para separar`,
+    `🗓️ Lanzamiento: ${releaseDateFormatted}`,
+    "",
+    "🌟 Más detalles:",
+    productUrl,
+    "",
+    "🎁 Envío gratis por Shalom a agencia como beneficio de preventa",
+    `🚢 Llegada a Perú: aprox. 2-3 meses luego del lanzamiento`,
+    "📌 Incluye importación completa: impuestos, aduanas, seguro y envío Japón → Perú",
+    "",
+    "🚚 Envíos a todo el Perú (Shalom / Olva Courier)",
+    "💳 Pagos yape o transferencia",
+    "",
+    "🇯🇵✨ Producto ORIGINAL y SELLADO",
+  ].join("\n")
+}
+const mimeToExt: Record<string, string> = {
+  "image/webp": "webp",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+}
+
+const downloadProductImages = async (imageUrls: string[], productName: string): Promise<number> => {
+  if (!imageUrls || imageUrls.length === 0) {
+    alert("❌ Este producto no tiene imágenes")
+    return 0
+  }
+  const zip = new JSZip()
+  const slug = productName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "producto"
+  let successCount = 0
+
+  for (let i = 0; i < imageUrls.length; i++) {
+    try {
+      const resp = await fetch(imageUrls[i])
+      const blob = await resp.blob()
+      const ext = mimeToExt[blob.type] || "jpg"
+      zip.file(`${slug}_${i + 1}.${ext}`, blob)
+      successCount++
+    } catch (err) {
+      console.error(`Error descargando imagen ${i + 1}:`, err)
+    }
+  }
+
+  if (successCount === 0) {
+    alert("❌ No se pudo descargar ninguna imagen")
+    return 0
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" })
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(zipBlob)
+  link.download = `${slug}.zip`
+  link.click()
+  URL.revokeObjectURL(link.href)
+  return successCount
+}
+
 const copyToClipboard = async (text: string): Promise<boolean> => {
   try { await navigator.clipboard.writeText(text); return true }
   catch {
@@ -251,6 +340,10 @@ export default function ProductsPage() {
     const ok = await copyToClipboard(generateProductTemplate(product))
     if (ok) alert("📋 Plantilla copiada")
   }
+  const handleCopyFacebookTemplate = async (product: Product) => {
+    const ok = await copyToClipboard(generateFacebookPostTemplate(product))
+    if (ok) alert("📋 Plantilla Facebook copiada")
+  }
 
   const brands = useMemo(() => {
     const s = new Set<string>(); products.forEach(p => { if (p.brand) s.add(p.brand) }); return Array.from(s).sort()
@@ -352,7 +445,7 @@ export default function ProductsPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} onDelete={handleDelete} deleting={deleting === product.id} onCopyTemplate={handleCopyTemplate} isSelected={selectedIds.has(product.id)} onToggleSelect={toggleSelectProduct} />
+                <ProductCard key={product.id} product={product} onDelete={handleDelete} deleting={deleting === product.id} onCopyTemplate={handleCopyTemplate} onCopyFacebookTemplate={handleCopyFacebookTemplate} isSelected={selectedIds.has(product.id)} onToggleSelect={toggleSelectProduct} />
               ))}
             </div>
 
@@ -545,8 +638,19 @@ function FilterBar({ searchTerm, setSearchTerm, selectedBrand, setSelectedBrand,
   )
 }
 
-function ProductCard({ product, onDelete, deleting, onCopyTemplate, isSelected, onToggleSelect }: any) {
+function ProductCard({ product, onDelete, deleting, onCopyTemplate, onCopyFacebookTemplate, isSelected, onToggleSelect }: any) {
   const [showImageGen, setShowImageGen] = useState(false)
+  const [downloadingImgs, setDownloadingImgs] = useState(false)
+
+  const handleDownloadImages = async () => {
+    setDownloadingImgs(true)
+    const count = await downloadProductImages(product.imageUrls || [], product.name)
+    setDownloadingImgs(false)
+    if (count > 0) {
+      alert(`✅ ${count} imágenes descargadas`)
+    }
+  }
+
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all overflow-hidden flex flex-col ${isSelected ? "ring-2 ring-pink-500 dark:ring-pink-400" : ""}`}>
       <div className="h-52 relative bg-gray-100 dark:bg-gray-700 shrink-0 overflow-hidden group">
@@ -578,14 +682,26 @@ function ProductCard({ product, onDelete, deleting, onCopyTemplate, isSelected, 
       </div>
       <div className="p-4 flex flex-col flex-1">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 text-sm">{product.name}</h3>
+          <div className="flex items-start gap-1.5 mb-1">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 text-sm flex-1 min-w-0">{product.name}</h3>
+            <button
+              onClick={() => onCopyFacebookTemplate(product)}
+              className="shrink-0 bg-blue-600 dark:bg-blue-500 text-white px-2.5 py-1 rounded text-sm hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
+              title="Copiar plantilla para Facebook"
+            >
+              📘
+            </button>
+          </div>
           <p className="text-blue-600 dark:text-blue-400 font-bold mb-1">S/. {product.price.toFixed(2)}</p>
           {product.brand && <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">📦 {product.brand}</p>}
         </div>
         <div className="flex gap-2 flex-wrap">
           <Link href={`/admin/products/edit/${product.id}`} className="flex-1 text-center bg-blue-500 dark:bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-700 text-sm">✏️ Editar</Link>
           <button onClick={() => setShowImageGen(!showImageGen)} className="flex-1 bg-purple-500 dark:bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-600 dark:hover:bg-purple-700 text-sm">🎨 Imagen</button>
-          <button onClick={() => onCopyTemplate(product)} className="bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded hover:bg-green-600 dark:hover:bg-green-700 text-sm">📋</button>
+          <button onClick={handleDownloadImages} disabled={downloadingImgs} className="bg-cyan-500 dark:bg-cyan-600 text-white px-3 py-2 rounded hover:bg-cyan-600 dark:hover:bg-cyan-700 text-sm disabled:opacity-50" title="Descargar todas las imágenes">
+            {downloadingImgs ? "⏳" : "📥"}
+          </button>
+          <button onClick={() => onCopyTemplate(product)} className="bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded hover:bg-green-600 dark:hover:bg-green-700 text-sm" title="Copiar plantilla básica">📋</button>
           <button onClick={() => onDelete(product.id)} disabled={deleting} className="bg-red-500 dark:bg-red-600 text-white px-3 py-2 rounded hover:bg-red-600 dark:hover:bg-red-700 disabled:opacity-50 text-sm">{deleting ? "..." : "🗑️"}</button>
         </div>
         {showImageGen && (
