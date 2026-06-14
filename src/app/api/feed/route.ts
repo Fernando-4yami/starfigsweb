@@ -137,6 +137,10 @@ export async function GET() {
       if (product.gtin) {
         xml += `
       <g:gtin>${xmlEscape(product.gtin)}</g:gtin>`
+      } else {
+        // Sin GTIN → declarar que el producto no tiene código de barras (figuras de colección)
+        xml += `
+      <g:identifier_exists>false</g:identifier_exists>`
       }
 
       // MPN con el slug como identificador alternativo
