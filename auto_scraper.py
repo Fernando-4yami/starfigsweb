@@ -13,7 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 import firebase_admin
 from firebase_admin import credentials, firestore
-import re, time, sys, os, copy
+import re, time, sys, os, copy, unicodedata
 from deep_translator import GoogleTranslator
 
 # --- CONFIG ---
@@ -170,6 +170,48 @@ def extract_gtin(soup):
     return ""
 
 
+# --- EXTRACCION DE NOMBRE Y PRECIO ---
+
+def extract_product_name(soup) -> str:
+    """Extrae el nombre del producto desde el <title> de tsoto."""
+    title = soup.find("title")
+    if not title:
+        return ""
+    name = title.get_text(strip=True)
+    # Quitar sufijo " - Shop - tsoto.net β"
+    for suffix in [" - Shop - tsoto.net", " - tsoto.net", " - Shop"]:
+        idx = name.find(suffix)
+        if idx > 0:
+            name = name[:idx]
+            break
+    return name.strip()
+
+
+def extract_price(soup) -> float | None:
+    """Extrae el precio numerico del producto."""
+    for el in soup.find_all(["div", "span"], class_=re.compile(r"shop_article_price|m_shop_article_price", re.I)):
+        text = el.get_text(strip=True)
+        # Busca patron como "60,99 EUR" o "1.299,00 EUR"
+        m = re.search(r"(\d{1,6}(?:\.\d{3})*,\d{2})", text)
+        if m:
+            # Convertir formato europeo "1.299,00" -> 1299.00
+            num_str = m.group(1).replace(".", "").replace(",", ".")
+            return float(num_str)
+    return None
+
+
+def generate_slug(name: str) -> str:
+    """Genera un slug URL-friendly desde el nombre."""
+    slug = name.lower()
+    # Normalizar unicode (quitar acentos)
+    slug = unicodedata.normalize("NFKD", slug).encode("ASCII", "ignore").decode("ASCII")
+    # Reemplazar caracteres no alfanumericos por guiones
+    slug = re.sub(r"[^a-z0-9\s-]", "", slug)
+    slug = re.sub(r"\s+", "-", slug)
+    slug = re.sub(r"-+", "-", slug)
+    return slug.strip("-")
+
+
 def normalize_dashes(text: str) -> str:
     lines = text.split("\n")
     normalized = []
@@ -225,6 +267,8 @@ def process_product(tsoto_id: int, save: bool = True) -> dict:
     print(f"[OK] ({len(desc_original)} chars)", end=" ")
 
     gtin = extract_gtin(soup)
+    name = extract_product_name(soup)
+    price = extract_price(soup)
 
     desc_es = translate_to_es(desc_original)
     print(f"-> ES ({len(desc_es)} chars)", end=" ")
@@ -232,38 +276,63 @@ def process_product(tsoto_id: int, save: bool = True) -> dict:
     result = {
         "tsotoId": tsoto_id,
         "status": "ok",
+        "name": name,
+        "price": price,
         "description": desc_original,
         "description_es": desc_es,
         "gtin": gtin,
     }
 
     if save and desc_es:
-        save_to_firestore(tsoto_id, desc_original, desc_es, gtin)
+        save_to_firestore(tsoto_id, name, price, desc_original, desc_es, gtin)
 
     return result
 
 
-def save_to_firestore(tsoto_id: int, description: str, description_es: str, gtin: str):
+def save_to_firestore(tsoto_id: int, name: str, price: float | None, description: str, description_es: str, gtin: str):
     docs = list(
         db.collection("products")
         .where("tsotoId", "==", tsoto_id)
         .limit(1)
         .stream()
     )
-    if not docs:
-        print(f"(no encontrado en Firestore)")
+    if docs:
+        # Producto existe → solo actualizar descripcion y gtin
+        doc_id = docs[0].id
+        update_data = {
+            "description": description,
+            "description_es": description_es,
+        }
+        if gtin:
+            update_data["gtin"] = gtin
+        db.collection("products").document(doc_id).update(update_data)
+        print(f"[UPDATE] {doc_id[:8]}...")
         return
 
-    doc_id = docs[0].id
-    update_data = {
+    # Producto NO existe → CREARLO
+    slug = generate_slug(name) if name else f"producto-{tsoto_id}"
+    product_data = {
+        "name": name or f"Producto {tsoto_id}",
+        "slug": slug,
+        "price": price if price else 0,
         "description": description,
         "description_es": description_es,
+        "tsotoId": tsoto_id,
+        "imageUrls": [],
+        "brand": "",
+        "line": "",
+        "category": "figura",
+        "createdAt": firestore.SERVER_TIMESTAMP,
+        "views": 0,
+        "stock": 0,
     }
     if gtin:
-        update_data["gtin"] = gtin
+        product_data["gtin"] = gtin
 
-    db.collection("products").document(doc_id).update(update_data)
-    print(f"[SAVE] {doc_id[:8]}...")
+    # Usar tsotoId como ID del documento para evitar duplicados en re-ejecuciones
+    doc_ref = db.collection("products").document(str(tsoto_id))
+    doc_ref.set(product_data)
+    print(f"[CREATE] {doc_ref.id[:8]}...")
 
 
 # --- FLUJO PRINCIPAL ---
