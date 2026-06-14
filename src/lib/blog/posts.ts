@@ -18,7 +18,7 @@ const posts: BlogPost[] = [
     date: "2025-01-15",
     category: "Guías",
     author: "Starfigs",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/KanColle_Nendoroid_-_Kirishima.jpg",
+    image: "https://cdn.shopify.com/s/files/1/0318/2649/files/Saber_v_Sader-min_grande.png",
     content: `
 Comprar figuras de anime en Perú puede ser una experiencia emocionante, pero también viene con un riesgo: las falsificaciones. Los bootlegs —figuras piratas de baja calidad— inundan el mercado y pueden engañar incluso a coleccionistas experimentados.
 
@@ -97,7 +97,7 @@ Identificar figuras originales no es difícil una vez que sabes qué buscar. En 
     date: "2025-01-20",
     category: "Guías",
     author: "Starfigs",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Hobby_shops_at_Comic_Frontier_18.jpg",
+    image: "https://mikatan.goodsmile.info/en/wp-content/uploads/2015/03/o0515069513236326090.jpg",
     content: `
 Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre un Nendoroid, un Figma y una figura a escala?** Cada formato tiene sus características, ventajas y público objetivo.
 
@@ -200,7 +200,7 @@ Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad*
     date: "2025-02-01",
     category: "Guías",
     author: "Starfigs",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Non_Non_Biyori_Natsumi_Koshigaya_Nendoroid.jpg",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Hobby_shops_at_Comic_Frontier_18.jpg",
     content: `
 El mundo de las figuras de anime es enorme y puede ser abrumador para quien recién empieza. Existen decenas de tipos, escalas, fabricantes y formatos. En esta guía te explicamos **cada tipo de figura de anime** de forma clara y sencilla.
 
@@ -316,7 +316,7 @@ En **Starfigs** encontrarás todos estos tipos disponibles en preventa y stock. 
     date: "2025-02-10",
     category: "Guías",
     author: "Starfigs",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Hobby_shops_at_Comic_Frontier_18.jpg",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Non_Non_Biyori_Natsumi_Koshigaya_Nendoroid.jpg",
     content: `
 Si estás empezando a coleccionar figuras de anime en Perú, una de las primeras preguntas que te vas a hacer es: **¿dónde compro?** No es tan fácil como ir a una tienda física y listo. Acá te cuento cómo va la cosa.
 
