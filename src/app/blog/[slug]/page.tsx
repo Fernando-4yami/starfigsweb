@@ -37,6 +37,15 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       type: "article",
       publishedTime: post.date,
       authors: [post.author],
+      images: post.image
+        ? [{ url: post.image, width: 800, height: 800, alt: post.title }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description.slice(0, 160),
+      images: post.image ? [post.image] : [],
     },
   }
 }
@@ -99,6 +108,16 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <p className="mt-3 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
             {post.description}
           </p>
+
+          {post.image && (
+            <div className="mt-6 -mx-4 sm:-mx-0 sm:rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-48 sm:h-72 object-cover"
+              />
+            </div>
+          )}
         </header>
 
         {/* Content */}

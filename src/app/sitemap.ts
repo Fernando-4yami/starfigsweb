@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getDb } from "@/lib/firebase/admin"
+import posts from "@/lib/blog/posts"
 
 const BASE_URL = "https://starfigsperu.com"
 
@@ -60,19 +61,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]
 
-  // Blog pages
-  const blogSlugs = [
-    "como-identificar-figuras-anime-originales-peru",
-    "nendoroid-vs-figma-vs-escala-diferencias",
-    "guia-completa-tipos-figuras-anime",
-    "donde-comprar-figuras-anime-originales-peru",
-    "como-funciona-preventa-figuras-anime",
-    "top-10-figuras-anime-coleccionistas-2025",
-  ]
-
-  const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
-    url: `${BASE_URL}/blog/${slug}`,
-    lastModified: new Date(),
+  // Blog pages — dinámico desde posts.ts para mantener consistencia
+  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }))

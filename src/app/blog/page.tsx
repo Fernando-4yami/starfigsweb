@@ -39,28 +39,40 @@ export default function BlogPage() {
               href={`/blog/${post.slug}`}
               className="block"
             >
-              <article className="border-b border-gray-200 dark:border-gray-800 pb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {post.category}
-                  </span>
-                  <span className="text-gray-300 dark:text-gray-600">·</span>
-                  <time className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(post.date).toLocaleDateString("es-PE", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </time>
+              <article className="flex gap-4 sm:gap-6 border-b border-gray-200 dark:border-gray-800 pb-6">
+                {post.image && (
+                  <div className="shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {post.category}
+                    </span>
+                    <span className="text-gray-300 dark:text-gray-600">·</span>
+                    <time className="text-xs text-gray-400 dark:text-gray-500">
+                      {new Date(post.date).toLocaleDateString("es-PE", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </time>
+                  </div>
+
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mb-2">
+                    {post.title}
+                  </h2>
+
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                    {post.description}
+                  </p>
                 </div>
-
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mb-2">
-                  {post.title}
-                </h2>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
-                  {post.description}
-                </p>
               </article>
             </Link>
           ))}
