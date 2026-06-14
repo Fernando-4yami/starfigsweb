@@ -1,13 +1,12 @@
 """
 auto_scraper.py — Scraper automático para tsoto.net
 ====================================================
-Extrae productos, descripciones limpias, GTIN, traduce a español
-y guarda en Firebase.
+Busca el último producto agregado en tsoto, compara con el último
+scrapeado (guardado en Firestore), y procesa solo los nuevos.
 
 Uso:
   python auto_scraper.py                  # Scrapea productos nuevos
-  python auto_scraper.py --backfill-all    # Backfill descripciones + GTIN para todos
-  python auto_scraper.py --product 24784   # Un producto específico
+  python auto_scraper.py --product 24784  # Un producto específico
 """
 
 import asyncio
@@ -28,13 +27,14 @@ SERVICE_ACCOUNT_PATH = os.environ.get(
 )
 STORAGE_BUCKET = "starfigs-29d31"
 REQUEST_DELAY = 1.5  # segundos entre requests a tsoto.net
+TSOTO_BASE = "https://www.tsoto.net"
+STATE_DOC_ID = "_scraper_state"  # Documento en Firestore para tracking
 
 # ─── FIREBASE INIT ─────────────────────────────────────────────────────────
 
 def init_firebase():
     cred_path = SERVICE_ACCOUNT_PATH
     if not os.path.exists(cred_path):
-        # Buscar en ubicaciones alternativas
         alt_paths = [
             "secrets/serviceAccountKey.json",
             "../tsoto_scraper/secrets/serviceAccountKey.json",
@@ -45,7 +45,7 @@ def init_firebase():
                 cred_path = p
                 break
         else:
-            print(f"❌ No se encontró serviceAccountKey.json en {cred_path} ni alternativas")
+            print(f"[ERR] No se encontró serviceAccountKey.json en {cred_path} ni alternativas")
             sys.exit(1)
 
     cred = credentials.Certificate(cred_path)
@@ -58,17 +58,70 @@ def init_firebase():
 
 db = init_firebase()
 
+
+# ─── TRACKING DEL ÚLTIMO PRODUCTO SCRAPEADO ────────────────────────────────
+
+def get_last_scraped_id() -> int:
+    """Obtiene el último tsotoId procesado desde Firestore."""
+    doc_ref = db.collection("_meta").document(STATE_DOC_ID)
+    doc = doc_ref.get()
+    if doc.exists:
+        return doc.to_dict().get("lastTsotoId", 0)
+    return 0
+
+
+def save_last_scraped_id(tsoto_id: int):
+    """Guarda el último tsotoId procesado en Firestore."""
+    doc_ref = db.collection("_meta").document(STATE_DOC_ID)
+    doc_ref.set({
+        "lastTsotoId": tsoto_id,
+        "updatedAt": firestore.SERVER_TIMESTAMP,
+    }, merge=True)
+    print(f"  [STATE] Último tsotoId guardado: {tsoto_id}")
+
+
+# ─── ENCONTRAR PRODUCTOS EN TSOTO ────────────────────────────────────────
+
+def get_latest_tsoto_ids() -> list[int]:
+    """
+    Scrapea la página de últimos productos de tsoto.net y devuelve
+    TODOS los IDs de productos visibles, ordenados del más nuevo al más viejo.
+    """
+    url = f"{TSOTO_BASE}/Shop?order=desc&by=latest"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    try:
+        r = requests.get(url, headers=headers, timeout=30)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        links = soup.select('a[href*="/Shop/"]')
+        ids = []
+        seen = set()
+        for a in links:
+            href = a.get("href", "")
+            m = re.search(r"/Shop/(\d+)", href)
+            if m:
+                pid = int(m.group(1))
+                if pid > 1000 and pid not in seen:
+                    seen.add(pid)
+                    ids.append(pid)
+
+        ids.sort(reverse=True)
+        if not ids:
+            print("[ERR] No se encontraron productos en la página de últimos")
+            return []
+
+        print(f"[LATEST] {len(ids)} productos visibles, el más nuevo: {ids[0]}")
+        return ids
+    except Exception as e:
+        print(f"[ERR] Error obteniendo página de últimos: {e}")
+        return []
+
+
 # ─── EXTRACCIÓN DE DESCRIPCIÓN ─────────────────────────────────────────────
 
 def extract_description_clean(soup):
-    """
-    Del panel de descripción de tsoto.net, extrae SOLO el texto descriptivo:
-    - Elimina div.MVO (datos técnicos)
-    - Elimina div.important-blue / div.important (warnings)
-    - Elimina span.b (límites de compra: "Max. bestellbare")
-    - Convierte <br/> a \n
-    - Filtra líneas no deseadas (pro Anschrift, Haushalt, bestellbare, 3x)
-    """
+    """Extrae la descripción limpia del panel de producto de tsoto.net."""
     anker = soup.find("a", id="Description")
     if not anker:
         return ""
@@ -79,33 +132,23 @@ def extract_description_clean(soup):
             if not pc:
                 continue
 
-            # Copia para no mutar el original
             c = copy.copy(pc)
 
-            # Eliminar MVO (datos técnicos)
             for x in c.find_all("div", class_="MVO"):
                 x.decompose()
-
-            # Eliminar warnings
             for x in c.find_all("div", class_=["important-blue", "important"]):
                 x.decompose()
-
-            # Eliminar span.b (límites de compra)
             for x in c.find_all("span", class_="b"):
                 x.decompose()
 
-            # Convertir <br/> a \n
             for br in c.find_all("br"):
                 br.replace_with("\n")
 
             texto = c.get_text()
-
-            # Normalizar múltiples saltos de línea
             texto = re.sub(r"\n{3,}", "\n\n", texto)
 
-            # Filtrar líneas que sean solo avisos de tsoto
             skip_patterns = [
-                "pro Anschrift", "Haushalt", "bestellbare", "Max\\.", "3x",
+                "pro Anschrift", "Haushalt", "bestellbare", r"Max\.", "3x",
             ]
             lines = texto.split("\n")
             clean_lines = []
@@ -113,7 +156,6 @@ def extract_description_clean(soup):
                 stripped = line.strip()
                 if not stripped:
                     continue
-                # Saltar líneas que coinciden con patrones de exclusión
                 if any(re.search(p, stripped, re.IGNORECASE) for p in skip_patterns):
                     continue
                 clean_lines.append(stripped)
@@ -124,9 +166,7 @@ def extract_description_clean(soup):
 
 
 def extract_gtin(soup):
-    """
-    Extrae el GTIN/EAN del MVO (datos técnicos) en la página de tsoto.
-    """
+    """Extrae el GTIN/EAN del bloque de datos técnicos (MVO)."""
     anker = soup.find("a", id="Description")
     if not anker:
         return ""
@@ -138,7 +178,6 @@ def extract_gtin(soup):
                 mvo = pc.find("div", class_="MVO")
                 if mvo:
                     texto = mvo.get_text()
-                    # Buscar número de 8-14 dígitos (GTIN/EAN)
                     m = re.search(r"\b(\d{8,14})\b", texto)
                     if m:
                         return m.group(1)
@@ -146,9 +185,7 @@ def extract_gtin(soup):
 
 
 def normalize_dashes(text: str) -> str:
-    """
-    Normaliza guiones al inicio de línea: '-Shiroko' → '- Shiroko'
-    """
+    """Normaliza guiones: '-Shiroko' → '- Shiroko'"""
     lines = text.split("\n")
     normalized = []
     for line in lines:
@@ -172,7 +209,7 @@ def translate_to_es(text: str) -> str:
             result = normalize_dashes(result)
         return result or text
     except Exception as e:
-        print(f"  ⚠️ Error traduciendo: {e}")
+        print(f"  [WARN] Error traduciendo: {e}")
         return text
 
 
@@ -180,14 +217,14 @@ def translate_to_es(text: str) -> str:
 
 def get_product_page(tsoto_id: int) -> BeautifulSoup | None:
     """Obtiene el HTML de una página de producto de tsoto.net."""
-    url = f"https://www.tsoto.net/Shop/{tsoto_id}-test"
+    url = f"{TSOTO_BASE}/Shop/{tsoto_id}-test"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
         r = requests.get(url, headers=headers, timeout=30)
         r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
     except Exception as e:
-        print(f"  ❌ Error HTTP {tsoto_id}: {e}")
+        print(f"  [ERR] HTTP {tsoto_id}: {e}")
         return None
 
 
@@ -196,26 +233,23 @@ def process_product(tsoto_id: int, save: bool = True) -> dict:
     Procesa un producto: scrapea, extrae descripción, GTIN, traduce.
     Retorna dict con los resultados.
     """
-    print(f"\n🔍 Procesando {tsoto_id}...", end=" ")
+    print(f"\n[PROC] {tsoto_id}...", end=" ")
 
     soup = get_product_page(tsoto_id)
     if not soup:
         return {"tsotoId": tsoto_id, "status": "error", "error": "HTTP falló"}
 
-    # Extraer descripción limpia
     desc_original = extract_description_clean(soup)
     if not desc_original:
-        print("❌ Sin descripción")
+        print("[SKIP] Sin descripcion")
         return {"tsotoId": tsoto_id, "status": "sin_descripcion"}
 
-    print(f"✅ ({len(desc_original)} chars)", end=" ")
+    print(f"[OK] ({len(desc_original)} chars)", end=" ")
 
-    # Extraer GTIN
     gtin = extract_gtin(soup)
 
-    # Traducir
     desc_es = translate_to_es(desc_original)
-    print(f"→ ES ({len(desc_es)} chars)", end=" ")
+    print(f"-> ES ({len(desc_es)} chars)", end=" ")
 
     result = {
         "tsotoId": tsoto_id,
@@ -225,7 +259,6 @@ def process_product(tsoto_id: int, save: bool = True) -> dict:
         "gtin": gtin,
     }
 
-    # Guardar en Firebase
     if save and desc_es:
         save_to_firestore(tsoto_id, desc_original, desc_es, gtin)
 
@@ -241,7 +274,7 @@ def save_to_firestore(tsoto_id: int, description: str, description_es: str, gtin
         .stream()
     )
     if not docs:
-        print(f"(⚠️ no encontrado en Firestore)")
+        print(f"(no encontrado en Firestore)")
         return
 
     doc_id = docs[0].id
@@ -253,83 +286,98 @@ def save_to_firestore(tsoto_id: int, description: str, description_es: str, gtin
         update_data["gtin"] = gtin
 
     db.collection("products").document(doc_id).update(update_data)
-    print(f"💾 {doc_id[:8]}...")
+    print(f"[SAVE] {doc_id[:8]}...")
 
 
-# ─── BATCH ─────────────────────────────────────────────────────────────────
+# ─── FLUJO PRINCIPAL: SCRAPEAR SOLO PRODUCTOS NUEVOS ────────────────────────
 
-def get_all_tsoto_ids() -> list[int]:
-    """Obtiene todos los tsotoId de Firestore."""
-    docs = list(
-        db.collection("products")
-        .where("tsotoId", ">=", 0)
-        .stream()
-    )
-    ids = []
-    for doc in docs:
-        d = doc.to_dict()
-        tid = d.get("tsotoId")
-        if tid:
-            ids.append(int(tid))
-    return sorted(set(ids), reverse=True)
+def scrape_new_products():
+    """
+    Flujo principal:
+    1. Obtiene todos los IDs visibles en la página de últimos de tsoto
+    2. Filtra solo los que son > último scrapeado
+    3. Procesa solo esos (sin range() = sin IDs ficticios)
+    4. Guarda el ID más alto que se procesó exitosamente
+    """
+    last_scraped = get_last_scraped_id()
 
+    if last_scraped == 0:
+        print("\n[STATE] No hay estado guardado. Usa --init ULTIMO_ID para establecer el punto de partida.")
+        print("  Ejemplo: python auto_scraper.py --init 24942")
+        print("  (el ID 24942 es el producto más nuevo en tsoto hoy)")
+        return
 
-def get_pending_ids() -> list[int]:
-    """Obtiene IDs que aún no tienen description_es."""
-    docs = list(
-        db.collection("products")
-        .where("tsotoId", ">=", 0)
-        .stream()
-    )
-    pending = []
-    for doc in docs:
-        d = doc.to_dict()
-        tid = d.get("tsotoId")
-        if tid and not d.get("description_es"):
-            pending.append(int(tid))
-    return sorted(set(pending), reverse=True)
+    print(f"\n[STATE] Último producto scrapeado: {last_scraped}")
 
+    all_ids = get_latest_tsoto_ids()
+    if not all_ids:
+        print("[ERR] No se pudieron obtener IDs de tsoto")
+        return
 
-def backfill_all():
-    """Procesa todos los productos que faltan por descripción + GTIN."""
-    pending = get_pending_ids()
-    total = len(pending)
-    print(f"\n📦 {total} productos pendientes\n")
+    # Filtrar solo IDs mayores al último scrapeado (son los nuevos)
+    new_ids = sorted([pid for pid in all_ids if pid > last_scraped])
+
+    if not new_ids:
+        print(f"\n[DONE] No hay productos nuevos (último visibles: {all_ids[0]}, ya procesado)")
+        return
+
+    total = len(new_ids)
+    print(f"\n[NEW] {total} producto(s) nuevo(s) para procesar: {new_ids}\n")
 
     ok = 0
     sin_desc = 0
     errores = 0
+    max_ok_id = last_scraped
 
-    for i, tid in enumerate(pending, 1):
+    for i, tid in enumerate(new_ids, 1):
+        if i > 1:
+            time.sleep(REQUEST_DELAY)
+
         result = process_product(tid)
         if result["status"] == "ok":
             ok += 1
+            if tid > max_ok_id:
+                max_ok_id = tid
         elif result["status"] == "sin_descripcion":
             sin_desc += 1
         else:
             errores += 1
 
         print(f"  [{i}/{total}]")
-        time.sleep(REQUEST_DELAY)
 
-    print(f"\n✅ Resumen: {ok} OK, {sin_desc} sin descripción, {errores} errores")
+    # Solo guardar estado si al menos uno se procesó bien
+    if ok > 0:
+        save_last_scraped_id(max_ok_id)
+    else:
+        print("\n  [STATE] No se guardó estado nuevo (0 productos procesados OK)")
+
+    print(f"\n[DONE] Resumen: {ok} OK, {sin_desc} sin descripcion, {errores} errores")
+    if ok > 0:
+        print(f"[DONE] Último tsotoId guardado: {max_ok_id}")
 
 
 # ─── MAIN ──────────────────────────────────────────────────────────────────
 
 def main():
-    if "--backfill-all" in sys.argv:
-        backfill_all()
+    if "--init" in sys.argv:
+        # Inicializar el estado con un ID específico
+        idx = sys.argv.index("--init")
+        if idx + 1 < len(sys.argv):
+            init_id = int(sys.argv[idx + 1])
+            save_last_scraped_id(init_id)
+            print(f"[INIT] Estado inicializado con tsotoId: {init_id}")
+        else:
+            print("[ERR] Especifica un ID: --init 24942")
     elif "--product" in sys.argv:
         idx = sys.argv.index("--product")
         if idx + 1 < len(sys.argv):
             tid = int(sys.argv[idx + 1])
             process_product(tid, save=True)
         else:
-            print("❌ Especifica un ID: --product 24784")
+            print("[ERR] Especifica un ID: --product 24784")
     else:
-        # Modo normal: procesar solo productos nuevos sin descripción
-        backfill_all()
+        # Modo normal: solo productos nuevos desde el último scrapeado
+        scrape_new_products()
 
 
 if __name__ == "__main__":
