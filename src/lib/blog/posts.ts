@@ -18,7 +18,7 @@ const posts: BlogPost[] = [
     date: "2025-01-15",
     category: "Guías",
     author: "Starfigs",
-    image: "https://firebasestorage.googleapis.com/v0/b/starfigs-29d31/o/products%2F24920%2F24920_original.webp?alt=media&token=f21858b9-8275-47c1-abcb-df04681100cc",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/KanColle_Nendoroid_-_Kirishima.jpg",
     content: `
 Comprar figuras de anime en Perú puede ser una experiencia emocionante, pero también viene con un riesgo: las falsificaciones. Los bootlegs —figuras piratas de baja calidad— inundan el mercado y pueden engañar incluso a coleccionistas experimentados.
 
@@ -97,7 +97,7 @@ Identificar figuras originales no es difícil una vez que sabes qué buscar. En 
     date: "2025-01-20",
     category: "Guías",
     author: "Starfigs",
-    image: "https://firebasestorage.googleapis.com/v0/b/starfigs-29d31/o/products%2F24919%2F24919_original.webp?alt=media&token=b79d41f8-07c4-4e8a-8a74-9b04b23f8697",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Hobby_shops_at_Comic_Frontier_18.jpg",
     content: `
 Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre un Nendoroid, un Figma y una figura a escala?** Cada formato tiene sus características, ventajas y público objetivo.
 
@@ -200,7 +200,7 @@ Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad*
     date: "2025-02-01",
     category: "Guías",
     author: "Starfigs",
-    image: "https://jumpichiban.com/cdn/shop/files/Oshi_No_Ko_T-Most_-_Ai_Hoshino_16.jpg?width=1200",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Non_Non_Biyori_Natsumi_Koshigaya_Nendoroid.jpg",
     content: `
 El mundo de las figuras de anime es enorme y puede ser abrumador para quien recién empieza. Existen decenas de tipos, escalas, fabricantes y formatos. En esta guía te explicamos **cada tipo de figura de anime** de forma clara y sencilla.
 
@@ -316,7 +316,7 @@ En **Starfigs** encontrarás todos estos tipos disponibles en preventa y stock. 
     date: "2025-02-10",
     category: "Guías",
     author: "Starfigs",
-    image: "https://firebasestorage.googleapis.com/v0/b/starfigs-29d31/o/products%2F24927%2F24927_original.webp?alt=media&token=ec755cd1-fc87-4aaf-a6ba-85393cfb97b3",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Hobby_shops_at_Comic_Frontier_18.jpg",
     content: `
 Si estás empezando a coleccionar figuras de anime en Perú, una de las primeras preguntas que te vas a hacer es: **¿dónde compro?** No es tan fácil como ir a una tienda física y listo. Acá te cuento cómo va la cosa.
 
