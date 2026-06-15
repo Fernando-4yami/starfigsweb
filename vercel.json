@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/upload-image": {
+      "maxDuration": 60
+    },
+    "api/batch-upload": {
+      "maxDuration": 60
+    }
+  }
+}
