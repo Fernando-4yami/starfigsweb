@@ -78,5 +78,49 @@ export async function GET() {
     results.tests.firebaseAdmin = { status: "❌ FAIL", error: e.message }
   }
 
+  // Test 5: Flujo completo de upload (como en el route real)
+  try {
+    const sharp = (await import("sharp")).default
+    const admin = await import("firebase-admin")
+    const { getApps } = await import("firebase-admin/app")
+    
+    // Crear una imagen de prueba de 500x500 (simula una foto real)
+    const testBuffer = await sharp({ create: { width: 500, height: 500, channels: 3, background: { r: 120, g: 180, b: 255 } } })
+      .jpeg({ quality: 90 })
+      .toBuffer()
+    
+    // 1. Generar blur placeholder
+    const blurBuffer = await sharp(testBuffer)
+      .resize(20, 20, { fit: "inside" })
+      .webp({ quality: 20 })
+      .toBuffer()
+    const blurPlaceholder = `data:image/webp;base64,${blurBuffer.toString("base64")}`
+    
+    // 2. Optimizar (simula el pipeline real)
+    const optimizedBuffer = await sharp(testBuffer)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 75 })
+      .toBuffer()
+    
+    // 3. Subir a Firebase Storage
+    if (!getApps().length) {
+      const base64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
+      const sa = JSON.parse(Buffer.from(base64!, "base64").toString("utf-8"))
+      admin.initializeApp({ credential: admin.credential.cert(sa), storageBucket: "starfigs-29d31" })
+    }
+    
+    const { v4: uuidv4 } = await import("uuid")
+    const filename = `test/diag_${uuidv4()}.webp`
+    const bucket = admin.storage().bucket("starfigs-29d31")
+    const file = bucket.file(filename)
+    await file.save(optimizedBuffer, { metadata: { contentType: "image/webp" } })
+    await file.makePublic()
+    const uploadUrl = `https://storage.googleapis.com/starfigs-29d31/${encodeURIComponent(filename)}`
+    
+    results.tests.uploadSimulation = { status: "✅ OK", url: uploadUrl }
+  } catch (e: any) {
+    results.tests.uploadSimulation = { status: "❌ FAIL", error: e.message, stack: e.stack?.split("\n").slice(0, 3).join("\n") }
+  }
+
   return NextResponse.json(results, { status: Object.values(results.tests).some((t: any) => t.status?.includes("❌")) ? 500 : 200 })
 }
