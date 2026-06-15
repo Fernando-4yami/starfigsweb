@@ -364,7 +364,8 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         })
 
         if (!response.ok) {
-          throw new Error(`Error al subir ${file.name}`)
+          const errorData = await response.json().catch(() => ({ details: response.statusText }))
+          throw new Error(`Error al subir ${file.name}: ${errorData.details || errorData.error || response.statusText}`)
         }
 
         const result = await response.json()
@@ -408,7 +409,8 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       })
 
       if (!response.ok) {
-        throw new Error("Error al subir miniatura")
+        const errorData = await response.json().catch(() => ({ details: response.statusText }))
+        throw new Error(`Error al subir miniatura: ${errorData.details || errorData.error || response.statusText}`)
       }
 
       const result = await response.json()
