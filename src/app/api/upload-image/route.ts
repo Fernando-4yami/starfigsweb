@@ -1,6 +1,7 @@
 // src/app/api/upload-image/route.ts
 export const dynamic = "force-dynamic"; // ← CRÍTICO: Esto evita que Next.js cachee el endpoint
 export const runtime = "nodejs"; // ← Asegura que use Node.js runtime
+export const maxDuration = 60; // ← ⏱️ Hasta 60s para evitar timeout con sharp
 
 import { type NextRequest, NextResponse } from "next/server"
 import sharp from "sharp"
