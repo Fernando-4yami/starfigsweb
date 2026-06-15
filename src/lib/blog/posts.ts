@@ -377,6 +377,183 @@ Comprar figuras desde Japón puede ser complicado: barreras de idioma, costos de
 
 En **Starfigs** nos encargamos de todo el proceso para que puedas reservar con tranquilidad. Trabajamos únicamente con productos originales y proveedores verificados, manteniéndote informado durante cada etapa de la importación hasta la entrega de tu pedido.`,
   },
+  {
+    slug: "comparativa-tipos-figuras-anime-prize-kuji-pop-up-parade-escala",
+    title: "¿Prize, Kuji, Pop Up Parade o Escala? Comparativa Completa de Tipos de Figuras de Anime",
+    description:
+      "Comparamos los 5 tipos principales de figuras de anime: Prize, Kuji, Pop Up Parade, Figma y Escala. Calidad, precio, tamaño y cuál comprar según tu presupuesto en Perú.",
+    date: "2025-06-15",
+    category: "Guías",
+    author: "Starfigs",
+    image: "https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_all_figures_600x600.png",
+    content: `
+Si estás empezando en el coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre una prize figure, una Kuji, una Pop Up Parade y una figura a escala?** ¿Vale la pena pagar más por una escala o con una prize figure basta?
+
+En esta guía te explicamos las diferencias reales entre los 5 tipos principales de figuras, para que sepas exactamente qué esperar según lo que pagues.
+
+> 📸 *Las imágenes de esta guía son del artículo original de Solaris Japan, donde compararon figuras de Megumin y Aqua (Konosuba) a través de todas las categorías. Un trabajo increíble que recomendamos leer.*
+
+## Los 5 Tipos de Figuras que Vamos a Comparar
+
+| Tipo | Precio aprox. | Altura | Calidad |
+|:---|---:|---:|---:|
+| 🎯 Prize Figure | S/40 - S/120 | 10-20 cm | ⭐⭐ |
+| 🎟️ Kuji (Ichiban Kuji) | S/50 - S/200 | 15-25 cm | ⭐⭐⭐ |
+| 🎨 Pop Up Parade | S/100 - S/180 | ~17 cm | ⭐⭐⭐⭐ |
+| ⚔️ Figma | S/200 - S/400 | ~15 cm | ⭐⭐⭐⭐ |
+| 🏛️ Escala | S/250 - S/1500+ | 15-45 cm | ⭐⭐⭐⭐⭐ |
+
+---
+
+## 🎯 Prize Figures (Figuras de Premio)
+
+![Megumin prize figure](https://cdn.shopify.com/s/files/1/0318/2649/files/IMG_6525_600x600.jpg)
+
+Las **prize figures** son las figuras que se ganan en las máquinas UFO Catcher de Japón o que vienen en las máquinas de gashapon. Fabricadas por empresas como **SEGA, Taito, Banpresto y Furyu**, son la puerta de entrada más económica al coleccionismo.
+
+**Lo bueno:**
+- ✅ Precio muy accesible (S/40 - S/120)
+- ✅ Gran variedad de personajes
+- ✅ Suficientemente buenas para verse bien en un estante
+
+**Lo malo:**
+- ❌ La calidad es inconsistente. Pueden tener pintura corrida, líneas de unión visibles y plástico con brillo excesivo
+- ❌ Los detalles se pierden de cerca
+- ❌ Las bases son sencillas y genéricas
+
+**¿Para quién?** Perfectas para empezar una colección con presupuesto ajustado. Se ven bien desde lejos y te permiten tener varios personajes sin gastar mucho. Pero si eres detallista, te van a frustrar.
+
+**Ejemplo real:** La Megumin prize de SEGA tiene una pose ambiciosa y colores intensos, pero de cerca notarás imperfecciones en la pintura, líneas de unión marcadas y algunas partes mal encajadas. Nada que no se espere por el precio.
+
+---
+
+## 🎟️ Kuji (Ichiban Kuji)
+
+![Megumin Kuji](https://cdn.shopify.com/s/files/1/0318/2649/files/IMG_7014_600x600.jpg)
+
+"Kuji" significa **lotería** en japonés. Las **Ichiban Kuji** de Banpresto (ahora Bandai Spirits) son figuras que se obtienen comprando boletos de lotería en tiendas de conveniencia japonesas. Compras un ticket y puedes ganar desde un llavero hasta la figura principal.
+
+**Lo bueno:**
+- ✅ Mejor calidad que las prize figures estándar
+- ✅ Suelen tener poses más naturales y mejores acabados
+- ✅ Tamaño generoso (cerca de 1/7 escala)
+- ✅ Precio accesible considerando la calidad
+
+**Lo malo:**
+- ❌ Siguen siendo figuras producidas en masa, con imperfecciones
+- ❌ La pintura puede verse extraña de cerca (degradados artificiales)
+- ❌ Son difíciles de conseguir si no es en preventa
+
+**¿Para quién?** Para coleccionistas que quieren algo mejor que una prize figure pero no quieren pagar el precio de una escala. En Starfigs traemos Ichiban Kuji completos para que puedas elegir el premio que quieres sin depender de la suerte.
+
+---
+
+## 🎨 Pop Up Parade
+
+![Megumin Pop Up Parade](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_pop_up_parade_no_hat_600x600.png)
+
+Lanzada por **Good Smile Company** en 2019, la línea **Pop Up Parade** se ha convertido en una de las favoritas por su increíble relación calidad-precio. Figuras de ~17 cm a un precio fijo, con calidad muy superior a su costo.
+
+**Lo bueno:**
+- ✅ Excelente calidad de pintura y acabados
+- ✅ Sin líneas de unión visibles ni rebabas
+- ✅ Precio fijo y accesible (S/100 - S/180)
+- ✅ Gran y creciente variedad de personajes
+- ✅ Las bases son simples pero bien diseñadas
+
+**Lo malo:**
+- ❌ Poses simples (es parte del concepto)
+- ❌ Menos detalle que una figura a escala
+- ❌ El sombreado no es tan profundo
+
+**¿Para quién?** Para el coleccionista que quiere calidad sin pagar el precio de una escala. Es el punto dulce entre precio y calidad. Si solo puedes comprar una figura y quieres la mejor experiencia posible por tu dinero, una Pop Up Parade es la respuesta.
+
+**Ejemplo real:** La Pop Up Parade de Megumin tiene un cabello con capas y textura, sin puntas abiertas ni acabados plásticos. La pintura es limpia, los accesorios están bien definidos y el conector de su bastón es transparente en vez de un feo soporte blanco.
+
+---
+
+## ⚔️ Figma
+
+![Aqua Figma](https://cdn.shopify.com/s/files/1/0318/2649/files/Aqua_all_figures_600x600.png)
+
+Los **Figma** son figuras articuladas de **Max Factory** (parte de Good Smile Company). A diferencia de las figuras estáticas, los Figma están diseñados para **posearse y jugarse**, con articulaciones en codos, rodillas, caderas y múltiples rostros intercambiables.
+
+**Lo bueno:**
+- ✅ Altísima articulación — puedes recrear cualquier escena
+- ✅ Proporciones realistas (~15 cm)
+- ✅ Vienen con múltiples accesorios y rostros
+- ✅ Ideales para fotografía y contenido
+
+**Lo malo:**
+- ❌ Precio más elevado (S/200 - S/400)
+- ❌ Las articulaciones pueden ser visibles
+- ❌ La pintura es sólida sin degradados complejos
+
+**¿Para quién?** Fotógrafos, creadores de contenido y quienes disfrutan cambiar las poses de sus figuras. Si eres de los que les gusta interactuar con las figuras y no solo mirarlas, un Figma es perfecto.
+
+---
+
+## 🏛️ Figuras a Escala
+
+![Megumin Scale](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_scale_600x600.png)
+
+Las **figuras a escala** son la cúspide del coleccionismo. Representaciones estáticas del personaje en proporciones realistas (1/8, 1/7, 1/6, 1/4) con el **máximo nivel de detalle y pintura** que la industria puede ofrecer.
+
+**Lo bueno:**
+- ✅ Calidad de pintura y detalle insuperables
+- ✅ Presencia impactante en cualquier vitrina
+- ✅ Materiales premium (PVC, ABS, partes de polystone)
+- ✅ Su valor tiende a aumentar con el tiempo
+
+**Lo malo:**
+- ❌ Precio elevado (S/250 - S/1500+, algunos modelos pasan los S/3000)
+- ❌ Ocupan mucho espacio
+- ❌ Son estáticas — no se pueden mover
+- ❌ Las preventas pueden tardar 6-12 meses
+
+**¿Para quién?** Para el coleccionista serio que quiere la pieza central de su colección. Si tienes un personaje favorito y quieres la mejor representación posible de él, una figura a escala es la respuesta.
+
+**Ejemplo real:** La Megumin a escala tiene un sombreado impecable, la piel se ve natural, los pliegues de la ropa son realistas y Chomusuke (su gato) está modelado con gran detalle. Incluso una figura a escala de segunda mano puede verse mejor que una prize figure nueva.
+
+---
+
+## 📊 Comparativa Visual
+
+![Comparativa de las 4 Megumins](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_all_figures_600x600.png)
+
+*Las 4 Megumins: Prize, Kuji, Pop Up Parade y Escala. La diferencia en calidad es evidente.*
+
+![Comparativa de las 4 Aquas](https://cdn.shopify.com/s/files/1/0318/2649/files/Aqua_all_figures_600x600.png)
+
+*Las 4 Aquas: Prize, Pop Up Parade, Figma y Escala. Cada nivel sube notablemente la calidad.*
+
+### ¿Qué notas en las fotos?
+
+1. **Prize:** La piel se ve brillante/plastica, las líneas de pintura no son precisas
+2. **Kuji:** Mejora notable, pero aún se ven imperfecciones de cerca
+3. **Pop Up Parade:** Pintura limpia, sin rebabas, colores sólidos
+4. **Figma:** Calidad sólida, diseñado para durar y posearse
+5. **Escala:** Sombreado profesional, texturas realistas, acabado de colección
+
+---
+
+## ¿Cuál Deberías Comprar?
+
+| Si tu presupuesto es... | Te recomendamos... |
+|:---|---:|
+| **S/40 - S/100** | Prize Figure o Ichiban Kuji |
+| **S/100 - S/200** | Pop Up Parade |
+| **S/200 - S/400** | Figma (si te gusta poseer) o una escala 1/8 en oferta |
+| **S/400+** | Figura a escala 1/7 o 1/8 de buena marca |
+
+**Regla de oro:** Siempre es mejor tener **una figura de buena calidad** que tres figuras mediocres por el mismo precio. Una Pop Up Parade bien elegida te dará más satisfacción que tres prize figures con defectos.
+
+---
+
+*Este artículo está inspirado en el excelente trabajo de Solaris Japan, quienes realizaron una comparativa similar con figuras de Megumin y Aqua de Konosuba. Puedes leer su artículo original en inglés aquí: [Solaris Japan - Anime Figures Comparison Guide](https://solarisjapan.com/blogs/news/anime-figures-comparison-guide). Las imágenes de Megumin y Aqua son propiedad de Solaris Japan y se usan con fines educativos y de referencia.*
+
+¿Tienes dudas sobre qué tipo de figura comprar? En **Starfigs** tenemos todos los tipos: desde prize figures económicas hasta escalas de colección, todas 100% originales e importadas desde Japón.`,
+  },
 ]
 
 export default posts
