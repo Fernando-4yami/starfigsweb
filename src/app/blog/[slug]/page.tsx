@@ -77,7 +77,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <article className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Breadcrumb */}
         <nav className="mb-8 text-xs text-gray-400 dark:text-gray-500">
           <Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Inicio</Link>
@@ -110,23 +110,31 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
 
           {post.image && (
-            <div className="mt-6 -mx-4 sm:-mx-0 sm:rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <div className="mt-6 bg-gray-100 dark:bg-gray-800">
               <img
                 src={post.image}
                 alt={post.title}
-                className="w-full h-48 sm:h-72 object-cover"
+                className="w-full h-56 sm:h-80 md:h-96 object-cover"
               />
             </div>
           )}
         </header>
 
         {/* Content */}
-        <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed space-y-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 dark:[&_h2]:text-gray-100 [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-gray-900 dark:[&_h3]:text-gray-100 [&_h3]:mt-6 [&_h3]:mb-2 [&_h4]:font-semibold [&_h4]:text-gray-900 dark:[&_h4]:text-gray-100 [&_h4]:mt-4 [&_h4]:mb-2 [&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-gray-100 [&_code]:text-sm [&_code]:bg-gray-100 dark:[&_code]:bg-gray-800 [&_code]:px-1 [&_code]:py-0.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_li]:text-gray-600 dark:[&_li]:text-gray-400 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 dark:[&_blockquote]:border-gray-700 [&_blockquote]:pl-4 [&_blockquote]:text-gray-500 dark:[&_blockquote]:text-gray-400 [&_blockquote]:italic [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_th]:bg-gray-50 dark:[&_th]:bg-gray-800 [&_th]:text-gray-700 dark:[&_th]:text-gray-300 [&_th]:font-semibold [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_td]:px-3 [&_td]:py-2 [&_td]:border-b [&_td]:border-gray-200 dark:[&_td]:border-gray-700 [&_tr]:last:[&_td]:border-b-0">
+        <div className="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed space-y-5 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 dark:[&_h2]:text-gray-100 [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-900 dark:[&_h3]:text-gray-100 [&_h3]:mt-8 [&_h3]:mb-3 [&_h4]:font-semibold [&_h4]:text-gray-900 dark:[&_h4]:text-gray-100 [&_h4]:mt-6 [&_h4]:mb-2 [&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-gray-100 [&_code]:text-sm [&_code]:bg-gray-100 dark:[&_code]:bg-gray-800 [&_code]:px-1 [&_code]:py-0.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_li]:text-gray-600 dark:[&_li]:text-gray-400 [&_li]:leading-relaxed [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 dark:[&_blockquote]:border-gray-700 [&_blockquote]:pl-5 [&_blockquote]:text-gray-500 dark:[&_blockquote]:text-gray-400 [&_blockquote]:italic [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_th]:bg-gray-50 dark:[&_th]:bg-gray-800 [&_th]:text-gray-700 dark:[&_th]:text-gray-300 [&_th]:font-semibold [&_th]:px-4 [&_th]:py-2.5 [&_th]:text-left [&_td]:px-4 [&_td]:py-2.5 [&_td]:border-b [&_td]:border-gray-200 dark:[&_td]:border-gray-700 [&_tr]:last:[&_td]:border-b-0">
           <div
             dangerouslySetInnerHTML={{
               __html: post.content
                 .split("\n")
                 .map((line) => {
+                  const imgMatch = line.match(/^!\[(.*?)\]\((.*?)\)$/)
+                  if (imgMatch) {
+                    const alt = imgMatch[1]
+                    const src = imgMatch[2]
+                    const caption = alt || ""
+                    return `<figure class="my-8 -mx-4 sm:-mx-6 lg:-mx-8"><img src="${src}" alt="${alt}" class="w-full" loading="lazy" />${caption ? `<figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 px-4">${caption}</figcaption>` : ""}</figure>`
+                  }
+                  if (line.startsWith("---")) return `<hr class="my-10 border-gray-200 dark:border-gray-800" />`
                   if (line.startsWith("## ")) return `<h2>${line.slice(3)}</h2>`
                   if (line.startsWith("### ")) return `<h3>${line.slice(4)}</h3>`
                   if (line.startsWith("#### ")) return `<h4>${line.slice(5)}</h4>`
@@ -143,7 +151,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                     const content = line.replace(/^\d+\.\s/, "")
                     return `<li>${content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</li>`
                   }
-                  let formatted = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>")
+                  let formatted = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/`([^`]+)`/g, "<code>$1</code>")
                   return `<p>${formatted}</p>`
                 })
                 .join("\n")

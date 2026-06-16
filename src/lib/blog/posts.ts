@@ -97,15 +97,20 @@ Identificar figuras originales no es difícil una vez que sabes qué buscar. En 
     date: "2025-01-20",
     category: "Guías",
     author: "Starfigs",
-    image: "https://mikatan.goodsmile.info/en/wp-content/uploads/2015/03/o0515069513236326090.jpg",
+    image: "https://images.goodsmile.info/cgm/images/product/20230531/14875/115598/large/109b83b4b8849b28be5e3347c617ee95.jpg",
     content: `
 Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre un Nendoroid, un Figma y una figura a escala?** Cada formato tiene sus características, ventajas y público objetivo.
 
 En esta guía te explicamos todo para que elijas la figura perfecta para ti.
 
-## 🧸 Nendoroid
+> 📸 *Las imágenes de esta guía son de los fabricantes oficiales: Good Smile Company, Max Factory y MyFigureCollection, usadas con fines educativos y de referencia. Puedes ver los productos originales en [goodsmile.com](https://goodsmile.com).*
 
-Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de aproximadamente **10 cm** fabricadas por **Good Smile Company**.
+## 🧸 Nendoroid — La Magia Chibi
+
+![Nendoroid Hatsune Miku NT mostrando rostros y piezas intercambiables](https://images.goodsmile.info/cgm/images/product/20230531/14875/115598/large/109b83b4b8849b28be5e3347c617ee95.jpg)
+*Imagen: Good Smile Company — Nendoroid Hatsune Miku NT*
+
+Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de aproximadamente **10 cm** fabricadas por **Good Smile Company**. Son reconocibles al instante por su estilo súper deformado que transforma a cualquier personaje en una versión adorable.
 
 **Características:**
 - Altura: ~10 cm
@@ -114,83 +119,112 @@ Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de apro
 - Precio: Generalmente entre S/150 y S/300
 
 **Ventajas:**
-- ✅ Gran cantidad de accesorios y expresiones
+- ✅ Gran cantidad de accesorios y expresiones intercambiables
 - ✅ Fáciles de exhibir por su tamaño compacto
-- ✅ Amplísima variedad de personajes
+- ✅ Amplísima variedad de personajes (miles de figuras lanzadas)
 - ✅ Excelente relación calidad-precio
 
 **Desventajas:**
-- ❌ No son proporciones realistas
-- ❌ Menos detalle que una escala
+- ❌ No son proporciones realistas (estilo chibi)
+- ❌ Menos detalle que una figura a escala
+- ❌ Las articulaciones pueden ser limitadas
 
-**Ideal para:** Coleccionistas que aman la personalización y tener muchos personajes sin ocupar demasiado espacio.
+**Ideal para:** Coleccionistas que aman la personalización y tener muchos personajes sin ocupar demasiado espacio. También son perfectos como piezas de escritorio por su tamaño compacto.
 
-## ⚔️ Figma
+---
 
-Los **Figma** son figuras articuladas de aproximadamente **15 cm** también de **Good Smile Company**, diseñadas para el juego y la posesión dinámica.
+## ⚔️ Figma — La Acción en tus Manos
+
+![Figma en pose dinámica mostrando su alta articulación](https://images.goodsmile.info/cgm/images/product/20200528/9672/68903/large/8c249a5b6c3104680873427af1a3962b.jpg)
+*Imagen: Good Smile Company — Figma (Max Factory)*
+
+Los **Figma** son figuras articuladas de aproximadamente **15 cm** fabricadas por **Max Factory** (parte de Good Smile Company). A diferencia de las figuras estáticas, los Figma están diseñados para **posearse al máximo**, con articulaciones en codos, rodillas, caderas y torso.
 
 **Características:**
 - Altura: ~15 cm
-- Alta articulación (movimiento en codos, rodillas, caderas)
+- Alta articulación (movimiento en codos, rodillas, caderas, tobillos)
 - Estilo realista proporcional
 - Precio: Entre S/200 y S/400
 
 **Ventajas:**
-- ✅ Posabilidad extrema — puedes recrear escenas
-- ✅ Proporciones realistas
-- ✅ Incluyen soportes para poses dinámicas
-- ✅ Ideal para fotografía
+- ✅ Posabilidad extrema — puedes recrear cualquier escena
+- ✅ Proporciones realistas y consistentes entre personajes
+- ✅ Incluyen soportes para poses dinámicas (saltos, vuelos, combate)
+- ✅ Ideal para fotografía y stop motion
 
 **Desventajas:**
-- ❌ Precio más elevado que los Nendoroid
+- ❌ Precio más elevado que un Nendoroid
 - ❌ Menos accesorios que un Nendoroid
+- ❌ Las articulaciones pueden ser visibles en algunas poses
 
-**Ideal para:** Fotógrafos, creadores de contenido y quienes disfrutan cambiar las poses de sus figuras.
+**Ideal para:** Fotógrafos, creadores de contenido, cosplayers en miniatura y quienes disfrutan cambiar las poses de sus figuras cada semana.
 
-## 🏛️ Figuras a Escala
+---
 
-Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad** que representan al personaje en proporciones realistas.
+## 🏛️ Figuras a Escala — La Obra de Arte
+
+![Figura a escala mostrando pintura de alta calidad y detalle](https://images.goodsmile.info/cgm/images/product/20160415/5573/35654/large/a6f6f966144883187c32bf28a8d053d2.jpg)
+*Imagen: Good Smile Company — Figura a escala 1/7*
+
+Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad** que representan al personaje en proporciones realistas. Son completamente estáticas y están diseñadas para ser el centro de atención de cualquier colección.
 
 **Características:**
 - Altura: 15 cm a 45 cm (dependiendo de la escala)
 - Sin articulación (estáticas)
-- Altísimo nivel de detalle y pintura
+- Altísimo nivel de detalle y pintura con degradados profesionales
 - Precio: Desde S/250 hasta S/1500+
 
 **Ventajas:**
-- ✅ La máxima calidad en detalles y pintura
-- ✅ Presencia impactante en vitrina
-- ✅ Materiales premium (PVC, ABS, algunas partes de polystone)
-- ✅ Incrementan su valor con el tiempo
+- ✅ La máxima calidad en detalles, pintura y acabados
+- ✅ Presencia impactante en cualquier vitrina
+- ✅ Materiales premium (PVC, ABS, a veces polystone)
+- ✅ Su valor tiende a aumentar con el tiempo
+- ✅ Los degradados y sombreados son de nivel profesional
 
 **Desventajas:**
-- ❌ Precio elevado
+- ❌ Precio elevado (algunas ediciones limitadas pasan los S/3000)
 - ❌ Ocupan mucho espacio
-- ❌ No se pueden mover o cambiar de pose
+- ❌ Son estáticas — no se pueden mover ni cambiar de pose
+- ❌ Las preventas pueden tardar 6-12 meses en llegar
 
-**Ideal para:** Coleccionistas serios que buscan la pieza central de su colección.
+**Ideal para:** Coleccionistas serios que buscan la pieza central de su colección. Si tienes un personaje favorito y quieres la mejor representación posible de él, una escala es la respuesta.
+
+---
+
+## 📏 Comparativa de Tamaños
+
+![Comparativa de tamaños: Nendoroid, Figma y figura a escala lado a lado](https://static.myfigurecollection.net/upload/pictures/2012/03/30/43469.jpg)
+*Imagen: MyFigureCollection — Comparativa de tamaños Nendoroid vs Figma vs Escala*
+
+Esta foto vale más que mil palabras. A la izquierda un **Nendoroid** (~10 cm), al centro un **Figma** (~15 cm), a la derecha una **figura a escala 1/8** (~22 cm). La diferencia de tamaño y presencia es evidente.
 
 ## 📊 Comparativa Rápida
 
-| Aspecto | Nendoroid | Figma | Escala |
+| Aspecto | 🧸 Nendoroid | ⚔️ Figma | 🏛️ Escala |
 |:---|---:|---:|---:|
 | **Altura** | ~10 cm | ~15 cm | 15-45 cm |
 | **Precio** | S/150-300 | S/200-400 | S/250-1500+ |
 | **Articulación** | Limitada | Alta | Ninguna |
 | **Detalle** | Bueno | Bueno | Excelente |
+| **Pintura** | Sólida | Sólida | Degradados |
+| **Accesorios** | Muchos | Varios | Solo la figura |
 | **Espacio** | Poco | Poco | Mucho |
 | **Variedad** | Amplia | Amplia | Limitada |
 | **Ideal para** | Principiantes | Fotografía | Coleccionistas |
 
 ## ¿Cuál Elegir?
 
-**Si eres principiante:** Empieza con un **Nendoroid** de tu personaje favorito. Son accesibles, vienen con muchos accesorios y no requieren mucho espacio.
+**Si eres principiante o tienes presupuesto ajustado:** Empieza con un **Nendoroid** de tu personaje favorito. Son accesibles (S/150-300), vienen con muchos accesorios y no requieren mucho espacio. Además, puedes cambiarles las expresiones para darles personalidad.
 
-**Si te gusta la fotografía:** Ve por un **Figma**. La posibilidad de cambiar poses te permitirá crear escenas increíbles.
+**Si te gusta la fotografía o el contenido para redes:** Ve por un **Figma** (S/200-400). La posibilidad de cambiar poses te permitirá crear escenas increíbles para Instagram, TikTok o simplemente para disfrutar cambiando la decoración de tu vitrina cada mes.
 
-**Si quieres una pieza de colección:** Invierte en una **figura a escala**. Son la joya de cualquier colección y su valor tiende a aumentar.
+**Si quieres una pieza de colección definitiva:** Invierte en una **figura a escala** (S/250-1500+). Son la joya de cualquier colección. Su valor tiende a aumentar con los años y la calidad es sencillamente incomparable.
 
-**¿No puedes decidirte?** ¡No hay reglas! Muchos coleccionistas tenemos los tres formatos. En Starfigs tenemos disponibles los tres tipos con importación directa desde Japón.`,
+**¿No puedes decidirte?** ¡No hay reglas! Muchos coleccionistas tenemos los tres formatos combinados en la misma vitrina. Un Nendoroid en el escritorio, un Figma en la repisa y una escala como pieza central del estante. En **Starfigs** tenemos disponibles los tres tipos con importación directa desde Japón.
+
+---
+
+*Fuentes de imágenes: [Good Smile Company](https://goodsmile.com) (Nendoroid Hatsune Miku NT, Figma, Scale 1/7), [MyFigureCollection](https://myfigurecollection.net) (comparativa de tamaños). Imágenes usadas con fines educativos y de referencia. Todos los derechos pertenecen a sus respectivos fabricantes.*`,
   },
   {
     slug: "guia-completa-tipos-figuras-anime",
