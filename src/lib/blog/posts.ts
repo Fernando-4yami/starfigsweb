@@ -97,18 +97,18 @@ Identificar figuras originales no es difícil una vez que sabes qué buscar. En 
     date: "2025-01-20",
     category: "Guías",
     author: "Starfigs",
-    image: "https://images.goodsmile.info/cgm/images/product/20230531/14875/115598/large/109b83b4b8849b28be5e3347c617ee95.jpg",
+    image: "https://mikatan.goodsmile.info/en/wp-content/uploads/2015/03/o0515069513236326090.jpg",
     content: `
 Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre un Nendoroid, un Figma y una figura a escala?** Cada formato tiene sus características, ventajas y público objetivo.
 
 En esta guía te explicamos todo para que elijas la figura perfecta para ti.
 
-> 📸 *Las imágenes de esta guía son de los fabricantes oficiales: Good Smile Company, Max Factory y MyFigureCollection, usadas con fines educativos y de referencia. Puedes ver los productos originales en [goodsmile.com](https://goodsmile.com).*
+> 📸 *Las imágenes de esta guía son de Solaris Japan (Megumin de Konosuba) y del blog oficial de Good Smile Company, usadas con fines educativos y de referencia.*
 
 ## 🧸 Nendoroid — La Magia Chibi
 
-![Nendoroid Hatsune Miku NT mostrando rostros y piezas intercambiables](https://images.goodsmile.info/cgm/images/product/20230531/14875/115598/large/109b83b4b8849b28be5e3347c617ee95.jpg)
-*Imagen: Good Smile Company — Nendoroid Hatsune Miku NT*
+![Megumin prize figure - calidad base vs Nendoroid](https://cdn.shopify.com/s/files/1/0318/2649/files/IMG_6525_600x600.jpg)
+*Imagen: Solaris Japan — Prize figure de Megumin (Konosuba). Un Nendoroid tiene un nivel de detalle y acabado superior a este.*
 
 Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de aproximadamente **10 cm** fabricadas por **Good Smile Company**. Son reconocibles al instante por su estilo súper deformado que transforma a cualquier personaje en una versión adorable.
 
@@ -135,8 +135,8 @@ Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de apro
 
 ## ⚔️ Figma — La Acción en tus Manos
 
-![Figma en pose dinámica mostrando su alta articulación](https://images.goodsmile.info/cgm/images/product/20200528/9672/68903/large/8c249a5b6c3104680873427af1a3962b.jpg)
-*Imagen: Good Smile Company — Figma (Max Factory)*
+![Aqua figuras - incluye Figma articulada](https://cdn.shopify.com/s/files/1/0318/2649/files/Aqua_all_figures_600x600.png)
+*Imagen: Solaris Japan — Aqua de Konosoba en distintos formatos, incluyendo Figma*
 
 Los **Figma** son figuras articuladas de aproximadamente **15 cm** fabricadas por **Max Factory** (parte de Good Smile Company). A diferencia de las figuras estáticas, los Figma están diseñados para **posearse al máximo**, con articulaciones en codos, rodillas, caderas y torso.
 
@@ -163,8 +163,8 @@ Los **Figma** son figuras articuladas de aproximadamente **15 cm** fabricadas po
 
 ## 🏛️ Figuras a Escala — La Obra de Arte
 
-![Figura a escala mostrando pintura de alta calidad y detalle](https://images.goodsmile.info/cgm/images/product/20160415/5573/35654/large/a6f6f966144883187c32bf28a8d053d2.jpg)
-*Imagen: Good Smile Company — Figura a escala 1/7*
+![Megumin a escala mostrando detalle de pintura de alta calidad](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_scale_600x600.png)
+*Imagen: Solaris Japan — Megumin figura a escala con pintura de alta calidad*
 
 Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad** que representan al personaje en proporciones realistas. Son completamente estáticas y están diseñadas para ser el centro de atención de cualquier colección.
 
@@ -191,12 +191,14 @@ Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad*
 
 ---
 
-## 📏 Comparativa de Tamaños
+## 📏 Comparativa Visual
 
-![Comparativa de tamaños: Nendoroid, Figma y figura a escala lado a lado](https://static.myfigurecollection.net/upload/pictures/2012/03/30/43469.jpg)
-*Imagen: MyFigureCollection — Comparativa de tamaños Nendoroid vs Figma vs Escala*
+![Comparativa de las 4 Megumins: Prize, Kuji, Pop Up Parade y Escala](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_all_figures_600x600.png)
+*Imagen: Solaris Japan — La misma Megumin en 4 calidades distintas: Prize, Kuji, Pop Up Parade y Escala*
 
-Esta foto vale más que mil palabras. A la izquierda un **Nendoroid** (~10 cm), al centro un **Figma** (~15 cm), a la derecha una **figura a escala 1/8** (~22 cm). La diferencia de tamaño y presencia es evidente.
+Esta foto vale más que mil palabras. Cuatro versiones de la misma Megumin (Konosuba) desde una prize figure básica (equivalente en precio a un Nendoroid) hasta una figura a escala. La diferencia en calidad de pintura, acabados y presencia es evidente.
+
+Entre los extremos (prize vs escala) está el **Figma**: más pequeño que una escala, pero con la ventaja de ser articulado y poder cambiar de pose.
 
 ## 📊 Comparativa Rápida
 
@@ -224,7 +226,7 @@ Esta foto vale más que mil palabras. A la izquierda un **Nendoroid** (~10 cm), 
 
 ---
 
-*Fuentes de imágenes: [Good Smile Company](https://goodsmile.com) (Nendoroid Hatsune Miku NT, Figma, Scale 1/7), [MyFigureCollection](https://myfigurecollection.net) (comparativa de tamaños). Imágenes usadas con fines educativos y de referencia. Todos los derechos pertenecen a sus respectivos fabricantes.*`,
+*Fuentes de imágenes: [Solaris Japan](https://solarisjapan.com) (Megumin y Aqua de Konosuba), [Good Smile Company Blog (Mikatan)](https://mikatan.goodsmile.info). Imágenes usadas con fines educativos y de referencia. Todos los derechos pertenecen a sus respectivos fabricantes.*`,
   },
   {
     slug: "guia-completa-tipos-figuras-anime",
