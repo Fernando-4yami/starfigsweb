@@ -97,13 +97,13 @@ Identificar figuras originales no es difícil una vez que sabes qué buscar. En 
     date: "2025-01-20",
     category: "Guías",
     author: "Starfigs",
-    image: "https://mikatan.goodsmile.info/en/wp-content/uploads/2015/03/o0515069513236326090.jpg",
+    image: "https://i.redd.it/3yncgcjvchf91.jpg",
     content: `
 Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has preguntado: **¿qué diferencia hay entre un Nendoroid, un Figma y una figura a escala?** Cada formato tiene sus características, ventajas y público objetivo.
 
 En esta guía te explicamos todo para que elijas la figura perfecta para ti.
 
-> 📸 *La imagen principal muestra varios Nendoroids juntos (Good Smile Company). Las imágenes de comparación son de Solaris Japan, usadas con fines educativos.*
+> 📸 *Imagen principal: comparativa Nendoroid vs Figma de Fire Emblem (vía Reddit u/LittleIzumi). Las imágenes de comparación son de Solaris Japan, usadas con fines educativos.*
 
 ## 🧸 Nendoroid — La Magia Chibi
 
