@@ -679,6 +679,11 @@ function ProductCard({ product, onDelete, deleting, onCopyTemplate, onCopyFacebo
         {isSelected && (
           <div className="absolute inset-0 bg-pink-500/10 dark:bg-pink-500/20 pointer-events-none" />
         )}
+        {(product.views ?? 0) > 0 && (
+          <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
+            👁️ {product.views}
+          </div>
+        )}
       </div>
       <div className="p-4 flex flex-col flex-1">
         <div className="flex-1">
