@@ -103,14 +103,11 @@ Si eres nuevo en el mundo del coleccionismo de figuras de anime, seguro te has p
 
 En esta guía te explicamos todo para que elijas la figura perfecta para ti.
 
-> 📸 *Las imágenes de esta guía son de Solaris Japan (Megumin de Konosuba) y del blog oficial de Good Smile Company, usadas con fines educativos y de referencia.*
+> 📸 *La imagen principal muestra varios Nendoroids juntos (Good Smile Company). Las imágenes de comparación son de Solaris Japan, usadas con fines educativos.*
 
 ## 🧸 Nendoroid — La Magia Chibi
 
-![Megumin prize figure - calidad base vs Nendoroid](https://cdn.shopify.com/s/files/1/0318/2649/files/IMG_6525_600x600.jpg)
-*Imagen: Solaris Japan — Prize figure de Megumin (Konosuba). Un Nendoroid tiene un nivel de detalle y acabado superior a este.*
-
-Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de aproximadamente **10 cm** fabricadas por **Good Smile Company**. Son reconocibles al instante por su estilo súper deformado que transforma a cualquier personaje en una versión adorable.
+Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de aproximadamente **10 cm** fabricadas por **Good Smile Company**. Son reconocibles al instante por su estilo súper deformado que transforma a cualquier personaje en una versión adorable. En la imagen principal de este artículo puedes ver varios Nendoroids juntos para que te hagas una idea de su estilo.
 
 **Características:**
 - Altura: ~10 cm
@@ -135,8 +132,8 @@ Los **Nendoroid** son figuras chibi (cabezas grandes, cuerpos pequeños) de apro
 
 ## ⚔️ Figma — La Acción en tus Manos
 
-![Aqua figuras - incluye Figma articulada](https://cdn.shopify.com/s/files/1/0318/2649/files/Aqua_all_figures_600x600.png)
-*Imagen: Solaris Japan — Aqua de Konosoba en distintos formatos, incluyendo Figma*
+![Comparativa de Aqua: Prize, Pop Up Parade, Figma y Escala — el Figma es la segunda desde la derecha](https://cdn.shopify.com/s/files/1/0318/2649/files/Aqua_all_figures_600x600.png)
+*Imagen: Solaris Japan — Cuatro versiones de Aqua (Konosuba). El Figma (2° desde la derecha) se distingue por sus articulaciones visibles y pose dinámica.*
 
 Los **Figma** son figuras articuladas de aproximadamente **15 cm** fabricadas por **Max Factory** (parte de Good Smile Company). A diferencia de las figuras estáticas, los Figma están diseñados para **posearse al máximo**, con articulaciones en codos, rodillas, caderas y torso.
 
@@ -163,8 +160,8 @@ Los **Figma** son figuras articuladas de aproximadamente **15 cm** fabricadas po
 
 ## 🏛️ Figuras a Escala — La Obra de Arte
 
-![Megumin a escala mostrando detalle de pintura de alta calidad](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_scale_600x600.png)
-*Imagen: Solaris Japan — Megumin figura a escala con pintura de alta calidad*
+![Megumin a escala 1/7 — detalle de pintura y acabado de colección](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_scale_600x600.png)
+*Imagen: Solaris Japan — Megumin figura a escala 1/7. Obsérvese la calidad del sombreado, los pliegues realistas y la presencia de Chomusuke con gran detalle.*
 
 Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad** que representan al personaje en proporciones realistas. Son completamente estáticas y están diseñadas para ser el centro de atención de cualquier colección.
 
@@ -193,12 +190,12 @@ Las **figuras a escala** (1/7, 1/8, 1/6, 1/4) son estatuillas de **alta calidad*
 
 ## 📏 Comparativa Visual
 
-![Comparativa de las 4 Megumins: Prize, Kuji, Pop Up Parade y Escala](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_all_figures_600x600.png)
-*Imagen: Solaris Japan — La misma Megumin en 4 calidades distintas: Prize, Kuji, Pop Up Parade y Escala*
+![Comparativa de las 4 Megumins: Prize, Kuji, Pop Up Parade y Escala — del nivel básico al premium](https://cdn.shopify.com/s/files/1/0318/2649/files/Megumin_all_figures_600x600.png)
+*Imagen: Solaris Japan — La misma Megumin en 4 calidades: Prize (básica), Kuji (intermedia), Pop Up Parade (calidad-precio) y Escala (premium). La diferencia es abismal.*
 
-Esta foto vale más que mil palabras. Cuatro versiones de la misma Megumin (Konosuba) desde una prize figure básica (equivalente en precio a un Nendoroid) hasta una figura a escala. La diferencia en calidad de pintura, acabados y presencia es evidente.
+Esta foto compara cuatro versiones de Megumin de Konosuba. Es perfecta para entender el salto de calidad que hay entre una figura básica (prize figure) y una figura a escala.
 
-Entre los extremos (prize vs escala) está el **Figma**: más pequeño que una escala, pero con la ventaja de ser articulado y poder cambiar de pose.
+Entre la Pop Up Parade y la Escala está el **Figma**: similar en tamaño a la Pop Up Parade, pero con la gran ventaja de ser **articulado** y poder cambiar de pose cuando quieras.
 
 ## 📊 Comparativa Rápida
 
@@ -226,7 +223,7 @@ Entre los extremos (prize vs escala) está el **Figma**: más pequeño que una e
 
 ---
 
-*Fuentes de imágenes: [Solaris Japan](https://solarisjapan.com) (Megumin y Aqua de Konosuba), [Good Smile Company Blog (Mikatan)](https://mikatan.goodsmile.info). Imágenes usadas con fines educativos y de referencia. Todos los derechos pertenecen a sus respectivos fabricantes.*`,
+*Fuentes de imágenes: [Solaris Japan](https://solarisjapan.com) (comparativas de Megumin y Aqua de Konosuba), [Good Smile Company Blog (Mikatan)](https://mikatan.goodsmile.info) (foto principal de Nendoroids). Imágenes usadas con fines educativos y de referencia. Todos los derechos pertenecen a sus respectivos fabricantes.*`,
   },
   {
     slug: "guia-completa-tipos-figuras-anime",
