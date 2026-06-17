@@ -53,9 +53,6 @@ export default function Footer() {
               <Link href="/guia-de-compra" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 Guía de Compra
               </Link>
-              <Link href="/series" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                Figuras por Serie
-              </Link>
               <Link href="/sobre-nosotros" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 Sobre Nosotros
               </Link>
