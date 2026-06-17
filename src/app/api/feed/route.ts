@@ -65,8 +65,8 @@ export async function GET() {
     const products: any[] = []
     snapshot.forEach((doc) => {
       const data = doc.data()
-      // Solo incluir productos con nombre y precio válido
-      if (data.name && data.price && data.price > 0) {
+      // Incluir productos con nombre (el precio se asigna default más abajo)
+      if (data.name) {
         products.push({
           id: doc.id,
           ...data,
@@ -89,7 +89,9 @@ export async function GET() {
       const imageUrl = product.imageUrls?.[0] || product.thumbnailUrl || ""
       const name = product.name || ""
       const slug = product.slug || ""
-      const price = product.price || 0
+      // 🔧 DEFAULT PRICE: S/100 para productos sin precio (solo en el feed, no toca frontend)
+      const hasPrice = product.price !== undefined && product.price !== null && product.price > 0
+      const price = hasPrice ? product.price : 100
       const stock = product.stock
       const releaseDate = product.releaseDate
 
