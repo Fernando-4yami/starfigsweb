@@ -24,7 +24,7 @@ export default function PlushPage() {
 
       {/* 🌍 CONTENIDO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
       <section className="sr-only">
-        <h1>{config.name} en Preventa Perú</h1>
+        <h1>{config.name} Originales | Starfigs Perú</h1>
         <p>{config.badge}</p>
         <p>{config.description}</p>
       </section>

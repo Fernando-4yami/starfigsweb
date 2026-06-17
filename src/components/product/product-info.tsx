@@ -35,14 +35,6 @@ export default function ProductInfo({
 }: ProductInfoProps) {
   const [showPriceTooltip, setShowPriceTooltip] = useState(false)
 
-  console.log("[v0] ProductInfo received props:", {
-    name,
-    stock,
-    discount,
-    showReleaseTag,
-    lowStockThreshold,
-  })
-
   const productForCalc = { price, stock, discount } as any
   const finalPrice = calculateFinalPrice(productForCalc)
   const hasDiscount = hasActiveDiscount(productForCalc)
@@ -52,15 +44,6 @@ export default function ProductInfo({
   const isLowStock = stock !== undefined && stock > 0 && stock <= lowStockThreshold
 
   const shouldShowStock = stock !== undefined && stock !== null && stock > 0
-
-  console.log("[v0] Calculated values:", {
-    finalPrice,
-    hasDiscount,
-    discountPercent,
-    inStock,
-    isLowStock,
-    shouldShowStock,
-  })
 
   return (
     <div className="space-y-6">

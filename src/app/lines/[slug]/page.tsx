@@ -85,8 +85,8 @@ export default async function LinePage({ params }: Props) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${lineName} en Preventa Perú`,
-    description: `Compra figuras de la línea ${lineName} en preventa en Perú. ${products.length} modelos disponibles.`,
+    name: `${lineName} | Starfigs Perú`,
+    description: `Compra figuras de la línea ${lineName} en Perú. ${products.length} modelos disponibles. Envío gratis.`,
     url: `https://starfigsperu.com/lines/${params.slug}`,
     isPartOf: {
       "@type": "WebSite",

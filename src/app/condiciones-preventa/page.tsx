@@ -70,10 +70,71 @@ const sections = [
 
 
 
+// FAQ Schema para Google Rich Results
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "¿Cómo funciona una reserva en Starfigs?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Starfigs trabaja mediante preventa e importación directa desde Japón. Productos menores a S/200 se reservan con S/40, y productos mayores a S/200 con el 50% del valor total. El saldo restante se cancela cuando el producto llega a Perú.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "¿Cuánto tarda en llegar una figura desde Japón?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "El tiempo estimado de llegada es de 2 a 3 meses aproximadamente. Este plazo puede variar debido a aduanas, logística internacional, retrasos del proveedor o cambios en la fecha de lanzamiento del fabricante.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "¿Puedo cancelar o cambiar mi reserva?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No se aceptan cancelaciones ni cambios de modelo o personaje una vez confirmada la reserva. Las reservas son compromisos de compra realizados específicamente para cada cliente.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "¿El envío es gratis?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Sí, las preventas incluyen envío gratuito por Agencias Shalom a nivel nacional (recojo en agencia). También disponible Olva Courier (costo por cotizar) y delivery local en Arequipa por S/7.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "¿Qué métodos de pago aceptan?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Aceptamos Yape, Plin y transferencia bancaria. Los medios de pago se proporcionan únicamente al momento de confirmar una reserva.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "¿Qué pasa si no pago el saldo restante a tiempo?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Si el saldo no se cancela dentro de 45 días calendario, la figura podrá incorporarse al inventario de Starfigs y la reserva realizada no será reembolsada.",
+      },
+    },
+  ],
+}
+
 export default function CondicionesPreventaPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
@@ -399,7 +460,8 @@ export default function CondicionesPreventaPage() {
             ← Volver a la tienda
           </Link>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

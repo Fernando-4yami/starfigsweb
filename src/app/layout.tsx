@@ -20,7 +20,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://starfigsperu.com"),
   title: {
-    default: "Starfigs Perú - Figuras de Anime en Preventa | Envío Gratis",
+    default: "Starfigs Perú - Figuras de Anime Originales | Envío Gratis",
+
     template: "%s | Starfigs Perú",
   },
   description:
@@ -44,14 +45,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_PE",
     siteName: "Starfigs Perú",
-    title: "Starfigs Perú - Figuras de Anime en Preventa | Envío Gratis",
+    title: "Starfigs Perú - Figuras de Anime Originales | Envío Gratis",
+
     description:
       "Las mejores figuras de anime en preventa en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom.",
     url: "https://starfigsperu.com",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Starfigs Perú - Figuras de Anime en Preventa",
+    title: "Starfigs Perú - Figuras de Anime Originales",
+
     description:
       "Las mejores figuras de anime en preventa en Perú. Envío gratis.",
   },

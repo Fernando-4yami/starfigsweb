@@ -119,6 +119,14 @@ export function generateCategoryMetadata(
       description,
       url: `${baseUrl}/categorias/${categorySlug}`,
       siteName,
+      images: [
+        {
+          url: `${baseUrl}/og-default.png`,
+          width: 1200,
+          height: 630,
+          alt: `Starfigs Perú - ${categoryName}`,
+        },
+      ],
       locale: "es_PE",
       type: "website",
     },
@@ -146,6 +154,14 @@ export function generateLineMetadata(lineName: string, productCount: number): Me
       description,
       url: `${baseUrl}/lines/${slug}`,
       siteName,
+      images: [
+        {
+          url: `${baseUrl}/og-default.png`,
+          width: 1200,
+          height: 630,
+          alt: `Starfigs Perú - ${lineName}`,
+        },
+      ],
       locale: "es_PE",
       type: "website",
     },
@@ -265,20 +281,27 @@ export function generateCategoryJsonLd(
   }
 }
 
-// JSON-LD para la organización
+// JSON-LD para la organización / negocio local
 export function generateOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "LocalBusiness"],
     name: siteName,
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
-    description: "Tienda especializada en figuras de anime y coleccionables",
+    description: "Tienda especializada en figuras de anime y coleccionables importadas desde Japón",
     address: {
       "@type": "PostalAddress",
       addressCountry: "PE",
     },
-    sameAs: ["https://www.facebook.com/starfigs", "https://www.instagram.com/starfigs"],
+    sameAs: ["https://www.facebook.com/starfigss", "https://www.instagram.com/starfigs"],
+    priceRange: "S/40 - S/5000",
+    areaServed: "PE",
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Figuras de anime",
+      itemListElement: ["Nendoroid", "Figma", "S.H.Figuarts", "Ichiban Kuji", "Pop Up Parade", "Escalas", "Figuras de Premio", "Plushies"],
+    },
   }
 }
 
