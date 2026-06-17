@@ -50,12 +50,6 @@ export default function Footer() {
               <Link href="/blog" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 Blog
               </Link>
-              <Link href="/guia-de-compra" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                Guía de Compra
-              </Link>
-              <Link href="/sobre-nosotros" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                Sobre Nosotros
-              </Link>
               <Link href="/condiciones-preventa" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 Condiciones de Preventa
               </Link>
