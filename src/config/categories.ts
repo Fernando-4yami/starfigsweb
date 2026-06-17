@@ -43,8 +43,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   scale: {
     name: "Figuras Escala",
     slug: "scale",
-    description: "Figuras a escala de máximo detalle y calidad",
-    badge: "📏 Proporciones perfectas • Detalles excepcionales",
+    description: "Figuras de anime a escala 1/7, 1/8 y 1/4 de máxima calidad, importadas desde Japón. La mejor opción para coleccionistas en Perú que buscan el máximo detalle, pintura profesional y piezas de exhibición definitivas para su colección. Envío gratis a todo Perú.",
+    badge: "📏 Figuras a escala 1/7, 1/8 y 1/4 • Detalle profesional",
     iconName: "Ruler",
     colors: {
       primary: "text-emerald-800",
@@ -60,8 +60,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   figma: {
     name: "Figma",
     slug: "figma",
-    description: "Figuras articuladas de máxima calidad y detalle",
-    badge: "🔧 Articulación premium • Accesorios intercambiables",
+    description: "Figuras de anime articuladas de Max Factory para coleccionistas en Perú. Los Figma ofrecen la máxima posabilidad con accesorios intercambiables, perfectos para fotografía y exhibición dinámica. Figuras originales importadas desde Japón con envío gratis a todo Perú.",
+    badge: "🔧 Figuras articuladas de Max Factory • Accesorios intercambiables",
     iconName: "Settings",
     colors: {
       primary: "text-blue-800",
@@ -87,8 +87,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   figuarts: {
     name: "S.H.Figuarts",
     slug: "figuarts",
-    description: "Figuras de acción de élite con articulación perfecta",
-    badge: "⚔️ Línea premium de Bandai • Articulación superior",
+    description: "Figuras de anime de acción S.H.Figuarts de Bandai Tamashii Nations, con articulación superior y acabados premium. Ideal para coleccionistas en Perú de Dragon Ball, One Piece, Marvel y más. Originales importadas desde Japón con envío gratis.",
+    badge: "⚔️ Figuras de acción Bandai • Dragon Ball, One Piece, Marvel",
     iconName: "Sword",
     colors: {
       primary: "text-red-800",
@@ -116,8 +116,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   ichiban: {
     name: "Ichiban Kuji",
     slug: "ichiban",
-    description: "Figuras de lotería japonesa con premios exclusivos de tus series favoritas",
-    badge: "🎰 Premios exclusivos • Series limitadas",
+    description: "Figuras de anime Ichiban Kuji originales de Banpresto, la lotería japonesa con premios exclusivos de tus series favoritas. Calidad superior a prize figures a precios accesibles. Importadas desde Japón para coleccionistas en Perú. Envío gratis.",
+    badge: "🎰 Lotería japonesa Banpresto • Premios exclusivos",
     iconName: "Gift",
     colors: {
       primary: "text-orange-800",
@@ -145,8 +145,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   plush: {
     name: "Plushies",
     slug: "plush",
-    description: "Peluches adorables y suaves para coleccionar",
-    badge: "🧸 Materiales premium • Diseños kawaii",
+    description: "Peluches de anime originales y suaves para coleccionar en Perú. Plushies oficiales de Pokemon, Sanrio, One Piece y más series populares. Perfectos como regalos o para decoración. Importados desde Japón con envío gratis a todo Perú.",
+    badge: "🧸 Peluches originales • Pokemon, Sanrio, One Piece",
     iconName: "Heart",
     colors: {
       primary: "text-pink-800",
@@ -175,8 +175,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   popup: {
     name: "Pop Up Parade",
     slug: "popup",
-    description: "Figuras de alta calidad a precios accesibles",
-    badge: "⚡ Línea premium de Good Smile Company • Calidad excepcional",
+    description: "Figuras de anime Pop Up Parade de Good Smile Company, la mejor relación calidad-precio del coleccionismo. Figuras de 17 cm con calidad de escala a precio de prize figure. Originales importadas desde Japón para coleccionistas en Perú con envío gratis.",
+    badge: "⚡ Línea Good Smile Company • Mejor calidad-precio",
     iconName: "Zap",
     colors: {
       primary: "text-purple-800",
@@ -202,8 +202,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   nendoroid: {
     name: "Nendoroid",
     slug: "nendoroid",
-    description: "Figuras chibi adorables y coleccionables",
-    badge: "😊 Diseño kawaii • Partes intercambiables • Expresiones múltiples",
+    description: "Figuras de anime Nendoroid originales de Good Smile Company, el formato chibi más famoso del mundo. Figuras coleccionables con piezas intercambiables de One Piece, Demon Slayer, Jujutsu Kaisen y más. Importadas desde Japón para fans en Perú. Envío gratis.",
+    badge: "😊 Nendoroid Good Smile • Partes intercambiables • Expresiones múltiples",
     iconName: "Smile",
     colors: {
       primary: "text-yellow-800",
@@ -230,8 +230,8 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
   pricing: {
     name: "Figuras de Premio",
     slug: "pricing",
-    description: "Figuras de líneas premium con excelente relación calidad-precio",
-    badge: "💰 Líneas premium con excelente relación calidad-precio • Más de 20 líneas disponibles",
+    description: "Figuras de anime de premio originales de Banpresto, Taito, Sega y más. Prize figures económicas con excelente relación calidad-precio para empezar tu colección. Más de 20 líneas diferentes. Importadas desde Japón para coleccionistas en Perú con envío gratis.",
+    badge: "💰 Banpresto, Taito, Sega • Más de 20 líneas",
     iconName: "DollarSign",
     colors: {
       primary: "text-indigo-800",
