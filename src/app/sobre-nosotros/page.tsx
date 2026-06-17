@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 
 export const metadata: Metadata = {
   title: "Sobre Nosotros",
@@ -85,7 +86,16 @@ export default function SobreNosotrosPage() {
       {/* Hero section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
-          <div className="text-6xl mb-6">🏯</div>
+          <div className="mb-6 flex justify-center">
+            <Image
+              src="/starfigs-logo.png"
+              alt="Starfigs"
+              width={300}
+              height={80}
+              className="h-auto w-auto max-w-[280px] sm:max-w-[320px]"
+              priority
+            />
+          </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Somos Starfigs
           </h1>
