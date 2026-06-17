@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://starfigsperu.com" // 🔧 Cambia por tu dominio real
+  const baseUrl = "https://starfigsperu.com"
 
   return {
     rules: [
@@ -15,7 +15,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: ["/admin/", "/api/"],
       },
+      {
+        userAgent: "Googlebot-Image",
+        allow: "/",
+      },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/api/image-sitemap`],
   }
 }

@@ -11,7 +11,7 @@ export function generateProductMetadata(product: Product): Metadata {
   const title = `${product.name} | Starfigs`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio en preventa: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad, importada desde Japón."}`
+  }. Desde S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime coleccionable, importada desde Japón."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 
@@ -54,7 +54,7 @@ export function generateSerializedProductMetadata(product: SerializedProduct): M
   const title = `${product.name} | Starfigs`
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
-  }. Precio en preventa: S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime de alta calidad, importada desde Japón."}`
+  }. Desde S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime coleccionable, importada desde Japón."}`
 
   const imageUrl = product.thumbnailUrl || product.imageUrls?.[0]
 
@@ -99,9 +99,9 @@ export function generateCategoryMetadata(
   badge: string,
   productCount?: number,
 ): Metadata {
-  const title = `${categoryName} en Preventa Perú`
+  const title = `${categoryName} | Starfigs Perú`
   const badgeText = badge?.trim() || ""
-  const descParts = [`Compra figuras ${categoryName} en preventa en Perú.`]
+  const descParts = [`Compra figuras ${categoryName} originales en Perú.`]
   if (badgeText) descParts.push(badgeText + ".")
   if (productCount) descParts.push(`${productCount} modelos disponibles.`)
   if (description?.trim()) descParts.push(description.trim())
@@ -131,9 +131,9 @@ export function generateCategoryMetadata(
 }
 
 export function generateLineMetadata(lineName: string, productCount: number): Metadata {
-  const title = `${lineName} en Preventa Perú`
+  const title = `${lineName} | Starfigs Perú`
   const slug = lineName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
-  const description = `Compra figuras de la línea ${lineName} en preventa en Perú. ${productCount} productos disponibles. Envío gratis por Agencias Shalom.`
+  const description = `Compra figuras de la línea ${lineName} en Perú. ${productCount} modelos disponibles. Envío gratis por Agencias Shalom.`
 
   return {
     title,
@@ -254,7 +254,7 @@ export function generateCategoryJsonLd(
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${categoryName} en Preventa Perú`,
+    name: `${categoryName} | Starfigs Perú`,
     description: description.slice(0, 160),
     url: `${baseUrl}/categorias/${categorySlug}`,
     isPartOf: {

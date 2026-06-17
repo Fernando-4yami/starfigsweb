@@ -224,7 +224,7 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             ) : (
               <CriticalProductImage
                 src={mainImageUrl}
-                alt={`${product.name} imagen principal`}
+                alt={`${product.name} - Figura de anime coleccionable - Foto principal`}
                 onLoad={() => setCriticalImageLoaded(true)}
               />
             )}

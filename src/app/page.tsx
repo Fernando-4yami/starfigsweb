@@ -29,8 +29,8 @@ export default async function Page() {
 
       {/* 🌍 HERO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
       <section className="sr-only">
-        <h1>Figuras de Anime en Preventa — Perú</h1>
-        <p>Las mejores figuras originales importadas de Japón. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis a todo el Perú por Agencias Shalom.</p>
+        <h1>Figuras de Anime Originales — Starfigs Perú</h1>
+        <p>Figuras de anime coleccionables importadas de Japón. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji, Pop Up Parade y escalas. Envío gratis a todo el Perú por Agencias Shalom.</p>
         <nav>
           <ul>
             {categories.map((cat) => (
