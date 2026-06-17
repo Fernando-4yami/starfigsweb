@@ -94,7 +94,7 @@ function Highlight({ children }: { children: React.ReactNode }) {
 
 const sections = [
   { id: "paso-a-paso", label: "Paso a paso", emoji: "🛒" },
-  { id: "tipos-producto", label: "Tipos de producto", emoji: "🏷️" },
+
   { id: "envios", label: "Opciones de envío", emoji: "📦" },
   { id: "pagos", label: "Métodos de pago", emoji: "💳" },
   { id: "reservas", label: "Reservas y preventas", emoji: "💰" },
@@ -204,39 +204,7 @@ export default function GuiaDeCompraPage() {
               </div>
             </SectionCard>
 
-            {/* Tipos de producto */}
-            <SectionCard id="tipos-producto" title="Tipos de producto" emoji="🏷️">
-              <p>En Starfigs manejamos 3 categorías principales:</p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-4">
-                  <p className="font-semibold text-green-700 dark:text-green-400 text-sm flex items-center gap-1">
-                    ✅ Stock
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Figuras que ya están en Perú. Se envían inmediatamente después de confirmar el pago.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4">
-                  <p className="font-semibold text-blue-700 dark:text-blue-400 text-sm flex items-center gap-1">
-                    📦 Preventa
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Figuras que aún no se lanzan en Japón. Las reservas con anticipación para asegurar la tuya.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/30 p-4">
-                  <p className="font-semibold text-purple-700 dark:text-purple-400 text-sm flex items-center gap-1">
-                    🛒 Online
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Figuras disponibles en tiendas japonesas (Lashinbang, Mercari). Las cotizamos y compramos por ti.
-                  </p>
-                </div>
-              </div>
-            </SectionCard>
 
             {/* Envíos */}
             <SectionCard id="envios" title="Opciones de envío" emoji="📦">
@@ -259,14 +227,7 @@ export default function GuiaDeCompraPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-4 text-xs sm:text-sm mt-4">
-                <p className="font-semibold text-amber-900 dark:text-amber-200">📌 Costos de envío a domicilio:</p>
-                <ul className="list-none mt-2 space-y-1">
-                  <ListItem>Lima Metropolitana: <Highlight>S/9</Highlight></ListItem>
-                  <ListItem>Provincias (fuera de Lima): <Highlight>S/15</Highlight></ListItem>
-                  <ListItem>Gratis para figuras mayores a <Highlight>S/200</Highlight></ListItem>
-                </ul>
-              </div>
+
             </SectionCard>
 
             {/* Pagos */}
