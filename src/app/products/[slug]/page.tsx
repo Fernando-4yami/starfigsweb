@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const rawProduct = await getProductBySlug(params.slug)
   if (!rawProduct) {
     return {
-      title: "Producto no encontrado | Starfigs",
+      title: "Producto no encontrado",
       description: "El producto que buscas no está disponible.",
     }
   }

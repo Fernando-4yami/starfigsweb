@@ -47,11 +47,11 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Condiciones de Preventa | Starfigs",
+  title: "Condiciones de Preventa",
   description:
     "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
   openGraph: {
-    title: "Condiciones de Preventa | Starfigs",
+    title: "Condiciones de Preventa",
     description:
       "Conoce cómo funciona el sistema de preventas de Starfigs: reservas, tiempos de llegada, cancelaciones, envíos y métodos de pago.",
   },

@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Página no encontrada | Starfigs Perú",
+  title: "Página no encontrada",
   description: "La página que buscas no existe. Explora nuestro catálogo de figuras de anime en preventa en Perú.",
 }
 

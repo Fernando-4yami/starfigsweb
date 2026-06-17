@@ -3,11 +3,11 @@ import Link from "next/link"
 import posts from "@/lib/blog/posts"
 
 export const metadata: Metadata = {
-  title: "Blog de Figuras de Anime | Starfigs Perú",
+  title: "Blog de Figuras de Anime",
   description:
     "Guías y consejos sobre figuras de anime originales en Perú. Aprende a identificar originales, descubre los mejores formatos y consejos para tu colección.",
   openGraph: {
-    title: "Blog de Figuras de Anime | Starfigs Perú",
+    title: "Blog de Figuras de Anime",
     description:
       "Guías y consejos sobre figuras de anime originales en Perú.",
     url: "https://starfigsperu.com/blog",

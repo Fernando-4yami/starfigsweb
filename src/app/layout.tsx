@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s | Starfigs Perú",
   },
   description:
-    "Las mejores figuras de anime en preventa en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom. Compra figuras originales importadas.",
+    "Las mejores figuras de anime originales en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom. Compra figuras importadas desde Japón.",
   keywords: [
     "figuras anime",
     "figuras anime perú",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     title: "Starfigs Perú - Figuras de Anime Originales | Envío Gratis",
 
     description:
-      "Las mejores figuras de anime en preventa en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom.",
+      "Las mejores figuras de anime originales en Perú. Nendoroid, Figma, S.H.Figuarts, Ichiban Kuji y más. Envío gratis por Agencias Shalom.",
     url: "https://starfigsperu.com",
   },
   twitter: {
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     title: "Starfigs Perú - Figuras de Anime Originales",
 
     description:
-      "Las mejores figuras de anime en preventa en Perú. Envío gratis.",
+      "Las mejores figuras de anime originales en Perú. Envío gratis.",
   },
   robots: {
     index: true,

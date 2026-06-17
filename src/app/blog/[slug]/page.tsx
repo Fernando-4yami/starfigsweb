@@ -17,13 +17,13 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const post = getPostBySlug(params.slug)
   if (!post) {
     return {
-      title: "Artículo no encontrado | Starfigs",
+      title: "Artículo no encontrado",
       description: "El artículo de blog que buscas no está disponible.",
     }
   }
 
   return {
-    title: `${post.title} | Starfigs Perú`,
+    title: post.title,
     description: post.description.slice(0, 160),
     alternates: {
       canonical: `https://starfigsperu.com/blog/${post.slug}`,

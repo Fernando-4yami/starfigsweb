@@ -8,7 +8,7 @@ const siteName = "Starfigs"
 // 🚀 FUNCIÓN PARA PRODUCTOS NORMALES (Product interface)
 export function generateProductMetadata(product: Product): Metadata {
   // El nombre del producto va primero para que Google lo use como título exacto
-  const title = `${product.name} | Starfigs`
+  const title = product.name
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
   }. Desde S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime coleccionable, importada desde Japón."}`
@@ -51,7 +51,7 @@ export function generateProductMetadata(product: Product): Metadata {
 // 🆕 FUNCIÓN PARA PRODUCTOS SERIALIZADOS (SerializedProduct interface)
 export function generateSerializedProductMetadata(product: SerializedProduct): Metadata {
   // El nombre del producto va primero para que Google lo use como título exacto
-  const title = `${product.name} | Starfigs`
+  const title = product.name
   const description = `${product.name} ${product.brand ? `de ${product.brand}` : ""} ${
     product.line ? `línea ${product.line}` : ""
   }. Desde S/. ${product.price.toFixed(2)}. ${product.description_es || product.description || "Figura de anime coleccionable, importada desde Japón."}`
@@ -99,7 +99,7 @@ export function generateCategoryMetadata(
   badge: string,
   productCount?: number,
 ): Metadata {
-  const title = `${categoryName} | Starfigs Perú`
+  const title = categoryName
   const badgeText = badge?.trim() || ""
   const descParts = [`Compra figuras ${categoryName} originales en Perú.`]
   if (badgeText) descParts.push(badgeText + ".")
@@ -139,7 +139,7 @@ export function generateCategoryMetadata(
 }
 
 export function generateLineMetadata(lineName: string, productCount: number): Metadata {
-  const title = `${lineName} | Starfigs Perú`
+  const title = lineName
   const slug = lineName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
   const description = `Compra figuras de la línea ${lineName} en Perú. ${productCount} modelos disponibles. Envío gratis por Agencias Shalom.`
 

@@ -2,11 +2,11 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Política de Cambios y Devoluciones | Starfigs",
+  title: "Política de Cambios y Devoluciones",
   description:
     "Conoce la política de cambios y devoluciones de Starfigs. Requisitos para reclamos, defectos de fabricación y procedimiento para solicitar cambios.",
   openGraph: {
-    title: "Política de Cambios y Devoluciones | Starfigs",
+    title: "Política de Cambios y Devoluciones",
     description:
       "Conoce la política de cambios y devoluciones de Starfigs. Requisitos para reclamos, defectos de fabricación y procedimiento para solicitar cambios.",
   },
