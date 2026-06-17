@@ -114,7 +114,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               <img
                 src={post.image}
                 alt={post.title}
-                className="w-full h-56 sm:h-80 md:h-96 object-cover"
+                className="w-full h-auto"
               />
             </div>
           )}
@@ -132,7 +132,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                     const alt = imgMatch[1]
                     const src = imgMatch[2]
                     const caption = alt || ""
-                    return `<figure class="my-8 -mx-4 sm:-mx-6 lg:-mx-8"><img src="${src}" alt="${alt}" class="w-full" loading="lazy" />${caption ? `<figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 px-4">${caption}</figcaption>` : ""}</figure>`
+                    return `<figure class="my-8 -mx-4 sm:-mx-6 lg:-mx-8"><img src="${src}" alt="${alt}" class="w-full h-auto" loading="lazy" />${caption ? `<figcaption class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 px-4">${caption}</figcaption>` : ""}</figure>`
                   }
                   if (line.startsWith("---")) return `<hr class="my-10 border-gray-200 dark:border-gray-800" />`
                   if (line.startsWith("## ")) return `<h2>${line.slice(3)}</h2>`
