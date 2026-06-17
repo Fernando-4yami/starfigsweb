@@ -16,37 +16,6 @@ export const metadata: Metadata = {
   },
 }
 
-const milestones = [
-  {
-    year: "2022",
-    title: "Nace Starfigs",
-    description:
-      "Todo empezó con una hoja de cálculos, muchas ganas, y un sueño algo cuestionable: llenar el Perú de figuras de anime. Yape era nuestro método de pago principal y WhatsApp nuestra tienda física.",
-    emoji: "🌱",
-  },
-  {
-    year: "2023",
-    title: "Primeros cientos de clientes",
-    description:
-      "De vender por WhatsApp pasamos a tener una web medio pelo, y aún así la gente confió en nosotros. Error. Quisimos hacer una pagina web, pero no sabiamos ni por donde empezar, asi que seguimos con el método tradicional.",
-    emoji: "📱",
-  },
-  {
-    year: "2024",
-    title: "La web que sí funciona",
-    description:
-      "Después de intentos fallidos (y un par de peleas con código que no entendíamos), finalmente lanzamos Starfigs de verdad. Catálogo online, carrito de compras, y lo más importante: menos errores 404.",
-    emoji: "🚀",
-  },
-  {
-    year: "2025",
-    title: "+10,000 productos y contando",
-    description:
-      "Miles de figuras importadas desde Japón, cientos de clientes satisfechos, y un equipo que todavía no se toma nada en serio (excepto las figuras, esas sí van en serio). Envíos a todo el Perú y una comunidad que crece cada día.",
-    emoji: "🏆",
-  },
-]
-
 const values = [
   {
     title: "Originales o nada",
@@ -147,51 +116,7 @@ export default function SobreNosotrosPage() {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-950 to-transparent" />
       </section>
 
-      {/* Timeline / Historia */}
-      <section className="bg-white dark:bg-gray-950">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 text-center mb-4">
-            Nuestra Historia
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-center mb-12 max-w-lg mx-auto">
-            De cero a héroes del coleccionismo (bueno, casi).
-          </p>
 
-          <div className="relative">
-            {/* Línea vertical */}
-            <div className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-0.5 bg-blue-200 dark:bg-blue-900 transform -translate-x-1/2" />
-
-            <div className="space-y-12">
-              {milestones.map((m, i) => (
-                <div key={m.year} className="relative">
-                  <div className={`flex flex-col sm:flex-row items-start gap-6 ${i % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"}`}>
-                    {/* Círculo en la línea */}
-                    <div className="absolute left-4 sm:left-1/2 w-4 h-4 bg-blue-600 dark:bg-blue-400 rounded-full transform -translate-x-1/2 mt-2 ring-4 ring-white dark:ring-gray-950 z-10" />
-
-                    {/* Contenido */}
-                    <div className={`ml-10 sm:ml-0 sm:w-[calc(50%-2rem)] ${i % 2 === 0 ? "sm:pr-8 sm:text-right" : "sm:pl-8"}`}>
-                      <div className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-full mb-3">
-                        {m.year}
-                      </div>
-                      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{m.emoji}</span>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                            {m.title}
-                          </h3>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {m.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Valores / Por qué elegirnos */}
       <section className="bg-gray-50 dark:bg-gray-900">
@@ -251,12 +176,6 @@ export default function SobreNosotrosPage() {
             ¿Recibiste tu figura y quieres aparecer aquí? Mándanos tu foto por WhatsApp y la subimos 🫶
           </p>
 
-          <Link
-            href="/catalogo"
-            className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-          >
-            ✨ Unirme a los clientes felices
-          </Link>
         </div>
       </section>
     </>
