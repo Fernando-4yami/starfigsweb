@@ -113,12 +113,25 @@ export async function GET() {
         } catch {
           // ignorar fechas inválidas
         }
+        // 🔥 FIX: Google REQUIERE availability_date para preorder.
+        // Si no pudimos generar una fecha válida, caemos a backorder
+        // para que Google no lo rechace.
+        if (!availabilityDate) {
+          availability = "backorder"
+        }
       } else {
         availability = "backorder"
       }
 
-      const description = product.description_es || product.description || `${name} - Figura de anime`
-      const brand = product.brand || "Sin marca"
+      // 🔧 DEFAULT BRAND: Si no tiene marca o está como "Sin marca", usar "Otros"
+      const rawBrand = (product.brand || "").trim()
+      const brand = rawBrand && rawBrand !== "Sin marca" ? rawBrand : "Otros"
+
+      // 🔧 DEFAULT DESCRIPTION: Google requiere > 50 caracteres
+      const rawDesc = (product.description_es || product.description || "").trim()
+      const description = rawDesc.length >= 50
+        ? rawDesc
+        : `${name} - Figura de anime coleccionable 100% original, importada desde Japón. Ideal para tu vitrina o como regalo para fans del anime. Producto en preventa.`
       const category = product.category || "figura"
 
       xml += `    <item>
@@ -132,6 +145,7 @@ export async function GET() {
       <g:price>${formatPrice(price)}</g:price>
       <g:condition>new</g:condition>
       <g:brand>${xmlEscape(brand)}</g:brand>
+      <g:product_type>${xmlEscape(category)}</g:product_type>
       <g:google_product_category>${getGoogleCategory(category)}</g:google_product_category>`
 
       if (product.gtin) {
