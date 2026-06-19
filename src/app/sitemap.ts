@@ -87,8 +87,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lineSlugs = cachedData.lineSlugs
   } else {
     try {
-      // Traer slug + line de todos los productos (no cuesta más reads, solo un campo extra)
-      const snapshot = await getDb().collection("products").select("slug", "line").get()
+      // Solo los 800 productos MÁS RECIENTES para no saturar el crawl budget de Google
+      // Google descubre el resto por enlaces internos (categorías, líneas, relacionados)
+      const snapshot = await getDb().collection("products")
+        .orderBy("createdAt", "desc")
+        .select("slug", "line")
+        .limit(800)
+        .get()
 
       productSlugs = []
       const uniqueLines = new Set<string>()
@@ -120,7 +125,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         timestamp: Date.now(),
       }
 
-      console.log(`🗺️ Sitemap: ${productSlugs.length} slugs, ${lineSlugs.length} líneas (cache 30 min)`)
+      console.log(`🗺️ Sitemap: ${productSlugs.length} slugs (limitado a 800), ${lineSlugs.length} líneas (cache 30 min)`)
     } catch (error) {
       console.error("Error fetching products for sitemap:", error)
     }

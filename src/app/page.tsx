@@ -1,6 +1,7 @@
 import HomePage from "@/app/ClientPage"
 import { getNewReleases } from "@/lib/firebase/products"
 import { categoryConfigs } from "@/config/categories"
+import { generateOrganizationJsonLd } from "@/lib/metadata"
 import Link from "next/link"
 import type { Product } from "@/lib/firebase/products"
 
@@ -20,8 +21,16 @@ export default async function Page() {
 
   const categories = Object.values(categoryConfigs)
 
+  const organizationJsonLd = generateOrganizationJsonLd()
+
   return (
     <>
+      {/* 🏢 JSON-LD Organización para Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+
       {/* 🚀 Preload de la primera imagen para mejorar LCP */}
       {firstProductImage && (
         <link rel="preload" href={firstProductImage} as="image" />
@@ -38,6 +47,13 @@ export default async function Page() {
                 <Link href={`/categorias/${cat.slug}`}>{cat.name}</Link>
               </li>
             ))}
+          </ul>
+        </nav>
+        <nav>
+          <p>Más contenido:</p>
+          <ul>
+            <li><Link href="/blog">Blog de Figuras de Anime</Link></li>
+            <li><Link href="/catalogo">Catálogo Completo</Link></li>
           </ul>
         </nav>
       </section>
