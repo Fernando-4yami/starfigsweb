@@ -2,7 +2,7 @@ import { getProductBySlug, getProducts } from "@/lib/firebase/products"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import ProductPageClient from "./ProductPageClient"
-import { generateAnyProductMetadata, generateAnyProductJsonLd } from "@/lib/metadata"
+import { generateAnyProductMetadata, generateAnyProductJsonLd, generateBreadcrumbJsonLd, CATEGORY_SLUG_TO_NAME } from "@/lib/metadata"
 import { serializeProduct } from "@/lib/serialize-product"
 
 interface ProductPageProps {
@@ -39,9 +39,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const product = serializeProduct(rawProduct)
   const productJsonLd = generateAnyProductJsonLd(product)
+  
+  const categoryName = product.category ? (CATEGORY_SLUG_TO_NAME[product.category.toLowerCase()] || product.category) : "Catálogo"
+  const breadcrumbLd = generateBreadcrumbJsonLd([
+    { name: "Inicio", url: "https://starfigsperu.com" },
+    { name: categoryName, url: `https://starfigsperu.com/categorias/${product.category?.toLowerCase()}` },
+    { name: product.name },
+  ])
 
   return (
     <>
+      {/* 🍞 Breadcrumb JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+
       {/* 🚀 PRELOAD IMAGEN CRÍTICA */}
       {product.imageUrls?.[0] && (
         <link

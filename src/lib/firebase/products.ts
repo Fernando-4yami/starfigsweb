@@ -21,10 +21,10 @@ import {
   writeBatch,
 } from "firebase/firestore"
 
-// 🚀 CACHÉ
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
-const POPULAR_CACHE_DURATION = 3 * 60 * 1000 // 3 minutos
-const SEARCH_CACHE_DURATION = 30 * 60 * 1000 // 30 minutos para búsquedas
+// 🚀 CACHÉ — ⬆️ Aumentado para reducir lecturas a Firestore
+const CACHE_DURATION = 15 * 60 * 1000 // 15 minutos (antes 5)
+const POPULAR_CACHE_DURATION = 15 * 60 * 1000 // 15 minutos (antes 3)
+const SEARCH_CACHE_DURATION = 120 * 60 * 1000 // 2 horas (antes 30 min)
 
 interface CacheEntry {
   data: any
@@ -291,7 +291,7 @@ const productsCollection = collection(db, "products")
 // ──────────────────────────────────────────────
 let searchProductPool: Product[] | null = null
 let searchProductPoolTime = 0
-const SEARCH_POOL_DURATION = 30 * 60 * 1000 // 30 minutos
+const SEARCH_POOL_DURATION = 120 * 60 * 1000 // 2 horas (antes 30 min)
 
 async function getProductPoolForSearch(forceRefresh = false): Promise<Product[]> {
   const now = Date.now()
@@ -300,7 +300,7 @@ async function getProductPoolForSearch(forceRefresh = false): Promise<Product[]>
     return searchProductPool
   }
 
-  console.log("🔄 Cargando pool completo para búsqueda (cache 30min)...")
+  console.log("🔄 Cargando pool completo para búsqueda (cache 2h)...")
 
   try {
     const snapshot = await getDocs(productsCollection)

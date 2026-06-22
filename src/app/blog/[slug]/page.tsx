@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import posts, { getPostBySlug } from "@/lib/blog/posts"
+import { generateBreadcrumbJsonLd } from "@/lib/metadata"
 
 interface BlogPostPageProps {
   params: { slug: string }
@@ -74,6 +75,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       "@id": `https://starfigsperu.com/blog/${post.slug}`,
     },
   }
+
+  const breadcrumbLd = generateBreadcrumbJsonLd([
+    { name: "Inicio", url: "https://starfigsperu.com" },
+    { name: "Blog", url: "https://starfigsperu.com/blog" },
+    { name: post.title },
+  ])
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -170,6 +177,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       </article>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
     </div>
   )
 }

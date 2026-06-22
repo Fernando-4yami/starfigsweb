@@ -1,5 +1,5 @@
 import { getProductsByLine, getAllProductsForSync, type Product } from "@/lib/firebase/products"
-import { generateLineMetadata } from "@/lib/metadata"
+import { generateLineMetadata, generateBreadcrumbJsonLd } from "@/lib/metadata"
 import type { Metadata } from "next"
 import LinesClient from "./LinesClient"
 
@@ -81,6 +81,12 @@ export default async function LinePage({ params }: Props) {
   
   const lineName = slugToLineName(params.slug)
   
+  const breadcrumbLd = generateBreadcrumbJsonLd([
+    { name: "Inicio", url: "https://starfigsperu.com" },
+    { name: "Líneas", url: "https://starfigsperu.com/catalogo" },
+    { name: lineName },
+  ])
+
   // JSON-LD CollectionPage
   const jsonLd = {
     "@context": "https://schema.org",
@@ -100,6 +106,10 @@ export default async function LinePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <LinesClient lineName={lineName} products={products} />
     </>

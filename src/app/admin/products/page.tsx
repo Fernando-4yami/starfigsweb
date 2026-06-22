@@ -9,6 +9,7 @@ import { type DocumentSnapshot } from "firebase/firestore"
 import Link from "next/link"
 import ImageGenerator from "@/components/ImageGenerator"
 import ImageGeneratorBatch, { type ImageGeneratorBatchHandle } from "@/components/ImageGeneratorBatch"
+import SocialPublisherModal from "@/components/SocialPublisherModal"
 import JSZip from "jszip"
 import { useState as useGlobalState } from "react"
 
@@ -59,57 +60,31 @@ const generateProductTemplate = (product: Product): string => {
   return `🔖 ${product.name}\nPrecio: s/${(product.price || 0).toFixed(2)}\nReserva min: s/40.00\n🌟 Mas detalles: ${productUrl}`
 }
 
-const formatDateDDMMYYYY = (date: Date | null | undefined): string => {
-  if (!date) return "Por confirmar"
-  const d = date instanceof Date ? date : new Date(date)
-  if (isNaN(d.getTime())) return "Por confirmar"
-  const day = String(d.getDate()).padStart(2, "0")
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const year = d.getFullYear()
-  return `${day}/${month}/${year}`
-}
+const convertBlobToJpeg = async (blob: Blob): Promise<Blob> => {
+  // Si ya es JPEG, devolver tal cual
+  if (blob.type === "image/jpeg") return blob
 
-const calculateReserva = (price: number): number => {
-  if (price > 200) {
-    // 50% redondeado hacia arriba
-    return Math.ceil(price * 0.5)
-  }
-  return 40
-}
-
-const generateFacebookPostTemplate = (product: Product): string => {
-  const baseUrl = "https://starfigsperu.com"
-  const productUrl = `${baseUrl}/products/${product.slug || product.id}`
-  const releaseDateFormatted = formatDateDDMMYYYY(product.releaseDate)
-  const price = product.price || 0
-  const reserva = calculateReserva(price)
-
-  return [
-    "⭐ PREVENTA / BAJO PEDIDO",
-    "",
-    `🔹 ${product.name}`,
-    "",
-    `💰 Precio: S/${price.toFixed(2)}`,
-    `💸 Reserva: S/${reserva} para separar`,
-    `🗓️ Lanzamiento: ${releaseDateFormatted}`,
-    "",
-    "🌟 Más detalles:",
-    productUrl,
-    "",
-    "🎁 Envío gratis por Shalom a agencia como beneficio de preventa",
-    `🚢 Llegada a Perú: aprox. 2-3 meses luego del lanzamiento`,
-    "📌 Incluye importación completa: impuestos, aduanas, seguro y envío Japón → Perú",
-    "",
-    "🚚 Envíos a todo el Perú (Shalom / Olva Courier)",
-    "💳 Pagos yape o transferencia",
-    "",
-    "🇯🇵✨ Producto ORIGINAL y SELLADO",
-  ].join("\n")
-}
-const mimeToExt: Record<string, string> = {
-  "image/webp": "webp",
-  "image/jpeg": "jpg",
-  "image/png": "png",
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      const canvas = document.createElement("canvas")
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) { reject(new Error("No se pudo crear el canvas")); return }
+      ctx.drawImage(img, 0, 0)
+      canvas.toBlob(jpegBlob => {
+        if (jpegBlob) resolve(jpegBlob)
+        else reject(new Error("Error al convertir a JPEG"))
+      }, "image/jpeg", 0.95)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src)
+      reject(new Error("Error al cargar la imagen para conversión"))
+    }
+    img.src = URL.createObjectURL(blob)
+  })
 }
 
 const downloadProductImages = async (imageUrls: string[], productName: string): Promise<number> => {
@@ -125,8 +100,8 @@ const downloadProductImages = async (imageUrls: string[], productName: string): 
     try {
       const resp = await fetch(imageUrls[i])
       const blob = await resp.blob()
-      const ext = mimeToExt[blob.type] || "jpg"
-      zip.file(`${slug}_${i + 1}.${ext}`, blob)
+      const jpegBlob = await convertBlobToJpeg(blob)
+      zip.file(`${slug}_${i + 1}.jpg`, jpegBlob)
       successCount++
     } catch (err) {
       console.error(`Error descargando imagen ${i + 1}:`, err)
@@ -340,9 +315,16 @@ export default function ProductsPage() {
     const ok = await copyToClipboard(generateProductTemplate(product))
     if (ok) alert("📋 Plantilla copiada")
   }
-  const handleCopyFacebookTemplate = async (product: Product) => {
-    const ok = await copyToClipboard(generateFacebookPostTemplate(product))
-    if (ok) alert("📋 Plantilla Facebook copiada")
+  const [publisherProduct, setPublisherProduct] = useState<Product | null>(null)
+  const [publisherOpen, setPublisherOpen] = useState(false)
+
+  const openPublisher = (product: Product) => {
+    setPublisherProduct(product)
+    setPublisherOpen(true)
+  }
+  const closePublisher = () => {
+    setPublisherOpen(false)
+    setPublisherProduct(null)
   }
 
   const brands = useMemo(() => {
@@ -445,7 +427,7 @@ export default function ProductsPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} onDelete={handleDelete} deleting={deleting === product.id} onCopyTemplate={handleCopyTemplate} onCopyFacebookTemplate={handleCopyFacebookTemplate} isSelected={selectedIds.has(product.id)} onToggleSelect={toggleSelectProduct} />
+                <ProductCard key={product.id} product={product} onDelete={handleDelete} deleting={deleting === product.id} onCopyTemplate={handleCopyTemplate} onOpenPublisher={openPublisher} isSelected={selectedIds.has(product.id)} onToggleSelect={toggleSelectProduct} />
               ))}
             </div>
 
@@ -464,6 +446,7 @@ export default function ProductsPage() {
         )}
       </div>
       <BatchGeneratorModal />
+      <SocialPublisherModal product={publisherProduct} isOpen={publisherOpen} onClose={closePublisher} />
     </div>
   )
 }
@@ -638,7 +621,7 @@ function FilterBar({ searchTerm, setSearchTerm, selectedBrand, setSelectedBrand,
   )
 }
 
-function ProductCard({ product, onDelete, deleting, onCopyTemplate, onCopyFacebookTemplate, isSelected, onToggleSelect }: any) {
+function ProductCard({ product, onDelete, deleting, onCopyTemplate, onOpenPublisher, isSelected, onToggleSelect }: any) {
   const [showImageGen, setShowImageGen] = useState(false)
   const [downloadingImgs, setDownloadingImgs] = useState(false)
 
@@ -690,11 +673,11 @@ function ProductCard({ product, onDelete, deleting, onCopyTemplate, onCopyFacebo
           <div className="flex items-start gap-1.5 mb-1">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 text-sm flex-1 min-w-0">{product.name}</h3>
             <button
-              onClick={() => onCopyFacebookTemplate(product)}
-              className="shrink-0 bg-blue-600 dark:bg-blue-500 text-white px-2.5 py-1 rounded text-sm hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
-              title="Copiar plantilla para Facebook"
+              onClick={() => onOpenPublisher(product)}
+              className="shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:from-blue-700 hover:to-purple-700 transition-all font-semibold shadow-sm"
+              title="Abrir publicador de redes"
             >
-              📘
+              📢
             </button>
           </div>
           <p className="text-blue-600 dark:text-blue-400 font-bold mb-1">S/. {product.price.toFixed(2)}</p>

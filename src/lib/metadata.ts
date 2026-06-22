@@ -305,6 +305,32 @@ export function generateOrganizationJsonLd() {
   }
 }
 
+// 🍞 BREADCRUMB JSON-LD
+export function generateBreadcrumbJsonLd(items: { name: string; url?: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      ...(item.url ? { item: item.url } : {}),
+    })),
+  }
+}
+
+// Mapa de slugs de categoría a nombres para breadcrumbs y links
+export const CATEGORY_SLUG_TO_NAME: Record<string, string> = {
+  nendoroid: "Nendoroid",
+  figma: "Figma",
+  figuarts: "S.H.Figuarts",
+  "ichiban-kuji": "Ichiban Kuji",
+  "pop-up-parade": "Pop Up Parade",
+  plush: "Plushies",
+  scale: "Figuras Escala",
+  pricing: "Figuras de Premio",
+}
+
 // 🆕 FUNCIONES DE CONVENIENCIA - Auto-detectan el tipo
 export function generateAnyProductMetadata(product: Product | SerializedProduct): Metadata {
   if (product.createdAt instanceof Date || product.createdAt === null || product.createdAt === undefined) {

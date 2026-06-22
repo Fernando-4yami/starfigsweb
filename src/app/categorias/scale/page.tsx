@@ -1,6 +1,6 @@
 import CategoryPage from "@/components/category-page"
 import { categoryConfigs } from "@/config/categories"
-import { generateCategoryMetadata, generateCategoryJsonLd } from "@/lib/metadata"
+import { generateCategoryMetadata, generateCategoryJsonLd, generateBreadcrumbJsonLd } from "@/lib/metadata"
 import type { Metadata } from "next"
 
 const config = categoryConfigs.scale
@@ -13,6 +13,11 @@ export const metadata: Metadata = generateCategoryMetadata(
 )
 
 const jsonLd = generateCategoryJsonLd(config.name, config.slug, config.description)
+const breadcrumbLd = generateBreadcrumbJsonLd([
+  { name: "Inicio", url: "https://starfigsperu.com" },
+  { name: "Categorías", url: "https://starfigsperu.com/catalogo" },
+  { name: config.name },
+])
 
 export default function ScalePage() {
   return (
@@ -20,6 +25,10 @@ export default function ScalePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       {/* 🌍 CONTENIDO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}

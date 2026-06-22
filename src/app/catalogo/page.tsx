@@ -26,13 +26,25 @@ export const metadata: Metadata = {
 }
 
 import { categoryConfigs } from "@/config/categories"
+import { generateBreadcrumbJsonLd } from "@/lib/metadata"
 import Link from "next/link"
 
 export default function CatalogoPage() {
   const categories = Object.values(categoryConfigs)
 
+  const breadcrumbLd = generateBreadcrumbJsonLd([
+    { name: "Inicio", url: "https://starfigsperu.com" },
+    { name: "Catálogo" },
+  ])
+
   return (
     <>
+      {/* 🍞 Breadcrumb JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+
       {/* 🌍 CONTENIDO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
       <section className="sr-only">
         <h1>Catálogo Completo de Figuras Anime</h1>
