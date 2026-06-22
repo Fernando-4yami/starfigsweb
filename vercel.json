@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/reset-ranking",
+      "schedule": "0 0 */14 * *"
+    }
+  ],
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next"
+}
