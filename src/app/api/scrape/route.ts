@@ -1,25 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp"
 
-import * as admin from "firebase-admin";
-import { getApps } from "firebase-admin/app";
+// ─── Lazy initializers ───────────────────────────
+// Los imports se hacen dentro del handler para evitar errores 500 en Vercel
+// durante la carga del módulo (sharp y firebase-admin son modulos nativos pesados)
 
-// Lazy getter para Firebase — solo se inicializa cuando se llama al endpoint
-let _db: admin.firestore.Firestore | null = null;
+let _admin: any = null;
+let _sharp: any = null;
 
-function getDb(): admin.firestore.Firestore {
-  if (!_db) {
+async function getAdmin() {
+  if (!_admin) {
+    const mod = await import("firebase-admin");
+    const { getApps } = await import("firebase-admin/app");
+    _admin = mod;
+
     if (!getApps().length) {
       const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-
-      // Soporta ambos formatos: base64 o vars individuales
       const base64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
       if (base64) {
         const decoded = Buffer.from(base64, "base64").toString("utf-8");
         const serviceAccount = JSON.parse(decoded);
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
+        _admin.initializeApp({
+          credential: _admin.credential.cert(serviceAccount),
           storageBucket: storageBucket || undefined,
         });
       } else if (
@@ -27,8 +29,8 @@ function getDb(): admin.firestore.Firestore {
         process.env.FIREBASE_CLIENT_EMAIL &&
         process.env.FIREBASE_PRIVATE_KEY
       ) {
-        admin.initializeApp({
-          credential: admin.credential.cert({
+        _admin.initializeApp({
+          credential: _admin.credential.cert({
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
             privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
@@ -39,9 +41,16 @@ function getDb(): admin.firestore.Firestore {
         throw new Error("Firebase Admin env vars not configured on server");
       }
     }
-    _db = admin.firestore();
   }
-  return _db;
+  return _admin;
+}
+
+async function getSharp() {
+  if (!_sharp) {
+    const mod = await import("sharp");
+    _sharp = mod.default || mod;
+  }
+  return _sharp;
 }
 
 // ─── HELPERS ─────────────────────────────────────
@@ -87,8 +96,9 @@ export async function POST(request: NextRequest) {
     const imageUrls = Array.isArray(data.images) ? data.images : [];
     const category = determineCategory(data);
 
-    // Inicializar Firebase solo cuando se necesita
-    const db = getDb();
+    // Inicializar Firebase (lazy — secuencial para evitar race condition)
+    const admin = await getAdmin();
+    const db = admin.firestore();
 
     // Verificar duplicados por slug y eliminar
     const existingQuery = await db
@@ -104,12 +114,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Extraer altura numerica y formatear size como "Xcm aprox."
-    // Ej: "Approx. 16 cm" → heightCm = 16, size = "16cm aprox."
     let heightCm: number | null = null;
     let size = "";
     if (data.size) {
-      // Requiere al menos un digito ANTES del punto decimal opcional
-      // Asi evitamos capturar el punto solitario de palabras como "Approx."
       const numMatch = String(data.size).match(/(\d+(?:\.\d+)?)/);
       if (numMatch) {
         const parsed = parseFloat(numMatch[1]);
@@ -120,7 +127,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Guardar en Firestore (releaseDate = createdAt para que tenga 1 mes antes de mostrar "Agotado")
+    // Guardar en Firestore
     const docRef = await db.collection("products").add({
       name,
       slug,
@@ -143,6 +150,7 @@ export async function POST(request: NextRequest) {
     // ========== GENERAR THUMBNAIL (200px WebP) ==========
     if (imageUrls.length > 0) {
       try {
+        const sharp = await getSharp();
         const response = await fetch(imageUrls[0])
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const arrayBuffer = await response.arrayBuffer()
