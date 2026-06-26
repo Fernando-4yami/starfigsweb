@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase/admin"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 export const dynamic = "force-dynamic"
 
@@ -72,8 +73,11 @@ interface GroupDTO {
 
 // ─── API ROUTE ───────────────────────────────────
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.ok) return adminAuth.response
+
     const db = getDb()
     const startTime = Date.now()
 

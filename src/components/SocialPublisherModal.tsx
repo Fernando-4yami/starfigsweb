@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import JSZip from "jszip"
 import { updateProduct } from "@/lib/firebase/products"
+import { getAdminAuthHeaders } from "@/lib/api/admin-client"
 
 // ──────────────── Types ────────────────
 

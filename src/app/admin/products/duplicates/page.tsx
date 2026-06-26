@@ -338,7 +338,7 @@ export default function DuplicatesPage() {
   }, [hasMoreGroups])
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-xl">Cargando...</div></div>
-  if (!user) { router.push("/login"); return null }
+  if (!user) { router.push("/admin/login"); return null }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

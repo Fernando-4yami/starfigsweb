@@ -12,6 +12,7 @@ import { createLineIfNotExists } from "@/lib/firebase/lines"
 import { createManufacturerIfNotExists } from "@/lib/firebase/manufacturers"
 import { normalizeText } from "@/lib/utils"
 import { collection, getDocs } from "firebase/firestore"
+import { getAdminAuthHeaders } from "@/lib/api/admin-client"
 
 // Interfaz para un producto individual
 interface ProductForm {

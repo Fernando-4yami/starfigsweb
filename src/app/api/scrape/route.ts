@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api/admin-auth";
 
 // ─── Lazy initializers ───────────────────────────
 // Los imports se hacen dentro del handler para evitar errores 500 en Vercel
@@ -82,6 +83,9 @@ function determineCategory(data: Record<string, unknown>): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request);
+    if (!adminAuth.ok) return adminAuth.response;
+
     const data = await request.json();
 
     // Validar campos requeridos

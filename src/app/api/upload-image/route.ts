@@ -6,6 +6,7 @@ export const maxDuration = 60; // ← ⏱️ Hasta 60s para evitar timeout con s
 import { type NextRequest, NextResponse } from "next/server"
 import sharp from "sharp"
 import { uploadProcessedImageBuffer } from "@/lib/firebase/upload-image-server"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 // 🎯 CONFIGURACIÓN OPTIMIZADA
 const IMAGE_CONFIG = {
@@ -80,6 +81,9 @@ async function optimizeImageSize(
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.ok) return adminAuth.response
+
     console.log("🚀 [upload-image] Iniciando proceso de upload...")
 
     // 1. Validar formData

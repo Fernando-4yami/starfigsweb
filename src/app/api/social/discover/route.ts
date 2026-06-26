@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.ok) return adminAuth.response
+
     const { accessToken } = await request.json()
 
     if (!accessToken) {

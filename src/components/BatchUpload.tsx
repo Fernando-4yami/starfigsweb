@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Upload, X, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { getAdminAuthHeaders } from "@/lib/api/admin-client"
 
 interface UploadedImage {
   imageUrl: string

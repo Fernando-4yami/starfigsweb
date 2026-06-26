@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { type NextRequest, NextResponse } from "next/server"
 import sharp from "sharp"
 import { uploadProcessedImageBuffer } from "@/lib/firebase/upload-image-server"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 // Función para generar blur placeholder
 async function generateBlurPlaceholder(buffer: Buffer): Promise<string> {
@@ -76,6 +77,9 @@ async function processImage(file: File, isFirstImage: boolean) {
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.ok) return adminAuth.response
+
     const formData = await request.formData()
     const files = formData.getAll("files") as File[]
 

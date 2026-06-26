@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = await requireAdmin(request)
+    if (!adminAuth.ok) return adminAuth.response
+
     const { pageId, accessToken, message, imageUrls } = await request.json()
 
     if (!pageId || !accessToken || !message || !imageUrls?.length) {
@@ -53,6 +57,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message,
+        published: true,
         attached_media: mediaIds.map((id) => ({ media_fbid: id })),
         access_token: accessToken,
       }),

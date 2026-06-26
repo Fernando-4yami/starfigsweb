@@ -1,11 +1,15 @@
 // src/app/api/diag/route.ts
 // 🩺 Endpoint de diagnóstico para verificar dependencias en Vercel
 // ⚠️ Usamos import() dinámico para poder capturar errores de carga de módulos
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/api/admin-auth"
 
 export const runtime = "nodejs"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const adminAuth = await requireAdmin(request)
+  if (!adminAuth.ok) return adminAuth.response
+
   const results: Record<string, any> = {
     timestamp: new Date().toISOString(),
     node: process.version,

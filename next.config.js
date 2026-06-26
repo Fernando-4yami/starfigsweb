@@ -6,10 +6,15 @@ const nextConfig = {
   },
 
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  compiler: {
+    removeConsole: {
+      exclude: ["error", "warn"],
+    },
   },
   images: {
     domains: ["firebasestorage.googleapis.com", "www.tsoto.net", "storage.googleapis.com"],
