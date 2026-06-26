@@ -25,6 +25,7 @@
     "formidable": "^3.5.4",
     "googleapis": "^173.0.0",
     "html-to-image": "^1.11.13",
+    "jspdf": "^4.2.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.511.0",
     "meilisearch": "^0.51.0",
