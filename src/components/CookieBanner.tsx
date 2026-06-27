@@ -16,37 +16,13 @@ export default function CookieBanner() {
   const acceptCookies = () => {
     localStorage.setItem("cookies-consent", "accepted")
     setShowBanner(false)
-
-    // 🚀 ACTIVAR GA DINÁMICAMENTE SIN RELOAD
-    if (typeof window !== "undefined" && window.gtag) {
-      // Actualizar consentimiento
-      window.gtag("consent", "update", {
-        analytics_storage: "granted",
-      })
-
-      // Enviar evento de consentimiento
-      window.gtag("event", "consent_granted", {
-        event_category: "cookies",
-        event_label: "user_accepted",
-      })
-
-      console.log("✅ Google Analytics activado dinámicamente")
-    }
-
-    // 🎉 NO MÁS RELOAD - GA se activa inmediatamente
+    window.dispatchEvent(new Event("cookie-consent-changed"))
   }
 
   const rejectCookies = () => {
     localStorage.setItem("cookies-consent", "rejected")
     setShowBanner(false)
-
-    // Enviar evento de rechazo (si GA ya estaba cargado)
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "consent_rejected", {
-        event_category: "cookies",
-        event_label: "user_rejected",
-      })
-    }
+    window.dispatchEvent(new Event("cookie-consent-changed"))
   }
 
   if (!showBanner) return null

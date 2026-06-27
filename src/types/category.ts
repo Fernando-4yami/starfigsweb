@@ -7,6 +7,7 @@ export interface Product {
   slug: string
   name: string
   imageUrls: string[]
+  thumbnailUrl?: string
   price: number
   heightCm?: number
   releaseDate?: Date | null

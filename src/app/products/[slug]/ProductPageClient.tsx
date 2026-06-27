@@ -84,7 +84,7 @@ function CriticalProductImage({
         sizes="(max-width: 768px) 100vw, 50vw"
         onLoad={handleLoad}
         onError={handleError}
-        quality={90}
+        quality={80}
       />
 
       {!imageLoaded && (

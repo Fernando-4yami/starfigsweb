@@ -11,13 +11,10 @@ export default async function Page() {
   // Pre-fetch productos en el servidor para que Google los vea
   let initialProducts: Product[] = []
   try {
-    initialProducts = await getNewReleases(12)
+    initialProducts = await getNewReleases(18)
   } catch (err) {
     console.error("Error pre-fetching homepage products:", err)
   }
-
-  // 🚀 Preload de la primera imagen para mejorar LCP
-  const firstProductImage = initialProducts[0]?.thumbnailUrl || initialProducts[0]?.imageUrls?.[0]
 
   const categories = Object.values(categoryConfigs)
 
@@ -30,11 +27,6 @@ export default async function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
-
-      {/* 🚀 Preload de la primera imagen para mejorar LCP */}
-      {firstProductImage && (
-        <link rel="preload" href={firstProductImage} as="image" />
-      )}
 
       {/* 🌍 HERO ESTÁTICO — invisible para usuarios, visible para Google (sr-only) */}
       <section className="sr-only">
@@ -58,7 +50,7 @@ export default async function Page() {
         </nav>
       </section>
 
-      {/* 🚀 CLIENTE — hidrata y reemplaza los productos estáticos con datos dinámicos */}
+      {/* El cliente conserva estos productos para evitar reemplazar el LCP al hidratar. */}
       <HomePage initialProducts={initialProducts} />
     </>
   )

@@ -155,7 +155,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                   {paginatedProducts.map((product, index) => (
-                    <ProductCard key={product.id} product={product} priority={index < 12} />
+                    <ProductCard key={product.id} product={product} priority={index < 2} />
                   ))}
                 </div>
 

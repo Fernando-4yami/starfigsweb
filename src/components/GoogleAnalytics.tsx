@@ -10,34 +10,19 @@ export default function GoogleAnalytics() {
   const [gaLoaded, setGaLoaded] = useState(false)
 
   useEffect(() => {
-    // Verificar si el usuario ya aceptó las cookies
-    const consent = localStorage.getItem("cookies-consent")
-    setCookiesAccepted(consent === "accepted")
-
-    // 🚀 ESCUCHAR CAMBIOS EN TIEMPO REAL
-    const handleStorageChange = () => {
-      const newConsent = localStorage.getItem("cookies-consent")
-      setCookiesAccepted(newConsent === "accepted")
+    const syncConsent = () => {
+      setCookiesAccepted(localStorage.getItem("cookies-consent") === "accepted")
     }
 
-    // Escuchar cambios en localStorage
-    window.addEventListener("storage", handleStorageChange)
-
-    // También escuchar cambios en la misma pestaña
-    const checkConsent = () => {
-      const newConsent = localStorage.getItem("cookies-consent")
-      if (newConsent === "accepted" && cookiesAccepted !== true) {
-        setCookiesAccepted(true)
-      }
-    }
-
-    const interval = setInterval(checkConsent, 1000) // Revisar cada segundo
+    syncConsent()
+    window.addEventListener("storage", syncConsent)
+    window.addEventListener("cookie-consent-changed", syncConsent)
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange)
-      clearInterval(interval)
+      window.removeEventListener("storage", syncConsent)
+      window.removeEventListener("cookie-consent-changed", syncConsent)
     }
-  }, [cookiesAccepted])
+  }, [])
 
   useEffect(() => {
     // 🚀 ACTIVAR GA CUANDO SE ACEPTEN COOKIES
@@ -64,8 +49,8 @@ export default function GoogleAnalytics() {
     }
   }, [cookiesAccepted, gaLoaded])
 
-  if (cookiesAccepted === false) {
-    return null // No cargar GA si no se aceptaron cookies
+  if (cookiesAccepted !== true) {
+    return null
   }
 
   return (

@@ -58,7 +58,7 @@ export default function CatalogoClient() {
             <ProductCard
               key={product.id}
               product={product}
-              priority={index < 12}
+              priority={index < 2}
             />
           ))}
         </div>

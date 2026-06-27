@@ -93,7 +93,7 @@ export default function LinesClient({ lineName, products }: LinesClientProps) {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {sortedProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} priority={index < 12} />
+              <ProductCard key={product.id} product={product} priority={index < 2} />
             ))}
           </div>
         )}

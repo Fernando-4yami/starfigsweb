@@ -84,7 +84,7 @@ export default function ProgressiveGallery({
               }`}
               sizes="(max-width: 768px) 100vw, 50vw"
               onLoad={() => setLoadedImages((prev) => new Set([...prev, selectedIndex]))}
-              quality={90}
+              quality={80}
             />
 
             {/* 🚀 BLUR PLACEHOLDER CON DARK MODE */}
@@ -181,7 +181,7 @@ export default function ProgressiveGallery({
               width={1600}
               height={1200}
               className="max-w-full max-h-full w-auto h-auto object-contain"
-              quality={95}
+              quality={90}
             />
           </div>
 

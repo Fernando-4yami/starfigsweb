@@ -327,7 +327,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
               pageTransitioning ? "opacity-0" : "opacity-100"
             }`}>
               {paginatedProducts.map((product, index) => (
-                <ProductCard key={product.id} product={product} priority={index < 12} />
+                <ProductCard key={product.id} product={product} priority={index < 2} />
               ))}
             </div>
 

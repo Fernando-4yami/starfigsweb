@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
-import { getProducts, getProductsByLine, searchProducts } from "@/lib/firebase/products"
 import type { Product, Filters, CategoryConfig, SortOption } from "@/types/category"
 
 // 🎯 CALCULAR PRODUCTOS POR PÁGINA RESPONSIVO (4 filas)
@@ -54,152 +53,37 @@ export function useCategoryProducts(config: CategoryConfig) {
     setCurrentPage(1)
   }, [filters, sortBy])
 
-  // 🚀 BÚSQUEDA MÁS ESTRICTA - VOLVER A LA LÓGICA ORIGINAL
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        let foundProducts: Product[] = []
-
-        console.log(`🔍 BÚSQUEDA ESTRICTA para categoría: ${config.name}`)
-        console.log(`📋 Términos de búsqueda:`, config.searchTerms)
-        console.log(`🎯 Tipo de búsqueda: ${config.searchType}`)
-
-        if (config.searchType === "line") {
-          // 🎯 BÚSQUEDA ESTRICTA POR LÍNEAS - Solo coincidencias exactas
-          console.log(`🚀 Búsqueda estricta por líneas...`)
-
-          const searchPromises = config.searchTerms.map(async (searchTerm) => {
-            console.log(`🔍 Buscando línea exacta: "${searchTerm}"`)
-            const products = await getProductsByLine(searchTerm)
-
-            // 🎯 FILTRO ESTRICTO - Solo productos que realmente pertenecen a la línea
-            const strictFiltered = products.filter((product) => {
-              const productLine = (product.line || "").toLowerCase().trim()
-              const searchTermLower = searchTerm.toLowerCase().trim()
-
-              // ✅ COINCIDENCIA MUY ESTRICTA
-              return (
-                productLine === searchTermLower ||
-                (productLine.includes(searchTermLower) && searchTermLower.length > 3) ||
-                (searchTermLower.includes(productLine) && productLine.length > 3)
-              )
-            })
-
-            console.log(`📦 Encontrados ${strictFiltered.length} productos estrictos para línea: "${searchTerm}"`)
-            return strictFiltered
-          })
-
-          const allResults = await Promise.all(searchPromises)
-          const combinedProducts = new Map<string, Product>()
-
-          allResults.forEach((products, index) => {
-            const searchTerm = config.searchTerms[index]
-            products.forEach((product) => {
-              if (!combinedProducts.has(product.id)) {
-                combinedProducts.set(product.id, product)
-                console.log(`➕ Agregado: ${product.name} (línea: "${product.line}")`)
-              }
-            })
-          })
-
-          foundProducts = Array.from(combinedProducts.values())
-          console.log(`🎯 Total productos únicos por líneas: ${foundProducts.length}`)
-        } else if (config.searchType === "scale") {
-          // ✅ BÚSQUEDA ESTRICTA DE FIGURAS A ESCALA
-          console.log(`🔍 Buscando productos con escala...`)
-          const allProducts = await getProducts(500)
-
-          foundProducts = allProducts.filter((product) => {
-            // ✅ FILTRO MUY ESTRICTO PARA ESCALA
-            const hasValidScale = product.scale && product.scale.trim() !== "" && product.scale.includes("/")
-            const nameHasScale = /1\/[0-9]+/.test(product.name.toLowerCase())
-            const descriptionHasScale = product.description
-              ? /1\/[0-9]+/.test(product.description.toLowerCase())
-              : false
-
-            // Marcas conocidas por figuras a escala (excluyendo líneas que NO son escala)
-            const isScaleBrand =
-              (product.brand?.toLowerCase().includes("kotobukiya") &&
-                !product.line?.toLowerCase().includes("nendoroid") &&
-                !product.line?.toLowerCase().includes("figma")) ||
-              product.brand?.toLowerCase().includes("alter") ||
-              (product.brand?.toLowerCase().includes("good smile") && product.line?.toLowerCase().includes("scale"))
-
-            return hasValidScale || nameHasScale || descriptionHasScale || isScaleBrand
-          })
-
-          console.log(`📦 Encontrados ${foundProducts.length} productos con escala`)
-        } else if (config.searchType === "name") {
-  
-
-          const searchPromises = config.searchTerms.map((term) => searchProducts(term))
-          const allResults = await Promise.all(searchPromises)
-          const combinedProducts = new Map<string, Product>()
-
-          allResults.forEach((products) => {
-            products.forEach((product) => {
-              // 🎯 FILTRO ESTRICTO - Solo si realmente contiene el término
-              const productName = product.name.toLowerCase()
-              const productLine = (product.line || "").toLowerCase()
-              const productBrand = (product.brand || "").toLowerCase()
-
-              const hasStrictMatch = config.searchTerms.some((term) => {
-                const termLower = term.toLowerCase()
-                return (
-                  productName.includes(termLower) ||
-                  productLine.includes(termLower) ||
-                  (termLower.length > 4 && productBrand.includes(termLower))
-                )
-              })
-
-              if (hasStrictMatch && !combinedProducts.has(product.id)) {
-                combinedProducts.set(product.id, product)
-              }
-            })
-          })
-
-          foundProducts = Array.from(combinedProducts.values())
-          console.log(`📦 Encontrados ${foundProducts.length} productos por nombre estricto`)
-        } else if (config.searchType === "custom" && config.customFilter) {
-          // Filtro personalizado
-          console.log(`🔍 Aplicando filtro personalizado...`)
-          const allProducts = await getProducts(500)
-          foundProducts = allProducts.filter(config.customFilter)
-          console.log(`📦 Encontrados ${foundProducts.length} productos con filtro personalizado`)
-        }
-
-        // 🎯 ORDENAMIENTO INICIAL POR RELEVANCIA Y POPULARIDAD
-        foundProducts.sort((a, b) => {
-          const viewsA = a.views ?? 0
-          const viewsB = b.views ?? 0
-          if (viewsA !== viewsB) {
-            return viewsB - viewsA
-          }
-          return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0)
+        const response = await fetch(`/api/categories/${config.slug}`, {
+          signal: controller.signal,
         })
+        if (!response.ok) throw new Error(`Category request failed: ${response.status}`)
+
+        const payload = await response.json()
+        const foundProducts: Product[] = payload.products.map((product: any) => ({
+          ...product,
+          createdAt: product.createdAt ? new Date(product.createdAt) : null,
+          releaseDate: product.releaseDate ? new Date(product.releaseDate) : null,
+          lastViewedAt: product.lastViewedAt ? new Date(product.lastViewedAt) : null,
+        }))
 
         setProducts(foundProducts)
-        console.log(`✅ TOTAL FINAL productos ${config.name}: ${foundProducts.length}`)
-
-        // Log de muestra para debug
-        if (foundProducts.length > 0) {
-          console.log(`📋 Muestra de productos encontrados:`)
-          foundProducts.slice(0, 5).forEach((product, index) => {
-            console.log(
-              `  ${index + 1}. ${product.name} (línea: "${product.line || "N/A"}", vistas: ${product.views ?? 0})`,
-            )
-          })
-        }
       } catch (error) {
+        if (controller.signal.aborted) return
         console.error(`❌ Error cargando productos ${config.name}:`, error)
         setProducts([])
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
     fetchProducts()
+    return () => controller.abort()
   }, [config])
 
   // Obtener opciones únicas para filtros - MÁS ESTRICTO

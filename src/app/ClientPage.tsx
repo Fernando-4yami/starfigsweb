@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { getNewReleases, getNewReleasesByDateRange, type Product, getPopularProducts } from "@/lib/firebase/products"
+import type { Product } from "@/lib/firebase/products"
 import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@/lib/utils"
 import ProductCard from "@/components/ProductCard"
 import RankingSection from "@/components/sections/ranking-section"
 import HowItWorks from "@/components/HowItWorks"
+import Link from "next/link"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
   const skeletonItems = useMemo(
@@ -40,10 +41,10 @@ const ProductSection = ({
   products: Product[]
   emptyMessage?: string
 }) => {
-  /** Los primeros 6 productos cargan con priority para mejorar LCP */
+  /** Solo la primera fila movil compite por el LCP. */
   const productCards = useMemo(
     () => products.map((product, i) => (
-      <ProductCard key={product.id} product={product} priority={i < 6} />
+      <ProductCard key={product.id} product={product} priority={i < 2} />
     )),
     [products],
   )
@@ -93,7 +94,7 @@ const ProductSectionWithLoadMore = ({
 
   const productCards = useMemo(
     () => visibleProducts.map((product, i) => (
-      <ProductCard key={product.id} product={product} priority={i < 6} />
+      <ProductCard key={product.id} product={product} priority={i < 2} />
     )),
     [visibleProducts],
   )
@@ -115,7 +116,7 @@ const ProductSectionWithLoadMore = ({
             {productCards}
           </div>
 
-          {hasMore && (
+          {hasMore ? (
             <div className="flex justify-center mt-10">
               <button
                 onClick={handleLoadMore}
@@ -123,6 +124,15 @@ const ProductSectionWithLoadMore = ({
               >
                 Ver más productos ({products.length - visibleCount} restantes)
               </button>
+            </div>
+          ) : (
+            <div className="flex justify-center mt-10">
+              <Link
+                href="/catalogo"
+                className="px-8 py-3 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200"
+              >
+                Ver catálogo completo
+              </Link>
             </div>
           )}
         </>
@@ -157,28 +167,25 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
   }, [])
 
   const fetchData = useCallback(async () => {
-    const { currStart, currEnd, nextMonthStart } = dateRanges
-
     try {
-      const [newlyAddedData, weeklyPopularData, currReleasesData, futureReleasesData] = await Promise.all([
-        getNewReleases(200),
-        getPopularProducts(10),
-        getNewReleasesByDateRange(currStart, currEnd),
-        getNewReleasesByDateRange(nextMonthStart, new Date("2100-01-01")),
-      ])
+      const response = await fetch("/api/home")
+      if (!response.ok) throw new Error(`Homepage request failed: ${response.status}`)
+      const payload = await response.json()
+      const parseProducts = (products: any[]): Product[] =>
+        products.map((product) => ({
+          ...product,
+          createdAt: product.createdAt ? new Date(product.createdAt) : null,
+          releaseDate: product.releaseDate ? new Date(product.releaseDate) : null,
+        }))
 
-      const sortedFuture = futureReleasesData.sort(
-        (a, b) => (a.releaseDate?.getTime() || 0) - (b.releaseDate?.getTime() || 0),
-      )
-
-      setData({
-        newlyAdded: newlyAddedData,
-        weeklyPopular: weeklyPopularData,
-        currReleases: currReleasesData,
-        futureReleases: sortedFuture,
+      setData((previous) => ({
+        ...previous,
+        weeklyPopular: parseProducts(payload.weeklyPopular),
+        currReleases: parseProducts(payload.currReleases),
+        futureReleases: parseProducts(payload.futureReleases),
         loading: false,
         error: null,
-      })
+      }))
     } catch (err: any) {
       console.error("Error loading homepage data:", err)
       setData((prev) => ({
@@ -187,7 +194,7 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
         error: err,
       }))
     }
-  }, [dateRanges])
+  }, [])
 
   useEffect(() => {
     fetchData()
