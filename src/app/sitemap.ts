@@ -3,6 +3,7 @@ import { getDb } from "@/lib/firebase/admin"
 import posts from "@/lib/blog/posts"
 
 const BASE_URL = "https://starfigsperu.com"
+export const revalidate = 86400
 
 // Líneas que YA son categorías (no duplicar en /lines/)
 const CATEGORY_LINE_NAMES = new Set([
@@ -75,65 +76,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Cache en memoria por 30 min para evitar 10k+ reads por crawl
-  let productSlugs: string[] = []
+  let products: Array<{ slug: string; lastModified: Date }> = []
   let lineSlugs: string[] = []
-  const CACHE_KEY = "sitemap-data"
-  const CACHE_TTL = 30 * 60 * 1000 // 30 min
+  try {
+    // Keep every product discoverable while prerendering only the newest subset.
+    const snapshot = await getDb().collection("products")
+      .select("slug", "line", "updatedAt", "createdAt")
+      .get()
 
-  const cachedData = (globalThis as any)[CACHE_KEY]
-  if (cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
-    productSlugs = cachedData.slugs
-    lineSlugs = cachedData.lineSlugs
-  } else {
-    try {
-      // Solo los 800 productos MÁS RECIENTES para no saturar el crawl budget de Google
-      // Google descubre el resto por enlaces internos (categorías, líneas, relacionados)
-      const snapshot = await getDb().collection("products")
-        .orderBy("createdAt", "desc")
-        .select("slug", "line")
-        .limit(800)
-        .get()
+    const uniqueLines = new Set<string>()
 
-      productSlugs = []
-      const uniqueLines = new Set<string>()
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data()
+      const slug = data.slug as string
+      const modifiedValue = data.updatedAt || data.createdAt
+      const modifiedDate = modifiedValue?.toDate?.() || new Date(modifiedValue || Date.now())
 
-      snapshot.docs.forEach((doc) => {
-        const data = doc.data()
-        const slug = data.slug as string
-        if (slug) productSlugs.push(slug)
-
-        const line = data.line as string
-        if (line && line.trim()) {
-          const lowerLine = line.trim().toLowerCase()
-          // Solo líneas que NO sean categorías
-          if (!CATEGORY_LINE_NAMES.has(lowerLine)) {
-            uniqueLines.add(line.trim())
-          }
-        }
-      })
-
-      // Convertir nombres de línea a slugs
-      lineSlugs = Array.from(uniqueLines)
-        .map(lineToSlug)
-        .filter((slug) => slug.length > 0)
-
-      // Cachear en memoria global
-      ;(globalThis as any)[CACHE_KEY] = {
-        slugs: productSlugs,
-        lineSlugs,
-        timestamp: Date.now(),
+      if (slug) {
+        products.push({
+          slug,
+          lastModified: Number.isNaN(modifiedDate.getTime()) ? new Date() : modifiedDate,
+        })
       }
 
-      console.log(`🗺️ Sitemap: ${productSlugs.length} slugs (limitado a 800), ${lineSlugs.length} líneas (cache 30 min)`)
-    } catch (error) {
-      console.error("Error fetching products for sitemap:", error)
-    }
+      const line = data.line as string
+      if (line && line.trim()) {
+        const lowerLine = line.trim().toLowerCase()
+        if (!CATEGORY_LINE_NAMES.has(lowerLine)) {
+          uniqueLines.add(line.trim())
+        }
+      }
+    })
+
+    lineSlugs = Array.from(uniqueLines)
+      .map(lineToSlug)
+      .filter((slug) => slug.length > 0)
+  } catch (error) {
+    console.error("Error fetching products for sitemap:", error)
   }
 
-  const productPages: MetadataRoute.Sitemap = productSlugs.map((slug) => ({
-    url: `${BASE_URL}/products/${slug}`,
-    lastModified: new Date(),
+  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
+    url: `${BASE_URL}/products/${product.slug}`,
+    lastModified: product.lastModified,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }))

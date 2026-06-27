@@ -35,16 +35,8 @@ export default function ProgressiveGallery({
   const handleThumbnailClick = useCallback(
     (index: number) => {
       setSelectedIndex(index)
-
-      if (!loadedImages.has(index)) {
-        const img = new window.Image()
-        img.onload = () => {
-          setLoadedImages((prev) => new Set([...prev, index]))
-        }
-        img.src = imageUrls[index]
-      }
     },
-    [imageUrls, loadedImages],
+    [],
   )
 
   const handleThumbnailLoad = useCallback((index: number) => {

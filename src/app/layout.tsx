@@ -17,35 +17,16 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
-// Componente de loading skeleton para la navegación
-function LoadingSkeleton() {
+function NavigationFallback() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* Navbar skeleton */}
-      <div className="animate-pulse border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded" />
-            <div className="flex gap-4">
-              <div className="h-4 w-20 bg-gray-200 dark:bg-gray-800 rounded" />
-              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded" />
-              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-800 rounded" />
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Main content skeleton */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 w-64 bg-gray-200 dark:bg-gray-800 rounded" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i}>
-                <div className="aspect-square bg-gray-200 dark:bg-gray-800 rounded mb-3" />
-                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
-              </div>
-            ))}
+    <div className="animate-pulse border-b border-gray-200 dark:border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded" />
+          <div className="flex gap-4">
+            <div className="h-4 w-20 bg-gray-200 dark:bg-gray-800 rounded" />
+            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded" />
+            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-800 rounded" />
           </div>
         </div>
       </div>
@@ -125,19 +106,19 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <GoogleAnalytics />
         <CookieBanner />
-        <Suspense fallback={<LoadingSkeleton />}>
-          <ThemeProvider>
-            <PageTransitionProvider>
-              <RoutePrefetcher />
-              <ScrollToTop />
+        <ThemeProvider>
+          <PageTransitionProvider>
+            <RoutePrefetcher />
+            <ScrollToTop />
+            <Suspense fallback={<NavigationFallback />}>
               <Navbar />
-              <main className="min-h-screen">
-                {children}
-              </main>
-              <Footer />
-            </PageTransitionProvider>
-          </ThemeProvider>
-        </Suspense>
+            </Suspense>
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </PageTransitionProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

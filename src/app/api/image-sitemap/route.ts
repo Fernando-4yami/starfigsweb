@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase/admin"
 
-export const dynamic = "force-dynamic"
-export const revalidate = 43200 // 12 horas
+export const revalidate = 86400 // 24 horas
 
 const BASE_URL = "https://starfigsperu.com"
 
@@ -69,7 +68,7 @@ export async function GET() {
 
     const headers = new Headers()
     headers.set("Content-Type", "application/xml; charset=utf-8")
-    headers.set("Cache-Control", "public, max-age=43200, s-maxage=43200, stale-while-revalidate=86400")
+    headers.set("Cache-Control", "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800")
 
     return new NextResponse(xml, { status: 200, headers })
   } catch (error) {

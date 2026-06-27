@@ -18,7 +18,7 @@ const nextConfig = {
   },
   images: {
     domains: ["firebasestorage.googleapis.com", "www.tsoto.net", "storage.googleapis.com"],
-    unoptimized: true,
+    minimumCacheTTL: 86400,
   },
 
   // 🚀 Optimizaciones de performance

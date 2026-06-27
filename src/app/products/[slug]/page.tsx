@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import ProductPageClient from "./ProductPageClient"
 import { generateAnyProductMetadata, generateAnyProductJsonLd, generateBreadcrumbJsonLd, CATEGORY_SLUG_TO_NAME } from "@/lib/metadata"
 import { serializeProduct } from "@/lib/serialize-product"
+import { cache } from "react"
 
 interface ProductPageProps {
   params: { slug: string }
@@ -11,15 +12,18 @@ interface ProductPageProps {
 
 export const revalidate = 600
 
+const getCachedProductBySlug = cache(getProductBySlug)
+
 export async function generateStaticParams() {
-  const products = await getProducts(8000) // Límite para build (más páginas estáticas para Google)
+  // Prebuild recent products. Other slugs render on demand and stay cached by ISR.
+  const products = await getProducts(800)
   return products.map((product) => ({
     slug: product.slug,
   }))
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const rawProduct = await getProductBySlug(params.slug)
+  const rawProduct = await getCachedProductBySlug(params.slug)
   if (!rawProduct) {
     return {
       title: "Producto no encontrado",
@@ -31,7 +35,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const rawProduct = await getProductBySlug(params.slug)
+  const rawProduct = await getCachedProductBySlug(params.slug)
 
   if (!rawProduct) {
     notFound()
@@ -54,17 +58,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-
-      {/* 🚀 PRELOAD IMAGEN CRÍTICA */}
-      {product.imageUrls?.[0] && (
-        <link
-          rel="preload"
-          as="image"
-          href={product.imageUrls[0]}
-          // @ts-ignore
-          fetchPriority="high"
-        />
-      )}
 
       {/* JSON-LD para SEO */}
       <script
