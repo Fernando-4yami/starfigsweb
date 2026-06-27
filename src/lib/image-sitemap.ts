@@ -1,0 +1,1 @@
+export const PRODUCTS_PER_IMAGE_SITEMAP = 2000
