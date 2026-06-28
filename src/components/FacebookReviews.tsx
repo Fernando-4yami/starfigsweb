@@ -194,7 +194,9 @@ export default function FacebookReviews() {
                     {summary.overallRating.toFixed(1)}
                   </span>
                 )}
-                {summary.ratingCount && <span>{summary.ratingCount} opiniones</span>}
+                {summary.ratingCount !== null && summary.ratingCount > 0 && (
+                  <span>{summary.ratingCount} opiniones</span>
+                )}
               </div>
             )}
             <a
