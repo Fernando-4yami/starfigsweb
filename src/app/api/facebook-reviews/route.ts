@@ -20,10 +20,19 @@ interface GraphErrorPayload {
 }
 
 interface GraphPage {
+  id?: string
   name?: string
   link?: string
   rating_count?: number
   overall_star_rating?: number
+}
+
+interface GraphAccountsResponse {
+  data?: Array<{
+    id?: string
+    name?: string
+    access_token?: string
+  }>
 }
 
 interface GraphRating {
@@ -122,6 +131,35 @@ function normalizeRating(review: GraphRating, index: number): FacebookReview | n
   }
 }
 
+async function resolvePageAccessToken(
+  pageId: string,
+  configuredToken: string,
+): Promise<string> {
+  const identity = await graphGet<GraphPage>("me", configuredToken, {
+    fields: "id,name",
+  })
+  if (identity.id === pageId) return configuredToken
+
+  const accounts = await graphGet<GraphAccountsResponse>(
+    "me/accounts",
+    configuredToken,
+    {
+      fields: "id,name,access_token",
+      limit: "200",
+    },
+  )
+  const page = accounts.data?.find((candidate) => candidate.id === pageId)
+
+  if (!page?.access_token) {
+    throw new GraphRequestError(
+      "No Page Access Token was returned for the configured Facebook Page",
+      210,
+    )
+  }
+
+  return page.access_token
+}
+
 async function getRatings(pageId: string, accessToken: string): Promise<GraphRating[]> {
   const commonParams = {
     limit: "25",
@@ -172,15 +210,16 @@ function createUnavailableResponse(
 
 export async function GET() {
   const pageId = process.env.FACEBOOK_PAGE_ID?.trim()
-  const accessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN?.trim()
+  const configuredToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN?.trim()
 
-  if (!pageId || !accessToken) {
+  if (!pageId || !configuredToken) {
     return NextResponse.json(createUnavailableResponse("not_configured"), {
       headers: { "Cache-Control": "no-store" },
     })
   }
 
   try {
+    const accessToken = await resolvePageAccessToken(pageId, configuredToken)
     const pagePromise = graphGet<GraphPage>(
       encodeURIComponent(pageId),
       accessToken,
