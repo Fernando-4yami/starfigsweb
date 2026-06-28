@@ -15,9 +15,6 @@ function parseInteger(value: string | null, fallback: number, min: number, max: 
 }
 
 function getSearchIndexOrigin(request: NextRequest): string {
-  const vercelUrl = process.env.VERCEL_URL?.trim()
-  if (vercelUrl) return `https://${vercelUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`
-
   const hostname = request.nextUrl.hostname.toLowerCase()
   if (hostname === "localhost" || hostname === "127.0.0.1") {
     return request.nextUrl.origin
