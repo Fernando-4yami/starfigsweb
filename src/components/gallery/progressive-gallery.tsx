@@ -25,11 +25,32 @@ export default function ProgressiveGallery({
   const [thumbnailsLoaded, setThumbnailsLoaded] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setThumbnailsLoaded(true)
-    }, 500)
+    let idleId: number | undefined
+    let timerId: ReturnType<typeof setTimeout> | undefined
 
-    return () => clearTimeout(timer)
+    const showThumbnails = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setThumbnailsLoaded(true), { timeout: 2000 })
+      } else {
+        timerId = setTimeout(() => setThumbnailsLoaded(true), 1000)
+      }
+    }
+
+    if (document.readyState === "complete") {
+      showThumbnails()
+    } else {
+      window.addEventListener("load", showThumbnails, { once: true })
+    }
+
+    return () => {
+      window.removeEventListener("load", showThumbnails)
+      if (idleId !== undefined && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timerId !== undefined) {
+        clearTimeout(timerId)
+      }
+    }
   }, [])
 
   const handleThumbnailClick = useCallback(
@@ -82,9 +103,9 @@ export default function ProgressiveGallery({
               className={`object-contain transition-all duration-300 ${
                 loadedImages.has(selectedIndex) ? "opacity-100 blur-0" : "opacity-0 blur-sm"
               }`}
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 767px) 300px, (max-width: 1279px) 45vw, 592px"
               onLoad={() => setLoadedImages((prev) => new Set([...prev, selectedIndex]))}
-              quality={80}
+              quality={70}
             />
 
             {/* 🚀 BLUR PLACEHOLDER CON DARK MODE */}

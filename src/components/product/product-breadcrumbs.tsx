@@ -12,7 +12,11 @@ export default function ProductBreadcrumbs({ category, productName }: ProductBre
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
       {/* Home - siempre clickable */}
-      <Link href="/" className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+      <Link
+        href="/"
+        prefetch={false}
+        className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      >
         <Home className="w-4 h-4" />
       </Link>
 

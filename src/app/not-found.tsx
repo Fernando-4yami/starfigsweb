@@ -1,4 +1,3 @@
-import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -31,18 +30,18 @@ export default function NotFound() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-10">
-          <Link
+          <a
             href="/"
             className="px-6 py-3 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
           >
             🏠 Ir al inicio
-          </Link>
-          <Link
+          </a>
+          <a
             href="/catalogo"
             className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
           >
             📦 Ver catálogo
-          </Link>
+          </a>
         </div>
 
         {/* Category Links */}
@@ -52,13 +51,13 @@ export default function NotFound() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {categories.map((cat) => (
-              <Link
+              <a
                 key={cat.slug}
                 href={`/categorias/${cat.slug}`}
                 className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
               >
                 {cat.emoji} {cat.name}
-              </Link>
+              </a>
             ))}
           </div>
         </div>

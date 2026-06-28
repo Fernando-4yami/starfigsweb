@@ -1,13 +1,10 @@
 "use client"
 
-import { getProductBySlug, incrementProductViews } from "@/lib/firebase/products"
 import { trackProductView, trackWhatsAppClick } from "@/lib/analytics"
-import { notFound, useRouter } from "next/navigation"
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import Image from "next/image"
-import { parseSerializedDate, serializeProduct, type SerializedProduct } from "@/lib/serialize-product"
+import { parseSerializedDate, type SerializedProduct } from "@/lib/serialize-product"
 
 import ProductBreadcrumbs from "@/components/product/product-breadcrumbs"
 import ProductInfo from "@/components/product/product-info"
@@ -41,25 +38,17 @@ const InfiniteRelatedProducts = dynamic(
 
 interface ProductPageClientProps {
   params: { slug: string }
-  initialProduct?: SerializedProduct
+  initialProduct: SerializedProduct
 }
 
 function CriticalProductImage({
   src,
   alt,
-  onLoad,
 }: {
   src: string
   alt: string
-  onLoad?: () => void
 }) {
-  const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
-
-  const handleLoad = () => {
-    setImageLoaded(true)
-    onLoad?.()
-  }
 
   const handleError = () => {
     setImageError(true)
@@ -80,16 +69,50 @@ function CriticalProductImage({
         alt={alt}
         fill
         priority={true}
-        className={`object-contain transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
-        sizes="(max-width: 768px) 100vw, 50vw"
-        onLoad={handleLoad}
+        className="object-contain"
+        sizes="(max-width: 767px) 300px, (max-width: 1279px) 45vw, 592px"
         onError={handleError}
-        quality={80}
+        quality={70}
       />
+    </div>
+  )
+}
 
-      {!imageLoaded && (
-        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+function DeferredRelatedProducts({ product }: { product: SerializedProduct }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "400px 0px" },
+    )
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={sectionRef} className="min-h-[320px]">
+      {isVisible ? (
+        <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6" aria-hidden="true">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="animate-pulse">
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3" />
+              <div className="bg-gray-200 dark:bg-gray-700 h-4 mb-2" />
+              <div className="bg-gray-200 dark:bg-gray-700 h-3 w-3/4" />
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -114,48 +137,57 @@ function FormattedDescription({ text }: { text: string }) {
   )
 }
 
-export default function ProductPageClient({ params, initialProduct }: ProductPageClientProps) {
+export default function ProductPageClient({ initialProduct: product }: ProductPageClientProps) {
   const router = useRouter()
-  const [product, setProduct] = useState<SerializedProduct | null>(initialProduct || null)
-  const [loading, setLoading] = useState(!initialProduct)
-  const [criticalImageLoaded, setCriticalImageLoaded] = useState(false)
 
   useEffect(() => {
-    if (initialProduct) {
-      setLoading(false)
-      return
+    let idleId: number | undefined
+    let timerId: ReturnType<typeof setTimeout> | undefined
+
+    const recordView = () => {
+      if (navigator.webdriver) return
+
+      const sessionKey = `starfigs:viewed:${product.id}`
+
+      try {
+        if (sessionStorage.getItem(sessionKey)) return
+        sessionStorage.setItem(sessionKey, "1")
+      } catch {
+        // Storage can be unavailable in strict privacy modes.
+      }
+
+      fetch(`/api/products/${encodeURIComponent(product.id)}/view`, {
+        method: "POST",
+        keepalive: true,
+      }).catch(console.error)
+
+      trackProductView(product.id, product.name, product.category || "figura", product.price)
     }
 
-    const fetchProduct = async () => {
-      try {
-        const fetchedProduct = await getProductBySlug(params.slug)
-        if (!fetchedProduct) {
-          notFound()
-          return
-        }
-
-        const serializedProduct = serializeProduct(fetchedProduct)
-        setProduct(serializedProduct)
-        setLoading(false)
-      } catch (error) {
-        console.error("Failed to fetch product:", error)
-        notFound()
+    const scheduleView = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(recordView, { timeout: 4000 })
+      } else {
+        timerId = setTimeout(recordView, 2000)
       }
     }
 
-    fetchProduct()
-  }, [params.slug, initialProduct])
+    if (document.readyState === "complete") {
+      scheduleView()
+    } else {
+      window.addEventListener("load", scheduleView, { once: true })
+    }
 
-  useEffect(() => {
-    if (!product) return
-    const timer = setTimeout(() => {
-      Promise.all([
-        incrementProductViews(product.id),
-        trackProductView(product.id, product.name, product.category || "figura", product.price),
-      ]).catch(console.error)
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [product])
+    return () => {
+      window.removeEventListener("load", scheduleView)
+      if (idleId !== undefined && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timerId !== undefined) {
+        clearTimeout(timerId)
+      }
+    }
+  }, [product.id, product.name, product.category, product.price])
 
   const handleWhatsAppClick = useCallback(() => {
     if (product) {
@@ -164,8 +196,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
   }, [product])
 
   const productData = useMemo(() => {
-    if (!product) return null
-
     const now = new Date()
     const releaseDate = parseSerializedDate(product.releaseDate)
 
@@ -176,7 +206,9 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
 
     const releaseMonthYear =
       showReleaseTag && releaseDate
-        ? format(releaseDate, "MMMM yyyy", { locale: es }).replace(/^./, (str) => str.toUpperCase())
+        ? new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric" })
+            .format(releaseDate)
+            .replace(/^./, (str) => str.toUpperCase())
         : ""
 
     const productUrl = `https://starfigsperu.com/products/${product.slug}`
@@ -185,14 +217,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
 
     return { releaseDate, showReleaseTag, releaseMonthYear, productUrl, whatsappUrl }
   }, [product])
-
-  if (loading || !product || !productData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
-      </div>
-    )
-  }
 
   const mainImageUrl = product.imageUrls?.[0] || "/placeholder.svg"
 
@@ -225,7 +249,6 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
               <CriticalProductImage
                 src={mainImageUrl}
                 alt={`${product.name} - Figura de anime coleccionable - Foto principal`}
-                onLoad={() => setCriticalImageLoaded(true)}
               />
             )}
 
@@ -284,7 +307,7 @@ export default function ProductPageClient({ params, initialProduct }: ProductPag
             <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-400 mb-2">Productos relacionados</h2>
           </div>
 
-          <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
+          <DeferredRelatedProducts product={product} />
         </div>
       </div>
     </div>

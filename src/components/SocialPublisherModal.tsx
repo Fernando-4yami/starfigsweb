@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import JSZip from "jszip"
 import { updateProduct } from "@/lib/firebase/products"
 import { getAdminAuthHeaders } from "@/lib/api/admin-client"
+import { Check, Copy } from "lucide-react"
+import { generateSocialTemplate, MONTHS_ES } from "@/lib/social-template"
 
 // ──────────────── Types ────────────────
 
@@ -26,11 +28,6 @@ interface Props {
 }
 
 // ──────────────── Helpers ────────────────
-
-const MONTHS_ES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-]
 
 const convertBlobToJpeg = async (blob: Blob): Promise<Blob> => {
   if (blob.type === "image/jpeg") return blob
@@ -143,29 +140,13 @@ export default function SocialPublisherModal({ product, isOpen, onClose }: Props
 
   // ── Template generation ──
   const generateTemplate = useCallback(() => {
-    const baseUrl = "https://starfigsperu.com"
-    const slug = product?.slug || product?.id || ""
-    const productUrl = `${baseUrl}/products/${slug}`
-    const month = editMonth && MONTHS_ES[parseInt(editMonth)]
-    const year = editYear
-    const dateStr = month && year ? `${month} ${year}` : "Por confirmar"
-
-    return [
-      "⭐🇯🇵 PREVENTA / BAJO PEDIDO",
-      "",
-      editName,
-      "",
-      "",
-      `🗓️ Lanzamiento: ${dateStr} `,
-      "",
-      "🌟 Más detalles: ",
-      productUrl,
-      "",
-      "🎁 Envío gratis por Shalom a agencia como beneficio de preventa",
-      "🚢 Llegada estimada: 2-3 meses después del lanzamiento",
-      "",
-      "🇯🇵 Producto ORIGINAL y SELLADO",
-    ].join("\n")
+    return generateSocialTemplate({
+      name: editName,
+      slug: product?.slug,
+      id: product?.id,
+      monthIndex: editMonth === "" ? null : Number(editMonth),
+      year: editYear === "" ? null : Number(editYear),
+    })
   }, [editName, editMonth, editYear, product?.slug, product?.id])
 
   const template = generateTemplate()
@@ -432,7 +413,23 @@ export default function SocialPublisherModal({ product, isOpen, onClose }: Props
 
           {/* ── Template preview ── */}
           <section className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">📝 Vista previa del post</h3>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                📝 Vista previa del post
+              </h3>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  copied
+                    ? "bg-green-500 text-white"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? "Copiado" : "Copiar texto para Facebook"}
+              </button>
+            </div>
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap font-mono leading-relaxed border border-gray-200 dark:border-gray-700 max-h-48 overflow-y-auto">
               {template}
             </div>
@@ -527,7 +524,10 @@ export default function SocialPublisherModal({ product, isOpen, onClose }: Props
                   : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
-              {copied ? "✅ Copiado" : "📋 Copiar"}
+              <span className="inline-flex items-center justify-center gap-2">
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? "Copiado" : "Copiar texto FB"}
+              </span>
             </button>
             <button
               onClick={handleDownload}

@@ -6,7 +6,6 @@ import Navbar from "@/components/Navbar/Navbar"
 import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/scroll-to-top"
 import PageTransitionProvider from "@/components/PageTransitionProvider"
-import RoutePrefetcher from "@/components/RoutePrefetcher"
 import GoogleAnalytics from "@/components/GoogleAnalytics"
 import CookieBanner from "@/components/CookieBanner"
 import { Suspense } from "react"
@@ -108,7 +107,6 @@ export default function RootLayout({
         <CookieBanner />
         <ThemeProvider>
           <PageTransitionProvider>
-            <RoutePrefetcher />
             <ScrollToTop />
             <Suspense fallback={<NavigationFallback />}>
               <Navbar />

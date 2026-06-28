@@ -12,6 +12,8 @@ import ImageGeneratorBatch, { type ImageGeneratorBatchHandle } from "@/component
 import SocialPublisherModal from "@/components/SocialPublisherModal"
 import JSZip from "jszip"
 import { useState as useGlobalState } from "react"
+import { Check, Copy } from "lucide-react"
+import { generateSocialTemplate } from "@/lib/social-template"
 
 // ========== BATCH STORAGE ==========
 const BATCH_STORAGE_KEY = 'starfigs-batch-products'
@@ -55,9 +57,12 @@ type SortBy = "name" | "price" | "createdAt" | "views"
 type SortOrder = "asc" | "desc"
 
 const generateProductTemplate = (product: Product): string => {
-  const baseUrl = "https://starfigsperu.com"
-  const productUrl = `${baseUrl}/products/${product.slug || product.id}`
-  return `🔖 ${product.name}\nPrecio: s/${(product.price || 0).toFixed(2)}\nReserva min: s/40.00\n🌟 Mas detalles: ${productUrl}`
+  return generateSocialTemplate({
+    name: product.name,
+    slug: product.slug,
+    id: product.id,
+    releaseDate: product.releaseDate,
+  })
 }
 
 const convertBlobToJpeg = async (blob: Blob): Promise<Blob> => {
@@ -312,8 +317,7 @@ export default function ProductsPage() {
     finally { setDeleting(null) }
   }
   const handleCopyTemplate = async (product: Product) => {
-    const ok = await copyToClipboard(generateProductTemplate(product))
-    if (ok) alert("📋 Plantilla copiada")
+    return copyToClipboard(generateProductTemplate(product))
   }
   const [publisherProduct, setPublisherProduct] = useState<Product | null>(null)
   const [publisherOpen, setPublisherOpen] = useState(false)
@@ -624,6 +628,7 @@ function FilterBar({ searchTerm, setSearchTerm, selectedBrand, setSelectedBrand,
 function ProductCard({ product, onDelete, deleting, onCopyTemplate, onOpenPublisher, isSelected, onToggleSelect }: any) {
   const [showImageGen, setShowImageGen] = useState(false)
   const [downloadingImgs, setDownloadingImgs] = useState(false)
+  const [copiedText, setCopiedText] = useState(false)
 
   const handleDownloadImages = async () => {
     setDownloadingImgs(true)
@@ -632,6 +637,13 @@ function ProductCard({ product, onDelete, deleting, onCopyTemplate, onOpenPublis
     if (count > 0) {
       alert(`✅ ${count} imágenes descargadas`)
     }
+  }
+
+  const handleCopyText = async () => {
+    const copied = await onCopyTemplate(product)
+    if (!copied) return
+    setCopiedText(true)
+    setTimeout(() => setCopiedText(false), 2000)
   }
 
   return (
@@ -689,7 +701,19 @@ function ProductCard({ product, onDelete, deleting, onCopyTemplate, onOpenPublis
           <button onClick={handleDownloadImages} disabled={downloadingImgs} className="bg-cyan-500 dark:bg-cyan-600 text-white px-3 py-2 rounded hover:bg-cyan-600 dark:hover:bg-cyan-700 text-sm disabled:opacity-50" title="Descargar todas las imágenes">
             {downloadingImgs ? "⏳" : "📥"}
           </button>
-          <button onClick={() => onCopyTemplate(product)} className="bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded hover:bg-green-600 dark:hover:bg-green-700 text-sm" title="Copiar plantilla básica">📋</button>
+          <button
+            type="button"
+            onClick={handleCopyText}
+            className={`flex-1 min-w-[150px] inline-flex items-center justify-center gap-2 px-3 py-2 rounded text-sm font-semibold text-white transition-colors ${
+              copiedText
+                ? "bg-emerald-600"
+                : "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+            }`}
+            title="Copiar texto completo para Facebook"
+          >
+            {copiedText ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copiedText ? "Copiado" : "Copiar texto FB"}
+          </button>
           <button onClick={() => onDelete(product.id)} disabled={deleting} className="bg-red-500 dark:bg-red-600 text-white px-3 py-2 rounded hover:bg-red-600 dark:hover:bg-red-700 disabled:opacity-50 text-sm">{deleting ? "..." : "🗑️"}</button>
         </div>
         {showImageGen && (

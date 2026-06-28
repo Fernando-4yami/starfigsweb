@@ -7,7 +7,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { searchProducts } from "@/lib/firebase/products"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -77,6 +76,7 @@ export default function Navbar() {
 
     debounceRef.current = setTimeout(async () => {
       try {
+        const { searchProducts } = await import("@/lib/firebase/products")
         const results = await searchProducts(term)
         const seen = new Set<string>()
         const terms: string[] = []
@@ -317,7 +317,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3 h-12 md:h-14">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/" className="flex items-center">
+              <Link href="/" prefetch={false} className="flex items-center">
                 <Image
                   src="/starfigs.webp"
                   alt="Starfigs Logo"
@@ -372,6 +372,7 @@ export default function Navbar() {
                 <Link
                   key={category.name}
                   href={category.path}
+                  prefetch={false}
                   className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     category.isHighlight
                       ? "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-semibold"
@@ -451,6 +452,7 @@ export default function Navbar() {
               <Link
                 key={category.name}
                 href={category.path}
+                prefetch={false}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-4 py-3 text-base font-medium transition-all duration-200 ${
                   category.isHighlight
@@ -482,6 +484,7 @@ export default function Navbar() {
           <div className="border-t border-gray-200 dark:border-gray-800 p-4">
             <Link
               href="/"
+              prefetch={false}
               className="block text-center text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
