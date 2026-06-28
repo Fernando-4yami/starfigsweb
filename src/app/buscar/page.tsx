@@ -1,5 +1,14 @@
 import { Suspense } from "react"
+import type { Metadata } from "next"
 import SearchPageClient from "./SearchPageClient"
+
+export const metadata: Metadata = {
+  title: "Buscar productos",
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string; page?: string }>
@@ -8,7 +17,8 @@ interface SearchPageProps {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams
   const query = params.q || ""
-  const page = Number.parseInt(params.page || "1", 10)
+  const parsedPage = Number.parseInt(params.page || "1", 10)
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
 
   return (
     <Suspense

@@ -7,6 +7,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Menu, X, Search } from "lucide-react"
 import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
+import type { SuggestionSearchResponse } from "@/lib/search/types"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -18,11 +19,22 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const suggestionRequestRef = useRef<AbortController | null>(null)
+  const suggestionCacheRef = useRef(new Map<string, string[]>())
   const skipDebounceRef = useRef(false)
   const typedTermRef = useRef("")
   const [selectedIndex, setSelectedIndex] = useState(-1)
+
+  const blurActiveSearchInput = () => {
+    const activeElement = document.activeElement
+    if (
+      activeElement instanceof HTMLElement &&
+      activeElement.classList.contains("starfigs-search-input")
+    ) {
+      activeElement.blur()
+    }
+  }
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -32,7 +44,7 @@ export default function Navbar() {
       setSuggestions([])
       setShowSuggestions(false)
       typedTermRef.current = ""
-      searchInputRef.current?.blur()
+      blurActiveSearchInput()
     }
   }
 
@@ -42,7 +54,7 @@ export default function Navbar() {
     setSuggestions([])
     setShowSuggestions(false)
     typedTermRef.current = ""
-    searchInputRef.current?.blur()
+    blurActiveSearchInput()
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +73,7 @@ export default function Navbar() {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
+    suggestionRequestRef.current?.abort()
 
     const term = searchTerm.trim().toLowerCase()
     if (term.length < 2) {
@@ -74,68 +87,43 @@ export default function Navbar() {
       return
     }
 
+    const cachedSuggestions = suggestionCacheRef.current.get(term)
+    if (cachedSuggestions) {
+      setSuggestions(cachedSuggestions)
+      setShowSuggestions(cachedSuggestions.length > 0)
+      return
+    }
+
     debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController()
+      suggestionRequestRef.current = controller
+
       try {
-        const { searchProducts } = await import("@/lib/firebase/products")
-        const results = await searchProducts(term)
-        const seen = new Set<string>()
-        const terms: string[] = []
+        const params = new URLSearchParams({
+          q: term,
+          mode: "suggestions",
+          limit: "8",
+        })
+        const response = await fetch(`/api/search?${params.toString()}`, {
+          signal: controller.signal,
+        })
+        if (!response.ok) throw new Error(`Suggestion request failed: ${response.status}`)
 
-        // Colectar líneas y marcas conocidas para filtrar
-        const known = new Set<string>()
-        for (const p of results) {
-          if (p.line) known.add(p.line.toLowerCase())
-          if (p.brand) known.add(p.brand.toLowerCase())
-        }
-        // Palabras genéricas a ignorar
-        const genericWords = /^(ver|version|type|the|anime|figure|figura|original|limited|exclusive|special|set|bunny|bare|leg|dx|reissue|re|edition|release|final|battle|awakening|awakened|mode|form|edit|another|extra|secret|rare|normal)$/i
-
-        for (const p of results) {
-          if (terms.length >= 8) break
-
-          // Separar el nombre y buscar la parte que contiene el término
-          const segments = p.name.split(/[-–—/·|]+/).map((s) => s.trim())
-          
-          for (let segment of segments) {
-            if (terms.length >= 8) break
-            const lower = segment.toLowerCase()
-            
-            // Saltar si no contiene el término
-            if (!lower.includes(term) && !lower.split(/\s+/).some((w) => w.startsWith(term))) continue
-            
-            // Limpiar: quitar texto entre paréntesis
-            segment = segment.replace(/\([^)]*\)/g, '').trim()
-            if (!segment || segment.length < 2) continue
-
-            // Remover palabras que sean líneas o marcas conocidas
-            const words = segment.split(/\s+/)
-            const filtered = words.filter((w) => {
-              const wl = w.toLowerCase()
-              return !known.has(wl) && !genericWords.test(w)
-            })
-            segment = filtered.join(' ').trim()
-            if (!segment || segment.length < 2) continue
-            
-            const cleaned = segment.toLowerCase()
-            
-            // Saltar si ya está en la lista
-            if (seen.has(cleaned)) continue
-            if (genericWords.test(cleaned)) continue
-            
-            seen.add(cleaned)
-            terms.push(segment)
-          }
-        }
-
-        setSuggestions(terms)
-        setShowSuggestions(terms.length > 0)
-      } catch {
+        const payload = (await response.json()) as SuggestionSearchResponse
+        suggestionCacheRef.current.set(term, payload.suggestions)
+        setSuggestions(payload.suggestions)
+        setShowSuggestions(payload.suggestions.length > 0)
+      } catch (error) {
+        if (controller.signal.aborted) return
+        console.error("Error loading search suggestions:", error)
         setSuggestions([])
+        setShowSuggestions(false)
       }
     }, 250)
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
+      suggestionRequestRef.current?.abort()
     }
   }, [searchTerm])
 
@@ -145,8 +133,7 @@ export default function Navbar() {
       const target = event.target as Element
       if (
         !target.closest(".search-suggestions") &&
-        searchInputRef.current &&
-        !searchInputRef.current.contains(target)
+        !target.closest(".starfigs-search-input")
       ) {
         closeSuggestions()
       }
@@ -166,7 +153,7 @@ export default function Navbar() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       closeSuggestions()
-      searchInputRef.current?.blur()
+      blurActiveSearchInput()
     }
 
     if (showSuggestions && suggestions.length > 0) {
@@ -333,7 +320,6 @@ export default function Navbar() {
             <div className="hidden md:flex flex-1 relative z-50">
               <form onSubmit={handleSearch} className="relative w-full">
                 <input
-                  ref={searchInputRef}
                   type="text"
                   placeholder="Buscar productos, personajes, series, marcas..."
                   value={searchTerm}
@@ -343,7 +329,7 @@ export default function Navbar() {
                     if (suggestions.length > 0) setShowSuggestions(true)
                   }}
                   autoComplete="off"
-                  className="w-full pl-14 pr-6 py-2.5 border-2 border-gray-300 dark:border-gray-600 
+                  className="starfigs-search-input w-full pl-14 pr-6 py-2.5 border-2 border-gray-300 dark:border-gray-600
                            bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100
                            placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-colors text-sm"
@@ -399,7 +385,6 @@ export default function Navbar() {
           <div className="md:hidden mt-2 pb-3 relative z-50">
             <form onSubmit={handleSearch} className="relative">
               <input
-                ref={searchInputRef}
                 type="text"
                 placeholder="Buscar figuras..."
                 value={searchTerm}
@@ -409,7 +394,7 @@ export default function Navbar() {
                   if (suggestions.length > 0) setShowSuggestions(true)
                 }}
                 autoComplete="off"
-                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700 
+                className="starfigs-search-input w-full pl-10 pr-4 py-1.5 border border-gray-300 dark:border-gray-700
                          bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100
                          placeholder-gray-500 dark:placeholder-gray-400
                          focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"

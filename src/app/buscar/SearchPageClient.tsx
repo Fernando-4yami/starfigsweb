@@ -2,30 +2,11 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { searchProducts } from "@/lib/firebase/products"
 import ProductCard from "@/components/ProductCard"
 import { Pagination } from "@/components/ui/pagination"
 import { ChevronRight, Home, Search, Package } from "lucide-react"
 import Link from "next/link"
-
-
-interface Product {
-  id: string
-  slug: string
-  name: string
-  imageUrls: string[]
-  price: number
-  heightCm?: number
-  releaseDate?: Date | null
-  brand?: string
-  line?: string
-  category?: string
-  scale?: string
-  description?: string
-  description_es?: string
-  createdAt?: Date | null
-  views?: number
-}
+import type { ProductSearchResponse, SearchProduct } from "@/lib/search/types"
 
 interface SearchPageClientProps {
   initialQuery: string
@@ -41,170 +22,119 @@ const getItemsPerPage = () => {
   return 8
 }
 
-function strictSearchFilter(products: Product[], query: string): Product[] {
-  if (!query.trim()) return products
-
-  const searchTerms = query
-    .toLowerCase()
-    .trim()
-    .split(/\s+/)
-    .filter((term) => term.length > 0)
-
-  const strictResults = products.filter((product) => {
-    const searchableText = [
-      product.name || "",
-      product.brand || "",
-      product.line || "",
-      product.category || "",
-      product.scale || "",
-      product.description_es || product.description || "",
-    ]
-      .join(" ")
-      .toLowerCase()
-
-    return searchTerms.every((term) => searchableText.includes(term))
-  })
-
-  return strictResults
-}
-
-function sortByRelevance(products: Product[], query: string): Product[] {
-  if (!query.trim()) return products
-
-  const searchTerms = query.toLowerCase().trim().split(/\s+/)
-
-  return [...products].sort((a, b) => {
-    let scoreA = 0
-    let scoreB = 0
-
-    const textA = a.name.toLowerCase()
-    const textB = b.name.toLowerCase()
-
-    searchTerms.forEach((term) => {
-      if (textA.includes(term)) {
-        if (textA.startsWith(term)) scoreA += 10
-        if (textA.includes(` ${term} `) || textA.startsWith(`${term} `) || textA.endsWith(` ${term}`)) {
-          scoreA += 5
-        }
-        scoreA += 1
-      }
-      if (textB.includes(term)) {
-        if (textB.startsWith(term)) scoreB += 10
-        if (textB.includes(` ${term} `) || textB.startsWith(`${term} `) || textB.endsWith(` ${term}`)) {
-          scoreB += 5
-        }
-        scoreB += 1
-      }
-    })
-
-    const createdAtA = a.createdAt ? new Date(a.createdAt).getTime() : 0
-    const createdAtB = b.createdAt ? new Date(b.createdAt).getTime() : 0
-    const now = Date.now()
-    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000
-
-    if (createdAtA > thirtyDaysAgo) {
-      const daysSinceCreated = (now - createdAtA) / (24 * 60 * 60 * 1000)
-      scoreA += Math.max(0, 5 - daysSinceCreated / 6)
-    }
-    if (createdAtB > thirtyDaysAgo) {
-      const daysSinceCreated = (now - createdAtB) / (24 * 60 * 60 * 1000)
-      scoreB += Math.max(0, 5 - daysSinceCreated / 6)
-    }
-
-    return scoreB - scoreA
-  })
-}
-
 export default function SearchPageClient({ initialQuery, initialPage }: SearchPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(initialQuery)
   const [currentPage, setCurrentPage] = useState(initialPage)
-  const [rawProducts, setRawProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
+  const [products, setProducts] = useState<SearchProduct[]>([])
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [loading, setLoading] = useState(Boolean(initialQuery.trim()))
+  const [searchError, setSearchError] = useState(false)
+  const [retryNonce, setRetryNonce] = useState(0)
   const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [viewportReady, setViewportReady] = useState(false)
   const [pageTransitioning, setPageTransitioning] = useState(false)
 
   const resultsRef = useRef<HTMLDivElement>(null)
-  const pageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const requestIdRef = useRef(0)
 
   useEffect(() => {
     const updateItemsPerPage = () => {
       setItemsPerPage(getItemsPerPage())
+      setViewportReady(true)
     }
     updateItemsPerPage()
     window.addEventListener("resize", updateItemsPerPage)
-    return () => {
-      window.removeEventListener("resize", updateItemsPerPage)
-      pageTimersRef.current.forEach(t => clearTimeout(t))
-      pageTimersRef.current = []
-    }
+    return () => window.removeEventListener("resize", updateItemsPerPage)
   }, [])
 
   useEffect(() => {
+    if (!viewportReady) return
+
+    const controller = new AbortController()
+    const requestId = ++requestIdRef.current
+
     const performSearch = async () => {
-      if (!query.trim()) {
-        setRawProducts([])
+      const trimmedQuery = query.trim()
+      if (trimmedQuery.length < 2) {
+        setProducts([])
+        setTotalProducts(0)
+        setSearchError(false)
+        setLoading(false)
+        setPageTransitioning(false)
         return
       }
+
       setLoading(true)
+      setSearchError(false)
+
       try {
-        const results = await searchProducts(query.trim())
-        setRawProducts(results)
+        const params = new URLSearchParams({
+          q: trimmedQuery,
+          page: currentPage.toString(),
+          limit: itemsPerPage.toString(),
+        })
+        const response = await fetch(`/api/search?${params.toString()}`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) throw new Error(`Search request failed: ${response.status}`)
+
+        const payload = (await response.json()) as ProductSearchResponse
+        if (requestId !== requestIdRef.current) return
+
+        setProducts(payload.products)
+        setTotalProducts(payload.total)
+
+        if (payload.page !== currentPage) {
+          setCurrentPage(payload.page)
+          const nextParams = new URLSearchParams()
+          nextParams.set("q", trimmedQuery)
+          if (payload.page > 1) nextParams.set("page", payload.page.toString())
+          router.replace(`/buscar?${nextParams.toString()}`, { scroll: false })
+        }
       } catch (error) {
-        console.error("Error en búsqueda:", error)
-        setRawProducts([])
+        if (controller.signal.aborted || requestId !== requestIdRef.current) return
+        console.error("Error en busqueda:", error)
+        setProducts([])
+        setTotalProducts(0)
+        setSearchError(true)
       } finally {
-        setLoading(false)
+        if (requestId === requestIdRef.current) {
+          setLoading(false)
+          setPageTransitioning(false)
+        }
       }
     }
-    performSearch()
-  }, [query])
 
-  const products = useMemo(() => {
-    if (!query.trim() || rawProducts.length === 0) return rawProducts
-    const strictFiltered = strictSearchFilter(rawProducts, query)
-    const sorted = sortByRelevance(strictFiltered, query)
-    return sorted
-  }, [rawProducts, query])
+    performSearch()
+    return () => controller.abort()
+  }, [currentPage, itemsPerPage, query, retryNonce, router, viewportReady])
 
   useEffect(() => {
     const urlQuery = searchParams.get("q") || ""
-    const urlPage = Number.parseInt(searchParams.get("page") || "1", 10)
-    if (urlQuery !== query) {
-      setQuery(urlQuery)
-      setCurrentPage(1)
-    } else if (urlPage !== currentPage) {
-      setCurrentPage(urlPage)
-    }
-  }, [searchParams, query, currentPage])
+    const parsedPage = Number.parseInt(searchParams.get("page") || "1", 10)
+    const urlPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
+    setQuery(urlQuery)
+    setCurrentPage(urlPage)
+  }, [searchParams])
 
-  const totalPages = Math.ceil(products.length / itemsPerPage)
-
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    return products.slice(startIndex, endIndex)
-  }, [products, currentPage, itemsPerPage])
+  const totalPages = Math.ceil(totalProducts / itemsPerPage)
 
   const paginationInfo = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = Math.min(startIndex + itemsPerPage, products.length)
+    const endIndex = Math.min(startIndex + products.length, totalProducts)
     return {
-      startIndex: startIndex + 1,
+      startIndex: totalProducts === 0 ? 0 : startIndex + 1,
       endIndex,
-      totalItems: products.length,
+      totalItems: totalProducts,
       currentPage,
       totalPages,
     }
-  }, [currentPage, itemsPerPage, products.length, totalPages])
+  }, [currentPage, itemsPerPage, products.length, totalPages, totalProducts])
 
   const handlePageChange = (newPage: number) => {
-    // Limpiar timers previos
-    pageTimersRef.current.forEach(t => clearTimeout(t))
-    pageTimersRef.current = []
-
-    // Fade out
     setPageTransitioning(true)
 
     if (resultsRef.current) {
@@ -225,12 +155,6 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
     const newUrl = `/buscar?${params.toString()}`
     router.push(newUrl, { scroll: false })
     setCurrentPage(newPage)
-
-    // Fade in después de que React haya renderizado el nuevo contenido
-    const timer = setTimeout(() => {
-      setPageTransitioning(false)
-    }, 200)
-    pageTimersRef.current.push(timer)
   }
 
   return (
@@ -283,10 +207,35 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
               </ul>
             </div>
           </div>
+        ) : query.trim().length < 2 ? (
+          <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
+            <Search className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+              Escribe al menos 2 caracteres
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Así podemos mostrarte resultados útiles del catálogo.
+            </p>
+          </div>
         ) : loading ? (
           <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">Buscando productos...</p>
+          </div>
+        ) : searchError ? (
+          <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
+            <Search className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+              No pudimos completar la búsqueda
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Inténtalo nuevamente en un momento.</p>
+            <button
+              type="button"
+              onClick={() => setRetryNonce((value) => value + 1)}
+              className="px-5 py-2.5 bg-amber-600 text-white font-medium hover:bg-amber-700 transition-colors"
+            >
+              Reintentar
+            </button>
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -326,7 +275,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
             <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-200 ${
               pageTransitioning ? "opacity-0" : "opacity-100"
             }`}>
-              {paginatedProducts.map((product, index) => (
+              {products.map((product, index) => (
                 <ProductCard key={product.id} product={product} priority={index < 2} />
               ))}
             </div>

@@ -3,7 +3,6 @@
 import { memo } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { incrementProductViews } from "@/lib/firebase/products"
 import type { Product } from "@/lib/firebase/products"
 import { Trophy, Star } from "lucide-react"
 
@@ -34,18 +33,6 @@ function RankingSection({ products }: RankingSectionProps) {
         </div>
       </section>
     )
-  }
-
-  // 🚀 Click handler
-  const handleRankingClick = (product: Product) => {
-    try {
-      incrementProductViews(product.id)
-        .catch((error) => {
-          console.error(`❌ Error incrementando views desde ranking:`, error)
-        })
-    } catch (error) {
-      console.error("Error en handleRankingClick:", error)
-    }
   }
 
   // 🎨 Colores de medallas
@@ -84,9 +71,9 @@ function RankingSection({ products }: RankingSectionProps) {
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
+                prefetch={false}
                 className="relative flex-shrink-0 cursor-pointer group"
                 title={product.name}
-                onClick={() => handleRankingClick(product)}
               >
                 {/* Card container */}
                 <div className={`relative w-40 bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden
@@ -140,9 +127,9 @@ function RankingSection({ products }: RankingSectionProps) {
             <Link
               key={product.id}
               href={`/products/${product.slug}`}
+              prefetch={false}
               className="relative cursor-pointer group w-full"
               title={product.name}
-              onClick={() => handleRankingClick(product)}
             >
               {/* Card container */}
               <div className={`relative bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden

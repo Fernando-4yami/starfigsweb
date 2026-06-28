@@ -6,6 +6,7 @@ import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@
 import ProductCard from "@/components/ProductCard"
 import RankingSection from "@/components/sections/ranking-section"
 import HowItWorks from "@/components/HowItWorks"
+import FacebookReviews from "@/components/FacebookReviews"
 import Link from "next/link"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
@@ -272,6 +273,8 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <HowItWorks />
       </div>
+
+      <FacebookReviews />
 
       {ctaSection}
     </main>

@@ -55,6 +55,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
       {/* Botón Anterior */}
       <button
         type="button"
+        aria-label="Página anterior"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 
@@ -82,6 +83,8 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
             <button
               key={`page-${pageNumber}`}
               type="button"
+              aria-label={`Ir a la página ${pageNumber}`}
+              aria-current={isActive ? "page" : undefined}
               onClick={() => onPageChange(pageNumber)}
               className={`min-w-[40px] px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
@@ -98,6 +101,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, className = 
       {/* Botón Siguiente */}
       <button
         type="button"
+        aria-label="Página siguiente"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 

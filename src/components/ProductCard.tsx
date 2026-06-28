@@ -1,12 +1,12 @@
 "use client"
 
-import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { incrementProductViews, type Product } from "@/lib/firebase/products"
+import type { Product } from "@/lib/firebase/products"
 import {
+  type SerializedProduct,
   parseSerializedDate,
   hasActiveDiscount,
   calculateFinalPrice,
@@ -15,7 +15,7 @@ import {
 } from "@/lib/serialize-product"
 
 interface ProductCardProps {
-  product: Product
+  product: Product | SerializedProduct
   /**
    * Si es true, la imagen se carga con priority (no lazy).
    * Útil para los primeros productos visibles en homepage/categorías (mejora LCP).
@@ -49,19 +49,12 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const finalPrice = calculateFinalPrice(product)
   const discountPercentage = getDiscountPercentage(product)
 
-  const handleClick = async (e: React.MouseEvent) => {
-    try {
-      incrementProductViews(product.id)
-        .catch((error) => {
-          console.error(`❌ Error incrementando views para ${product.name}:`, error)
-        })
-    } catch (error) {
-      console.error("Error en handleClick:", error)
-    }
-  }
-
   return (
-    <Link href={`/products/${product.slug}`} className="group block text-inherit no-underline" onClick={handleClick}>
+    <Link
+      href={`/products/${product.slug}`}
+      prefetch={false}
+      className="group block text-inherit no-underline"
+    >
       <div className="bg-white dark:bg-gray-800 shadow-md hover:shadow-xl dark:hover:shadow-2xl dark:hover:shadow-blue-500/10 transition-shadow duration-300 overflow-hidden flex flex-col border border-transparent dark:border-gray-700">
         {/* Imagen */}
         <div className="relative w-full h-0 pb-[100%] bg-gray-50 dark:bg-gray-900 overflow-hidden">
