@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { FieldPath } from "firebase-admin/firestore"
 import { getDb } from "@/lib/firebase/admin"
-import { PRODUCTS_PER_IMAGE_SITEMAP } from "@/lib/image-sitemap"
+import {
+  getCachedImageSitemapProductIds,
+  getImageSitemapPageCount,
+  PRODUCTS_PER_IMAGE_SITEMAP,
+} from "@/lib/image-sitemap"
 
 export const revalidate = 86400
 
@@ -17,11 +21,8 @@ function xmlEscape(value: string): string {
 }
 
 export async function generateStaticParams() {
-  const countSnapshot = await getDb().collection("products").count().get()
-  const pageCount = Math.max(
-    1,
-    Math.ceil(countSnapshot.data().count / PRODUCTS_PER_IMAGE_SITEMAP),
-  )
+  const productIds = await getCachedImageSitemapProductIds()
+  const pageCount = getImageSitemapPageCount(productIds.length)
 
   return Array.from({ length: pageCount }, (_, page) => ({
     page: page.toString(),
@@ -38,13 +39,26 @@ export async function GET(
   }
 
   try {
-    const snapshot = await getDb()
+    const productIds = await getCachedImageSitemapProductIds()
+    const pageCount = getImageSitemapPageCount(productIds.length)
+
+    if (page >= pageCount) {
+      return NextResponse.json({ error: "Sitemap page not found" }, { status: 404 })
+    }
+
+    let query: FirebaseFirestore.Query = getDb()
       .collection("products")
       .orderBy(FieldPath.documentId())
-      .offset(page * PRODUCTS_PER_IMAGE_SITEMAP)
       .limit(PRODUCTS_PER_IMAGE_SITEMAP)
       .select("slug", "imageUrls", "thumbnailUrl", "name")
-      .get()
+
+    const startIndex = page * PRODUCTS_PER_IMAGE_SITEMAP
+    const previousProductId = startIndex > 0 ? productIds[startIndex - 1] : null
+    if (previousProductId) {
+      query = query.startAfter(previousProductId)
+    }
+
+    const snapshot = await query.get()
 
     if (snapshot.empty && page > 0) {
       return NextResponse.json({ error: "Sitemap page not found" }, { status: 404 })

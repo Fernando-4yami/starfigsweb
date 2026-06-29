@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase/admin"
-import { PRODUCTS_PER_IMAGE_SITEMAP } from "@/lib/image-sitemap"
+import {
+  getCachedImageSitemapProductIds,
+  getImageSitemapPageCount,
+} from "@/lib/image-sitemap"
 
 export const revalidate = 86400
 
@@ -8,9 +10,8 @@ const BASE_URL = "https://starfigsperu.com"
 
 export async function GET() {
   try {
-    const countSnapshot = await getDb().collection("products").count().get()
-    const productCount = countSnapshot.data().count
-    const pageCount = Math.max(1, Math.ceil(productCount / PRODUCTS_PER_IMAGE_SITEMAP))
+    const productIds = await getCachedImageSitemapProductIds()
+    const pageCount = getImageSitemapPageCount(productIds.length)
 
     const sitemapEntries = Array.from(
       { length: pageCount },

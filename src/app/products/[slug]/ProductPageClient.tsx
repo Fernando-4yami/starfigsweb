@@ -36,6 +36,14 @@ const InfiniteRelatedProducts = dynamic(
   },
 )
 
+const FIRESTORE_VIEW_TRACKING_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_PRODUCT_VIEW_TRACKING === "true"
+const VIEW_SAMPLE_RATE = Math.min(
+  Math.max(Number(process.env.NEXT_PUBLIC_PRODUCT_VIEW_SAMPLE_RATE || "0.1"), 0),
+  1,
+)
+const VIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000
+
 interface ProductPageClientProps {
   params: { slug: string }
   initialProduct: SerializedProduct
@@ -147,11 +155,18 @@ export default function ProductPageClient({ initialProduct: product }: ProductPa
     const recordView = () => {
       if (navigator.webdriver) return
 
+      trackProductView(product.id, product.name, product.category || "figura", product.price)
+
+      if (!FIRESTORE_VIEW_TRACKING_ENABLED) return
+      if (Math.random() > VIEW_SAMPLE_RATE) return
+
       const sessionKey = `starfigs:viewed:${product.id}`
+      const now = Date.now()
 
       try {
-        if (sessionStorage.getItem(sessionKey)) return
-        sessionStorage.setItem(sessionKey, "1")
+        const previousView = Number(localStorage.getItem(sessionKey) || "0")
+        if (previousView && now - previousView < VIEW_COOLDOWN_MS) return
+        localStorage.setItem(sessionKey, String(now))
       } catch {
         // Storage can be unavailable in strict privacy modes.
       }
@@ -160,8 +175,6 @@ export default function ProductPageClient({ initialProduct: product }: ProductPa
         method: "POST",
         keepalive: true,
       }).catch(console.error)
-
-      trackProductView(product.id, product.name, product.category || "figura", product.price)
     }
 
     const scheduleView = () => {

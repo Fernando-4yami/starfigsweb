@@ -102,7 +102,7 @@ async function loadCategoryProducts(slug: string): Promise<PublicProduct[]> {
 const getCachedCategoryProducts = unstable_cache(
   loadCategoryProducts,
   ["category-products-v2"],
-  { revalidate: 3600 },
+  { revalidate: 21600 },
 )
 
 function parseInteger(
@@ -299,7 +299,7 @@ export async function GET(
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
         },
       },
     )

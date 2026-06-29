@@ -85,7 +85,7 @@ async function loadRelatedProducts(productId: string) {
 const getCachedRelatedProducts = unstable_cache(
   loadRelatedProducts,
   ["related-products-v2"],
-  { revalidate: 21_600 },
+  { revalidate: 86_400 },
 )
 
 export async function GET(
@@ -104,7 +104,7 @@ export async function GET(
     return NextResponse.json(payload, {
       headers: {
         "Cache-Control":
-          "public, max-age=300, s-maxage=21600, stale-while-revalidate=604800",
+          "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
       },
     })
   } catch (error) {

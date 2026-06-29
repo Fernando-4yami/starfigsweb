@@ -4,6 +4,9 @@ import admin, { getDb } from "@/lib/firebase/admin"
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
+const FIRESTORE_VIEW_WRITES_ENABLED =
+  process.env.PRODUCT_VIEW_WRITES_ENABLED === "true"
+
 interface ViewRouteContext {
   params: { id: string }
 }
@@ -13,6 +16,16 @@ export async function POST(_request: NextRequest, { params }: ViewRouteContext) 
 
   if (!productId || productId.length > 128 || !/^[a-zA-Z0-9_-]+$/.test(productId)) {
     return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
+  }
+
+  if (!FIRESTORE_VIEW_WRITES_ENABLED) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Cache-Control": "no-store",
+        "X-Starfigs-View-Tracking": "disabled",
+      },
+    })
   }
 
   try {

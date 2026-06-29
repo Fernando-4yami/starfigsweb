@@ -6,7 +6,7 @@ import {
   PUBLIC_PRODUCT_FIELDS,
 } from "@/lib/api/public-product"
 
-export const revalidate = 3600
+export const revalidate = 21600
 
 export async function GET() {
   try {
@@ -51,7 +51,7 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400",
         },
       },
     )

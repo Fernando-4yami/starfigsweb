@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { buildSearchIndex } from "@/lib/search/index-builder"
 
-export const revalidate = 21_600
+export const revalidate = 86_400
 export const runtime = "nodejs"
 
 export async function GET() {
@@ -9,7 +9,7 @@ export async function GET() {
     const index = await buildSearchIndex()
     return NextResponse.json(index, {
       headers: {
-        "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=604800",
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
       },
     })
   } catch (error) {
