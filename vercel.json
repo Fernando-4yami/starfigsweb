@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/rebuild-catalog-artifacts",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/reset-ranking",
+      "schedule": "0 5 */15 * *"
     }
   ],
   "buildCommand": "npm run build",

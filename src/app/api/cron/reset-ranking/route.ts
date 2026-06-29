@@ -1,83 +1,79 @@
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import admin, { getDb } from "@/lib/firebase/admin"
 
 export const dynamic = "force-dynamic"
-export const maxDuration = 300 // 5 min timeout para 20k+ productos
+export const runtime = "nodejs"
+export const maxDuration = 60
 
-export async function GET(request: NextRequest) {
-  // 🔐 Validar el cron secret
-  const authHeader = request.headers.get("authorization")
+const RESET_LIMIT = 500
+
+function getAuthorizationError(request: NextRequest): NextResponse | null {
   const expectedKey = process.env.CRON_SECRET
-
   if (!expectedKey) {
-    console.error("❌ CRON_SECRET no configurado en variables de entorno")
     return NextResponse.json(
       { error: "Server misconfiguration: CRON_SECRET not set" },
       { status: 500 },
     )
   }
 
-  if (authHeader !== `Bearer ${expectedKey}`) {
+  if (request.headers.get("authorization") !== `Bearer ${expectedKey}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const startTime = Date.now()
-  console.log("🔄 Iniciando reset automático del ranking...")
+  return null
+}
+
+export async function GET(request: NextRequest) {
+  const authorizationError = getAuthorizationError(request)
+  if (authorizationError) return authorizationError
+
+  const startedAt = Date.now()
 
   try {
-    // Leer todos los productos
-    const snapshot = await getDb().collection("products").get()
+    const db = getDb()
+    const snapshot = await db
+      .collection("products")
+      .where("views", ">", 0)
+      .orderBy("views", "desc")
+      .limit(RESET_LIMIT)
+      .select("views")
+      .get()
 
     if (snapshot.empty) {
-      console.log("⚠️ No hay productos para resetear")
       return NextResponse.json({
         success: true,
         updated: 0,
-        message: "No products found",
-        duration: `${Date.now() - startTime}ms`,
+        hasMore: false,
+        message: "No ranked products to reset",
+        durationMs: Date.now() - startedAt,
       })
     }
 
-    // Resetear en batches de 500 (Firestore max batch size)
-    const batchSize = 500
-    const totalDocs = snapshot.size
-    let processed = 0
-
-    const docs = snapshot.docs
-    for (let i = 0; i < docs.length; i += batchSize) {
-      const batch = getDb().batch()
-      const chunk = docs.slice(i, i + batchSize)
-
-      chunk.forEach((doc) => {
-        batch.update(doc.ref, {
-          views: 0,
-          lastViewedAt: null,
-          lastResetAt: admin.firestore.FieldValue.serverTimestamp(),
-        })
+    const batch = db.batch()
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, {
+        views: 0,
+        lastViewedAt: null,
+        lastResetAt: admin.firestore.FieldValue.serverTimestamp(),
       })
+    })
 
-      await batch.commit()
-      processed += chunk.length
-      console.log(`📦 Batch ${Math.ceil((i + 1) / batchSize)}/${Math.ceil(totalDocs / batchSize)}: ${processed}/${totalDocs} productos`)
-    }
-
-    const duration = Date.now() - startTime
-    console.log(`✅ Reset completado: ${processed} productos en ${duration}ms`)
+    await batch.commit()
 
     return NextResponse.json({
       success: true,
-      updated: processed,
-      total: totalDocs,
-      duration: `${duration}ms`,
+      updated: snapshot.size,
+      hasMore: snapshot.size === RESET_LIMIT,
+      durationMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("❌ Error en reset del ranking:", error)
+    console.error("Ranking reset failed:", error)
     return NextResponse.json(
       {
-        error: String(error),
         success: false,
-        duration: `${Date.now() - startTime}ms`,
+        error: error instanceof Error ? error.message : String(error),
+        durationMs: Date.now() - startedAt,
       },
       { status: 500 },
     )
