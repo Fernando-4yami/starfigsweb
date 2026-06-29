@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server"
-import { FieldPath } from "firebase-admin/firestore"
-import { getDb } from "@/lib/firebase/admin"
+import generatedImageSitemap from "@/lib/search/generated-image-sitemap.json"
+import { expandImageUrl } from "@/lib/search/image-url"
 import {
-  getCachedImageSitemapProductIds,
   getImageSitemapPageCount,
   PRODUCTS_PER_IMAGE_SITEMAP,
 } from "@/lib/image-sitemap"
+import type { CompactImageSitemapEntry } from "@/lib/search/index-types"
 
 export const revalidate = 86400
 
 const BASE_URL = "https://starfigsperu.com"
+const imageSitemapEntries = generatedImageSitemap as CompactImageSitemapEntry[]
 
 function xmlEscape(value: string): string {
   return value
@@ -20,9 +21,8 @@ function xmlEscape(value: string): string {
     .replace(/'/g, "&apos;")
 }
 
-export async function generateStaticParams() {
-  const productIds = await getCachedImageSitemapProductIds()
-  const pageCount = getImageSitemapPageCount(productIds.length)
+export function generateStaticParams() {
+  const pageCount = getImageSitemapPageCount(imageSitemapEntries.length)
 
   return Array.from({ length: pageCount }, (_, page) => ({
     page: page.toString(),
@@ -34,78 +34,46 @@ export async function GET(
   { params }: { params: { page: string } },
 ) {
   const page = Number(params.page)
-  if (!Number.isInteger(page) || page < 0) {
-    return NextResponse.json({ error: "Invalid sitemap page" }, { status: 404 })
+  const pageCount = getImageSitemapPageCount(imageSitemapEntries.length)
+
+  if (!Number.isInteger(page) || page < 0 || page >= pageCount) {
+    return NextResponse.json({ error: "Sitemap page not found" }, { status: 404 })
   }
 
-  try {
-    const productIds = await getCachedImageSitemapProductIds()
-    const pageCount = getImageSitemapPageCount(productIds.length)
-
-    if (page >= pageCount) {
-      return NextResponse.json({ error: "Sitemap page not found" }, { status: 404 })
-    }
-
-    let query: FirebaseFirestore.Query = getDb()
-      .collection("products")
-      .orderBy(FieldPath.documentId())
-      .limit(PRODUCTS_PER_IMAGE_SITEMAP)
-      .select("slug", "imageUrls", "thumbnailUrl", "name")
-
-    const startIndex = page * PRODUCTS_PER_IMAGE_SITEMAP
-    const previousProductId = startIndex > 0 ? productIds[startIndex - 1] : null
-    if (previousProductId) {
-      query = query.startAfter(previousProductId)
-    }
-
-    const snapshot = await query.get()
-
-    if (snapshot.empty && page > 0) {
-      return NextResponse.json({ error: "Sitemap page not found" }, { status: 404 })
-    }
-
-    const entries: string[] = []
-
-    snapshot.forEach((doc) => {
-      const data = doc.data()
-      const slug = data.slug as string
-      const name = data.name as string
-      const imageUrls: string[] = data.imageUrls || []
-      const thumbnailUrl = data.thumbnailUrl as string
-
-      if (!slug || !name) return
-
-      const images = [...new Set(thumbnailUrl ? [thumbnailUrl, ...imageUrls] : imageUrls)]
-        .filter(Boolean)
-
-      if (images.length === 0) return
-
-      const imageEntries = images.map((imageUrl) => `    <image:image>
+  const startIndex = page * PRODUCTS_PER_IMAGE_SITEMAP
+  const entries = imageSitemapEntries
+    .slice(startIndex, startIndex + PRODUCTS_PER_IMAGE_SITEMAP)
+    .map(([slug, name, compactImages]) => {
+      const imageEntries = compactImages
+        .map(expandImageUrl)
+        .filter((imageUrl): imageUrl is string => Boolean(imageUrl))
+        .map((imageUrl) => `    <image:image>
       <image:loc>${xmlEscape(imageUrl)}</image:loc>
       <image:title>${xmlEscape(name)}</image:title>
       <image:caption>${xmlEscape(name)} - Figura de anime coleccionable en Starfigs Peru</image:caption>
-    </image:image>`).join("\n")
+    </image:image>`)
+        .join("\n")
 
-      entries.push(`  <url>
+      if (!imageEntries) return ""
+
+      return `  <url>
     <loc>${BASE_URL}/products/${xmlEscape(slug)}</loc>
 ${imageEntries}
-  </url>`)
+  </url>`
     })
+    .filter(Boolean)
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries.join("\n")}
 </urlset>`
 
-    return new NextResponse(xml, {
-      headers: {
-        "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
-      },
-    })
-  } catch (error) {
-    console.error(`Error generating image sitemap page ${page}:`, error)
-    return NextResponse.json({ error: "Error generating image sitemap" }, { status: 500 })
-  }
+  return new NextResponse(xml, {
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control":
+        "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  })
 }

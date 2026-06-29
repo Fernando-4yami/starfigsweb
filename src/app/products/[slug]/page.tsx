@@ -1,10 +1,12 @@
-import { getProductBySlug, getProducts } from "@/lib/firebase/products"
+import { getProductBySlug } from "@/lib/firebase/products"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import ProductPageClient from "./ProductPageClient"
 import { generateAnyProductMetadata, generateAnyProductJsonLd, generateBreadcrumbJsonLd, CATEGORY_SLUG_TO_NAME } from "@/lib/metadata"
 import { serializeProduct } from "@/lib/serialize-product"
 import { cache } from "react"
+import generatedIndex from "@/lib/search/generated-index.json"
+import type { CompactSearchIndexEntry } from "@/lib/search/index-types"
 
 interface ProductPageProps {
   params: { slug: string }
@@ -16,10 +18,13 @@ const getCachedProductBySlug = cache(getProductBySlug)
 
 export async function generateStaticParams() {
   // Prebuild recent products. Other slugs render on demand and stay cached by ISR.
-  const products = await getProducts(800)
-  return products.map((product) => ({
-    slug: product.slug,
-  }))
+  return (generatedIndex as CompactSearchIndexEntry[])
+    .slice()
+    .sort((a, b) => b[8] - a[8])
+    .slice(0, 800)
+    .map((product) => ({
+      slug: product[2],
+    }))
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {

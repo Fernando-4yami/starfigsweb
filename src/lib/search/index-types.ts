@@ -26,6 +26,41 @@ export type CompactSearchIndexEntry = [
   searchableText: string,
 ]
 
+export type CompactFeedEntry = [
+  id: string,
+  name: string,
+  slug: string,
+  price: number,
+  imageUrl: string | null,
+  brand: string | null,
+  category: string | null,
+  stock: number | null,
+  gtin: string | null,
+  line: string | null,
+  scale: string | null,
+  releaseDate: string | null,
+  description: string | null,
+]
+
+export type CompactSitemapEntry = [
+  slug: string,
+  line: string | null,
+  modifiedAtMs: number,
+]
+
+export type CompactImageSitemapEntry = [
+  slug: string,
+  name: string,
+  imageUrls: string[],
+]
+
+export interface CatalogArtifacts {
+  searchIndex: CompactSearchIndexEntry[]
+  feed: CompactFeedEntry[]
+  sitemap: CompactSitemapEntry[]
+  imageSitemap: CompactImageSitemapEntry[]
+}
+
 export interface SearchIndexEntry {
   product: SearchProduct
   searchableText: string

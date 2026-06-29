@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next"
-import { getDb } from "@/lib/firebase/admin"
 import posts from "@/lib/blog/posts"
+import generatedSitemap from "@/lib/search/generated-sitemap.json"
+import type { CompactSitemapEntry } from "@/lib/search/index-types"
 
 const BASE_URL = "https://starfigsperu.com"
 export const revalidate = 86400
 
-// Líneas que YA son categorías (no duplicar en /lines/)
 const CATEGORY_LINE_NAMES = new Set([
   "nendoroid",
   "figma",
@@ -26,7 +26,8 @@ const CATEGORY_SLUGS = [
   "pricing",
 ]
 
-// Convierte nombre de línea a slug URL
+const sitemapEntries = generatedSitemap as CompactSitemapEntry[]
+
 function lineToSlug(lineName: string): string {
   return lineName
     .toLowerCase()
@@ -34,7 +35,12 @@ function lineToSlug(lineName: string): string {
     .replace(/^-|-$/g, "")
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+function dateFromMs(value: number): Date {
+  const date = new Date(value || Date.now())
+  return Number.isNaN(date.getTime()) ? new Date() : date
+}
+
+export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -68,7 +74,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]
 
-  // Blog pages — dinámico desde posts.ts para mantener consistencia
   const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.date),
@@ -76,60 +81,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  let products: Array<{ slug: string; lastModified: Date }> = []
-  let lineSlugs: string[] = []
-  try {
-    // Keep every product discoverable while prerendering only the newest subset.
-    const snapshot = await getDb().collection("products")
-      .select("slug", "line", "updatedAt", "createdAt")
-      .get()
-
-    const uniqueLines = new Set<string>()
-
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data()
-      const slug = data.slug as string
-      const modifiedValue = data.updatedAt || data.createdAt
-      const modifiedDate = modifiedValue?.toDate?.() || new Date(modifiedValue || Date.now())
-
-      if (slug) {
-        products.push({
-          slug,
-          lastModified: Number.isNaN(modifiedDate.getTime()) ? new Date() : modifiedDate,
-        })
+  const uniqueLineSlugs = new Set<string>()
+  const productPages: MetadataRoute.Sitemap = sitemapEntries.map(
+    ([slug, line, modifiedAtMs]) => {
+      if (line && line.trim() && !CATEGORY_LINE_NAMES.has(line.trim().toLowerCase())) {
+        const lineSlug = lineToSlug(line)
+        if (lineSlug) uniqueLineSlugs.add(lineSlug)
       }
 
-      const line = data.line as string
-      if (line && line.trim()) {
-        const lowerLine = line.trim().toLowerCase()
-        if (!CATEGORY_LINE_NAMES.has(lowerLine)) {
-          uniqueLines.add(line.trim())
-        }
+      return {
+        url: `${BASE_URL}/products/${slug}`,
+        lastModified: dateFromMs(modifiedAtMs),
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
       }
-    })
+    },
+  )
 
-    lineSlugs = Array.from(uniqueLines)
-      .map(lineToSlug)
-      .filter((slug) => slug.length > 0)
-  } catch (error) {
-    console.error("Error fetching products for sitemap:", error)
-  }
-
-  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${BASE_URL}/products/${product.slug}`,
-    lastModified: product.lastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }))
-
-  const linePages: MetadataRoute.Sitemap = lineSlugs.map((slug) => ({
+  const linePages: MetadataRoute.Sitemap = Array.from(uniqueLineSlugs).map((slug) => ({
     url: `${BASE_URL}/lines/${slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }))
-
-  console.log(`🗺️ Sitemap total: ${staticPages.length} estáticas + ${blogPages.length} blog + ${productPages.length} productos + ${linePages.length} líneas = ${staticPages.length + blogPages.length + productPages.length + linePages.length} URLs`)
 
   return [...staticPages, ...blogPages, ...productPages, ...linePages]
 }

@@ -1,5 +1,9 @@
 import { getDb } from "@/lib/firebase/admin"
 import type {
+  CatalogArtifacts,
+  CompactFeedEntry,
+  CompactImageSitemapEntry,
+  CompactSitemapEntry,
   CompactDiscount,
   CompactSearchIndexEntry,
 } from "@/lib/search/index-types"
@@ -23,6 +27,9 @@ const SEARCH_FIELDS = [
   "scale",
   "views",
   "discount",
+  "stock",
+  "gtin",
+  "updatedAt",
 ] as const
 
 function toDate(value: any): Date | null {
@@ -47,6 +54,13 @@ function normalizeDiscount(value: any): CompactDiscount | null {
     toIso(value.startDate),
     toIso(value.endDate),
   ]
+}
+
+function firstNonEmpty(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim()
+  }
+  return null
 }
 
 function createIndexEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): CompactSearchIndexEntry {
@@ -84,11 +98,90 @@ function createIndexEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): Compact
   ]
 }
 
-export async function buildSearchIndex(): Promise<CompactSearchIndexEntry[]> {
+function createFeedEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): CompactFeedEntry | null {
+  const data = doc.data()
+  const name = String(data.name || "").trim()
+  const slug = String(data.slug || doc.id).trim()
+  if (!name || !slug) return null
+
+  const imageUrls = Array.isArray(data.imageUrls) ? data.imageUrls : []
+  const imageUrl = firstNonEmpty(data.thumbnailUrl, imageUrls[0])
+  const description = firstNonEmpty(data.description_es, data.description)
+
+  return [
+    doc.id,
+    name,
+    slug,
+    Number(data.price) || 0,
+    compactImageUrl(imageUrl),
+    data.brand || null,
+    data.category || null,
+    typeof data.stock === "number" ? data.stock : null,
+    data.gtin || null,
+    data.line || null,
+    data.scale || null,
+    toIso(data.releaseDate),
+    description ? description.slice(0, 1200) : null,
+  ]
+}
+
+function createSitemapEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): CompactSitemapEntry | null {
+  const data = doc.data()
+  const slug = String(data.slug || "").trim()
+  if (!slug) return null
+
+  const modifiedAt = toDate(data.updatedAt) || toDate(data.createdAt) || new Date()
+
+  return [
+    slug,
+    data.line || null,
+    Number.isNaN(modifiedAt.getTime()) ? Date.now() : modifiedAt.getTime(),
+  ]
+}
+
+function createImageSitemapEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): CompactImageSitemapEntry | null {
+  const data = doc.data()
+  const slug = String(data.slug || "").trim()
+  const name = String(data.name || "").trim()
+  if (!slug || !name) return null
+
+  const imageUrls = Array.isArray(data.imageUrls) ? data.imageUrls : []
+  const images = [...new Set([data.thumbnailUrl, imageUrls[0]].filter(Boolean))]
+    .map(compactImageUrl)
+    .filter((value): value is string => Boolean(value))
+
+  if (images.length === 0) return null
+
+  return [slug, name, images]
+}
+
+export async function buildCatalogArtifacts(): Promise<CatalogArtifacts> {
   const snapshot = await getDb()
     .collection("products")
     .select(...SEARCH_FIELDS)
     .get()
 
-  return snapshot.docs.map(createIndexEntry)
+  const searchIndex: CompactSearchIndexEntry[] = []
+  const feed: CompactFeedEntry[] = []
+  const sitemap: CompactSitemapEntry[] = []
+  const imageSitemap: CompactImageSitemapEntry[] = []
+
+  snapshot.docs.forEach((doc) => {
+    searchIndex.push(createIndexEntry(doc))
+
+    const feedEntry = createFeedEntry(doc)
+    if (feedEntry) feed.push(feedEntry)
+
+    const sitemapEntry = createSitemapEntry(doc)
+    if (sitemapEntry) sitemap.push(sitemapEntry)
+
+    const imageEntry = createImageSitemapEntry(doc)
+    if (imageEntry) imageSitemap.push(imageEntry)
+  })
+
+  return { searchIndex, feed, sitemap, imageSitemap }
+}
+
+export async function buildSearchIndex(): Promise<CompactSearchIndexEntry[]> {
+  return (await buildCatalogArtifacts()).searchIndex
 }
