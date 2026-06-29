@@ -6,7 +6,7 @@ import { expandImageUrl } from "@/lib/search/image-url"
 import { normalizeSearchText } from "@/lib/search/normalize"
 import type { SearchProduct } from "@/lib/search/types"
 
-const SEARCH_INDEX_TTL = 15 * 60 * 1000
+const SEARCH_INDEX_TTL = 24 * 60 * 60 * 1000
 
 interface RankedEntry {
   entry: SearchIndexEntry
@@ -79,7 +79,8 @@ cachedAt = Date.now()
 
 async function loadSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
   const response = await fetch(`${origin}/api/search-index`, {
-    cache: "no-store",
+    cache: "force-cache",
+    next: { revalidate: 86_400 },
   })
 
   if (!response.ok) {

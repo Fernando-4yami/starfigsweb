@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server"
-import { buildSearchIndex } from "@/lib/search/index-builder"
+import searchIndex from "@/lib/search/generated-index.json"
 
 export const revalidate = 86_400
-export const runtime = "nodejs"
 
 export async function GET() {
   try {
-    const index = await buildSearchIndex()
-    return NextResponse.json(index, {
+    return NextResponse.json(searchIndex, {
       headers: {
         "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
       },

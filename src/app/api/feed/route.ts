@@ -1,13 +1,31 @@
+import { unstable_cache } from "next/cache"
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase/admin"
 
-export const dynamic = "force-dynamic"
-export const revalidate = 43200 // 12 horas - Google cachea el feed
+export const revalidate = 86400
 
 const BASE_URL = "https://starfigsperu.com"
 
-function xmlEscape(str: string): string {
-  return str
+interface FeedProduct {
+  id: string
+  name: string
+  slug: string
+  price?: number
+  description?: string
+  description_es?: string
+  imageUrls?: string[]
+  thumbnailUrl?: string
+  brand?: string
+  category?: string
+  stock?: number
+  gtin?: string
+  line?: string
+  scale?: string
+  releaseDate?: string | null
+}
+
+function xmlEscape(value: string): string {
+  return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -17,123 +35,124 @@ function xmlEscape(str: string): string {
 
 function getGoogleCategory(category?: string): string {
   const map: Record<string, string> = {
-    figura: "6006",    // Collectibles
+    figura: "6006",
     nendoroid: "6006",
     figma: "6006",
     "pop-up-parade": "6006",
     "ichiban-kuji": "6006",
     scale: "6006",
-    plush: "2121",     // Plush Toys / Stuffed Animals
+    plush: "2121",
     figuarts: "6006",
     pricing: "6006",
   }
+
   if (!category) return "6006"
-  const lower = category.toLowerCase().trim()
-  return map[lower] || "6006"
+  return map[category.toLowerCase().trim()] || "6006"
 }
 
 function formatPrice(price: number): string {
   return `${price.toFixed(2)} PEN`
 }
 
+function toIsoDate(value: any): string | null {
+  if (!value) return null
+
+  const date = typeof value.toDate === "function" ? value.toDate() : new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+async function loadFeedProducts(): Promise<FeedProduct[]> {
+  const snapshot = await getDb()
+    .collection("products")
+    .select(
+      "name",
+      "slug",
+      "price",
+      "description",
+      "description_es",
+      "imageUrls",
+      "thumbnailUrl",
+      "brand",
+      "category",
+      "stock",
+      "gtin",
+      "line",
+      "scale",
+      "releaseDate",
+    )
+    .get()
+
+  const products: FeedProduct[] = []
+  snapshot.forEach((doc) => {
+    const data = doc.data()
+    if (!data.name) return
+
+    products.push({
+      id: doc.id,
+      name: data.name,
+      slug: data.slug || doc.id,
+      price: data.price,
+      description: data.description,
+      description_es: data.description_es,
+      imageUrls: Array.isArray(data.imageUrls) ? data.imageUrls : [],
+      thumbnailUrl: data.thumbnailUrl,
+      brand: data.brand,
+      category: data.category,
+      stock: data.stock,
+      gtin: data.gtin,
+      line: data.line,
+      scale: data.scale,
+      releaseDate: toIsoDate(data.releaseDate),
+    })
+  })
+
+  return products
+}
+
+const getCachedFeedProducts = unstable_cache(
+  loadFeedProducts,
+  ["google-product-feed-v2"],
+  { revalidate: 86400 },
+)
+
 export async function GET() {
   try {
-    const db = getDb()
+    const products = await getCachedFeedProducts()
 
-    // Traer todos los productos con los campos necesarios
-    const snapshot = await db
-      .collection("products")
-      .select(
-        "name",
-        "slug",
-        "price",
-        "description",
-        "description_es",
-        "imageUrls",
-        "thumbnailUrl",
-        "brand",
-        "category",
-        "stock",
-        "gtin",
-        "line",
-        "scale",
-        "heightCm",
-        "releaseDate",
-      )
-      .get()
-
-    const products: any[] = []
-    snapshot.forEach((doc) => {
-      const data = doc.data()
-      // Incluir productos con nombre (el precio se asigna default más abajo)
-      if (data.name) {
-        products.push({
-          id: doc.id,
-          ...data,
-        })
-      }
-    })
-
-    console.log(`📦 Feed Google: ${products.length} productos listos`)
-
-    // Generar XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
   <channel>
-    <title>Starfigs Perú - Product Feed</title>
+    <title>Starfigs Peru - Product Feed</title>
     <link>${BASE_URL}</link>
-    <description>Figuras de anime originales importadas desde Japón. Preventas, pedidos por encargo y envíos a todo el Perú.</description>
+    <description>Figuras de anime originales importadas desde Japon. Preventas, pedidos por encargo y envios a todo el Peru.</description>
 `
 
     for (const product of products) {
       const imageUrl = product.imageUrls?.[0] || product.thumbnailUrl || ""
       const name = product.name || ""
-      const slug = product.slug || ""
-      // 🔧 DEFAULT PRICE: S/100 para productos sin precio (solo en el feed, no toca frontend)
+      const slug = product.slug || product.id
       const hasPrice = product.price !== undefined && product.price !== null && product.price > 0
-      const price = hasPrice ? product.price : 100
-      const stock = product.stock
-      const releaseDate = product.releaseDate
+      const price = hasPrice ? Number(product.price) : 100
 
-      // Determinar disponibilidad según las reglas de Google:
-      // - stock > 0 → in_stock (disponible para envío inmediato) — no requiere availability_date
-      // - stock ≤ 0 + releaseDate → preorder + availability_date (obligatorio)
-      // - stock ≤ 0 sin releaseDate → backorder (preventa sin fecha) — no requiere availability_date
       let availability: string
       let availabilityDate = ""
-      if (stock !== undefined && stock > 0) {
+      if (product.stock !== undefined && product.stock > 0) {
         availability = "in_stock"
-      } else if (releaseDate) {
+      } else if (product.releaseDate) {
         availability = "preorder"
-        try {
-          const date = typeof releaseDate.toDate === "function"
-            ? releaseDate.toDate()
-            : new Date(releaseDate)
-          if (!isNaN(date.getTime())) {
-            availabilityDate = date.toISOString().split("T")[0]
-          }
-        } catch {
-          // ignorar fechas inválidas
-        }
-        // 🔥 FIX: Google REQUIERE availability_date para preorder.
-        // Si no pudimos generar una fecha válida, caemos a backorder
-        // para que Google no lo rechace.
-        if (!availabilityDate) {
-          availability = "backorder"
-        }
+        availabilityDate = product.releaseDate.slice(0, 10)
+        if (!availabilityDate) availability = "backorder"
       } else {
         availability = "backorder"
       }
 
-      // 🔧 DEFAULT BRAND: Si no tiene marca o está como "Sin marca", usar "Otros"
       const rawBrand = (product.brand || "").trim()
       const brand = rawBrand && rawBrand !== "Sin marca" ? rawBrand : "Otros"
-
-      // 🔧 DEFAULT DESCRIPTION: Google requiere > 50 caracteres
       const rawDesc = (product.description_es || product.description || "").trim()
-      const description = rawDesc.length >= 50
-        ? rawDesc
-        : `${name} - Figura de anime coleccionable 100% original, importada desde Japón. Ideal para tu vitrina o como regalo para fans del anime. Producto en preventa.`
+      const description =
+        rawDesc.length >= 50
+          ? rawDesc
+          : `${name} - Figura de anime coleccionable 100% original, importada desde Japon. Ideal para tu vitrina o como regalo para fans del anime. Producto en preventa.`
       const category = product.category || "figura"
 
       xml += `    <item>
@@ -154,32 +173,25 @@ export async function GET() {
         xml += `
       <g:gtin>${xmlEscape(product.gtin)}</g:gtin>`
       } else {
-        // Sin GTIN → declarar que el producto no tiene código de barras (figuras de colección)
         xml += `
       <g:identifier_exists>false</g:identifier_exists>`
       }
 
-      // MPN con el slug como identificador alternativo
       xml += `
       <g:mpn>${xmlEscape(slug)}</g:mpn>`
 
-      // Línea de producto como custom label (útil para campañas)
       if (product.line) {
         xml += `
       <g:custom_label_0>${xmlEscape(product.line)}</g:custom_label_0>`
       }
 
-      // Escala como custom label
       if (product.scale) {
         xml += `
       <g:custom_label_1>${xmlEscape(product.scale)}</g:custom_label_1>`
       }
 
-      // Categoría como custom label
       xml += `
-      <g:custom_label_2>${xmlEscape(category)}</g:custom_label_2>`
-
-      xml += `
+      <g:custom_label_2>${xmlEscape(category)}</g:custom_label_2>
     </item>
 `
     }
@@ -187,16 +199,18 @@ export async function GET() {
     xml += `  </channel>
 </rss>`
 
-    // Cache en el CDN de Firebase Hosting
     const headers = new Headers()
     headers.set("Content-Type", "application/xml; charset=utf-8")
-    headers.set("Cache-Control", "public, max-age=43200, s-maxage=43200, stale-while-revalidate=86400")
+    headers.set(
+      "Cache-Control",
+      "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+    )
 
     return new NextResponse(xml, { status: 200, headers })
   } catch (error) {
-    console.error("❌ Error generando feed:", error)
+    console.error("Error generating product feed:", error)
     return NextResponse.json(
-      { error: "Error generando feed de productos" },
+      { error: "Error generating product feed" },
       { status: 500 },
     )
   }
