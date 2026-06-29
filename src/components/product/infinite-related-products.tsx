@@ -1,6 +1,6 @@
 "use client"
 
-import { getRelatedProducts, type Product } from "@/lib/firebase/products"
+import type { Product } from "@/lib/firebase/products"
 import { useState, useEffect, useRef, useCallback } from "react"
 import ProductCard from "@/components/ProductCard"
 import type { SerializedProduct } from "@/lib/serialize-product"
@@ -148,6 +148,8 @@ export default function InfiniteRelatedProducts({
   const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
+    const controller = new AbortController()
+
     const fetchAllRelatedProducts = async () => {
       try {
         setLoading(true)
@@ -174,13 +176,33 @@ export default function InfiniteRelatedProducts({
         }
 
         console.log(`🔍 No hay cache, consultando base de datos...`)
-        const allProducts = await getRelatedProducts(
-          currentProduct.id,
-          currentProduct.slug,
-          currentProduct.line,
-          currentProduct.brand,
-          currentProduct.category,
+        const response = await fetch(
+          `/api/products/${encodeURIComponent(currentProduct.id)}/related`,
+          { signal: controller.signal },
         )
+        if (!response.ok) {
+          throw new Error(`Related products request failed: ${response.status}`)
+        }
+
+        const payload = await response.json()
+        const allProducts: Product[] = payload.products.map((product: any) => ({
+          ...product,
+          createdAt: product.createdAt ? new Date(product.createdAt) : null,
+          releaseDate: product.releaseDate
+            ? new Date(product.releaseDate)
+            : null,
+          discount: product.discount
+            ? {
+                ...product.discount,
+                startDate: product.discount.startDate
+                  ? new Date(product.discount.startDate)
+                  : null,
+                endDate: product.discount.endDate
+                  ? new Date(product.discount.endDate)
+                  : null,
+              }
+            : undefined,
+        }))
 
         console.log(`📋 Producto actual:`)
         console.log(`  - Nombre: "${currentProduct.name}"`)
@@ -216,15 +238,17 @@ export default function InfiniteRelatedProducts({
 
         console.log(`✅ Encontrados ${finalProducts.length} productos relacionados por JERARQUÍA`)
       } catch (error) {
+        if (controller.signal.aborted) return
         console.error("Error fetching infinite related products:", error)
         setAllRelatedProducts([])
         setDisplayedProducts([])
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
-    fetchAllRelatedProducts()
+    void fetchAllRelatedProducts()
+    return () => controller.abort()
   }, [currentProduct, initialBatchSize])
 
   useEffect(() => {

@@ -12,6 +12,7 @@ export const PUBLIC_PRODUCT_FIELDS = [
   "heightCm",
   "scale",
   "views",
+  "discount",
 ] as const
 
 function toDate(value: any): Date | null {
@@ -24,6 +25,15 @@ function toDate(value: any): Date | null {
 export function normalizePublicProduct(doc: FirebaseFirestore.QueryDocumentSnapshot) {
   const data = doc.data()
   const imageUrls: string[] = data.imageUrls || []
+  const discount = data.discount
+    ? {
+        isActive: Boolean(data.discount.isActive),
+        type: data.discount.type === "fixed" ? "fixed" : "percentage",
+        value: Number(data.discount.value) || 0,
+        startDate: toDate(data.discount.startDate)?.toISOString() || null,
+        endDate: toDate(data.discount.endDate)?.toISOString() || null,
+      }
+    : undefined
 
   return {
     id: doc.id,
@@ -40,6 +50,7 @@ export function normalizePublicProduct(doc: FirebaseFirestore.QueryDocumentSnaps
     heightCm: data.heightCm || undefined,
     scale: data.scale || undefined,
     views: Number(data.views) || 0,
+    discount,
   }
 }
 

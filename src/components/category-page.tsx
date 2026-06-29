@@ -15,7 +15,6 @@ interface CategoryPageProps {
 
 export default function CategoryPage({ config }: CategoryPageProps) {
   const {
-    products,
     loading,
     sortBy,
     setSortBy,
@@ -87,7 +86,6 @@ export default function CategoryPage({ config }: CategoryPageProps) {
               handleFilterChange={handleFilterChange}
               clearAllFilters={clearAllFilters}
               activeFiltersCount={activeFiltersCount}
-              products={products}
             />
           </div>
 
@@ -192,7 +190,6 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                   handleFilterChange={handleFilterChange}
                   clearAllFilters={clearAllFilters}
                   activeFiltersCount={activeFiltersCount}
-                  products={products}
                 />
               </div>
             </div>
@@ -212,7 +209,6 @@ interface FiltersContentProps {
   handleFilterChange: (key: string, value: any) => void
   clearAllFilters: () => void
   activeFiltersCount: number
-  products: any[]
 }
 
 function FiltersContent({
@@ -222,7 +218,6 @@ function FiltersContent({
   handleFilterChange,
   clearAllFilters,
   activeFiltersCount,
-  products,
 }: FiltersContentProps) {
   return (
     <div className="bg-white dark:bg-gray-800 shadow-md/5 border border-gray-200 dark:border-gray-700 p-4">
@@ -257,7 +252,7 @@ function FiltersContent({
                   className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                 />
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                  {series} ({products.filter((p) => p.name.toLowerCase().includes(series.toLowerCase())).length})
+                  {series} ({filterOptions.counts.series[series] || 0})
                 </span>
               </label>
             ))}
@@ -284,7 +279,7 @@ function FiltersContent({
                   className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                 />
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                  {brand} ({products.filter((p) => p.brand === brand).length})
+                  {brand} ({filterOptions.counts.brands[brand] || 0})
                 </span>
               </label>
             ))}
@@ -311,7 +306,7 @@ function FiltersContent({
                   className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                 />
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                  {category} ({products.filter((p) => p.category === category).length})
+                  {category} ({filterOptions.counts.categories[category] || 0})
                 </span>
               </label>
             ))}
@@ -377,7 +372,7 @@ function FiltersContent({
                   className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                 />
                 <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                  {scale} ({products.filter((p) => p.scale === scale).length})
+                  {scale} ({filterOptions.counts.scales[scale] || 0})
                 </span>
               </label>
             ))}
@@ -405,7 +400,7 @@ function FiltersContent({
                     className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
                   />
                   <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                    {line} ({products.filter((p) => p.line === line).length})
+                    {line} ({filterOptions.counts.lines[line] || 0})
                   </span>
                 </label>
               ))}

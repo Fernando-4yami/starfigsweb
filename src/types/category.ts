@@ -19,6 +19,13 @@ export interface Product {
   createdAt?: Date | null
   views?: number // ← AGREGAR ESTA LÍNEA
   lastViewedAt?: Date | null // ← AGREGAR ESTA LÍNEA
+  discount?: {
+    isActive: boolean
+    type: "percentage" | "fixed"
+    value: number
+    startDate?: Date | null
+    endDate?: Date | null
+  }
 }
 
 export interface Filters {
@@ -64,6 +71,13 @@ export interface FilterOptions {
   priceRange: {
     min: number
     max: number
+  }
+  counts: {
+    brands: Record<string, number>
+    categories: Record<string, number>
+    scales: Record<string, number>
+    lines: Record<string, number>
+    series: Record<string, number>
   }
 }
 
