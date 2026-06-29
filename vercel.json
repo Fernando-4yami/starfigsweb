@@ -3,8 +3,8 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/cron/reset-ranking",
-      "schedule": "0 0 */14 * *"
+      "path": "/api/cron/rebuild-catalog-artifacts",
+      "schedule": "30 4 * * *"
     }
   ],
   "buildCommand": "npm run build",

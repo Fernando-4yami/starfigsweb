@@ -37,12 +37,13 @@ const InfiniteRelatedProducts = dynamic(
 )
 
 const FIRESTORE_VIEW_TRACKING_ENABLED =
-  process.env.NEXT_PUBLIC_ENABLE_PRODUCT_VIEW_TRACKING === "true"
+  process.env.NEXT_PUBLIC_ENABLE_PRODUCT_VIEW_TRACKING !== "false"
 const VIEW_SAMPLE_RATE = Math.min(
-  Math.max(Number(process.env.NEXT_PUBLIC_PRODUCT_VIEW_SAMPLE_RATE || "0.1"), 0),
+  Math.max(Number(process.env.NEXT_PUBLIC_PRODUCT_VIEW_SAMPLE_RATE || "0.25"), 0),
   1,
 )
 const VIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000
+const VIEW_DWELL_MS = 10_000
 
 interface ProductPageClientProps {
   params: { slug: string }
@@ -151,17 +152,21 @@ export default function ProductPageClient({ initialProduct: product }: ProductPa
   useEffect(() => {
     let idleId: number | undefined
     let timerId: ReturnType<typeof setTimeout> | undefined
+    let dwellTimerId: ReturnType<typeof setTimeout> | undefined
+    const startedAt = Date.now()
 
     const recordView = () => {
       if (navigator.webdriver) return
+      if (document.visibilityState !== "visible") return
 
       trackProductView(product.id, product.name, product.category || "figura", product.price)
 
       if (!FIRESTORE_VIEW_TRACKING_ENABLED) return
-      if (Math.random() > VIEW_SAMPLE_RATE) return
 
       const sessionKey = `starfigs:viewed:${product.id}`
       const now = Date.now()
+      const dwellMs = now - startedAt
+      if (dwellMs < VIEW_DWELL_MS) return
 
       try {
         const previousView = Number(localStorage.getItem(sessionKey) || "0")
@@ -171,18 +176,26 @@ export default function ProductPageClient({ initialProduct: product }: ProductPa
         // Storage can be unavailable in strict privacy modes.
       }
 
+      if (Math.random() > VIEW_SAMPLE_RATE) return
+
       fetch(`/api/products/${encodeURIComponent(product.id)}/view`, {
         method: "POST",
         keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dwellMs }),
       }).catch(console.error)
     }
 
     const scheduleView = () => {
-      if ("requestIdleCallback" in window) {
-        idleId = window.requestIdleCallback(recordView, { timeout: 4000 })
-      } else {
-        timerId = setTimeout(recordView, 2000)
-      }
+      dwellTimerId = setTimeout(() => {
+        if ("requestIdleCallback" in window) {
+          idleId = window.requestIdleCallback(recordView, { timeout: 4000 })
+        } else {
+          timerId = setTimeout(recordView, 0)
+        }
+      }, VIEW_DWELL_MS)
     }
 
     if (document.readyState === "complete") {
@@ -198,6 +211,9 @@ export default function ProductPageClient({ initialProduct: product }: ProductPa
       }
       if (timerId !== undefined) {
         clearTimeout(timerId)
+      }
+      if (dwellTimerId !== undefined) {
+        clearTimeout(dwellTimerId)
       }
     }
   }, [product.id, product.name, product.category, product.price])
