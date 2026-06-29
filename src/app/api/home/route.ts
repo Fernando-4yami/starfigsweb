@@ -14,7 +14,12 @@ export async function GET() {
     const { start: currentStart, end: currentEnd } = getCurrentMonthDateRange()
     const nextMonthStart = getNextMonthStartDate()
 
-    const [popularSnapshot, currentSnapshot, futureSnapshot] = await Promise.all([
+    const [newlyAddedSnapshot, popularSnapshot, currentSnapshot, futureSnapshot] = await Promise.all([
+      collection
+        .orderBy("createdAt", "desc")
+        .limit(90)
+        .select(...PUBLIC_PRODUCT_FIELDS)
+        .get(),
       collection
         .where("views", ">", 0)
         .orderBy("views", "desc")
@@ -39,6 +44,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
+        newlyAdded: newlyAddedSnapshot.docs.map(normalizePublicProduct),
         weeklyPopular: popularSnapshot.docs.map(normalizePublicProduct),
         currReleases: currentSnapshot.docs.map(normalizePublicProduct),
         futureReleases: futureSnapshot.docs.map(normalizePublicProduct),

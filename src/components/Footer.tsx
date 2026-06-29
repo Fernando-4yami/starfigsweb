@@ -12,10 +12,10 @@ export default function Footer() {
           <div className="space-y-4">
             <Link href="/" prefetch={false} className="block">
               <Image
-                src="/starfigs.webp"
+                src="/starfigs-logo.png"
                 alt="Starfigs"
                 width={200}
-                height={36}
+                height={54}
                 className="mx-auto h-auto w-auto max-w-[200px]"
                 sizes="200px"
               />

@@ -50,3 +50,4 @@ next-env.d.ts
 lib/firebase/serviceAccountKey.json
 **/serviceAccountKey.json
 lib/search-console/credentials.json
+src/lib/search/generated-index.json

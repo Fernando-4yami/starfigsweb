@@ -71,6 +71,12 @@ function expandIndexEntry(entry: CompactSearchIndexEntry): SearchIndexEntry {
   }
 }
 
+const bundledCompactIndex =
+  require("./generated-index.json") as CompactSearchIndexEntry[]
+const bundledIndex = bundledCompactIndex.map(expandIndexEntry)
+cachedIndex = bundledIndex
+cachedAt = Date.now()
+
 async function loadSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
   const response = await fetch(`${origin}/api/search-index`, {
     cache: "no-store",
@@ -85,9 +91,7 @@ async function loadSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
   return compactIndex.map(expandIndexEntry)
 }
 
-async function getSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
-  const now = Date.now()
-  if (cachedIndex && now - cachedAt < SEARCH_INDEX_TTL) return cachedIndex
+function refreshSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
   if (pendingIndex) return pendingIndex
 
   pendingIndex = loadSearchIndex(origin)
@@ -108,6 +112,18 @@ async function getSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
     })
 
   return pendingIndex
+}
+
+async function getSearchIndex(origin: string): Promise<SearchIndexEntry[]> {
+  const now = Date.now()
+  if (cachedIndex) {
+    if (now - cachedAt >= SEARCH_INDEX_TTL) {
+      void refreshSearchIndex(origin)
+    }
+    return cachedIndex
+  }
+
+  return refreshSearchIndex(origin)
 }
 
 function scoreEntry(

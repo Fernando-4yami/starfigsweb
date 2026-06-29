@@ -17,8 +17,14 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ["firebasestorage.googleapis.com", "www.tsoto.net", "storage.googleapis.com"],
-    minimumCacheTTL: 86400,
+    domains: [
+      "firebasestorage.googleapis.com",
+      "www.tsoto.net",
+      "storage.googleapis.com",
+      "jumpichiban.com",
+      "www.jumpichiban.com",
+    ],
+    unoptimized: true,
   },
 
   // 🚀 Optimizaciones de performance

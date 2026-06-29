@@ -102,7 +102,7 @@ function RankingSection({ products }: RankingSectionProps) {
                         alt={product.name}
                         fill
                         className="object-contain"
-                        loading={i < 3 ? "eager" : "lazy"}
+                        loading="lazy"
                         sizes="160px"
                       />
                     </div>
@@ -158,7 +158,7 @@ function RankingSection({ products }: RankingSectionProps) {
                       alt={product.name}
                       fill
                       className="object-contain"
-                      loading={i < 5 ? "eager" : "lazy"}
+                      loading="lazy"
                       sizes="128px"
                     />
                   </div>

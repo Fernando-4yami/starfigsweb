@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "tsx scripts/generate-search-index.ts",
+    "predev": "tsx scripts/generate-search-index.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

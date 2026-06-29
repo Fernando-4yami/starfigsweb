@@ -6,8 +6,6 @@ import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@
 import ProductCard from "@/components/ProductCard"
 import RankingSection from "@/components/sections/ranking-section"
 import HowItWorks from "@/components/HowItWorks"
-import FacebookReviews from "@/components/FacebookReviews"
-import Link from "next/link"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
   const skeletonItems = useMemo(
@@ -42,10 +40,9 @@ const ProductSection = ({
   products: Product[]
   emptyMessage?: string
 }) => {
-  /** Solo la primera fila movil compite por el LCP. */
   const productCards = useMemo(
-    () => products.map((product, i) => (
-      <ProductCard key={product.id} product={product} priority={i < 2} />
+    () => products.map((product) => (
+      <ProductCard key={product.id} product={product} />
     )),
     [products],
   )
@@ -117,7 +114,7 @@ const ProductSectionWithLoadMore = ({
             {productCards}
           </div>
 
-          {hasMore ? (
+          {hasMore && (
             <div className="flex justify-center mt-10">
               <button
                 onClick={handleLoadMore}
@@ -125,15 +122,6 @@ const ProductSectionWithLoadMore = ({
               >
                 Ver más productos ({products.length - visibleCount} restantes)
               </button>
-            </div>
-          ) : (
-            <div className="flex justify-center mt-10">
-              <Link
-                href="/catalogo"
-                className="px-8 py-3 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200"
-              >
-                Ver catálogo completo
-              </Link>
             </div>
           )}
         </>
@@ -181,6 +169,10 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
 
       setData((previous) => ({
         ...previous,
+        newlyAdded:
+          Array.isArray(payload.newlyAdded) && payload.newlyAdded.length > 0
+            ? parseProducts(payload.newlyAdded)
+            : previous.newlyAdded,
         weeklyPopular: parseProducts(payload.weeklyPopular),
         currReleases: parseProducts(payload.currReleases),
         futureReleases: parseProducts(payload.futureReleases),
@@ -273,8 +265,6 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <HowItWorks />
       </div>
-
-      <FacebookReviews />
 
       {ctaSection}
     </main>
