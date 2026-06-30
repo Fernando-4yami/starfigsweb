@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase/admin"
 import { requireAdmin } from "@/lib/api/admin-auth"
+import generatedIndex from "@/lib/search/generated-index.json"
+import type { CompactSearchIndexEntry } from "@/lib/search/index-types"
+import { expandImageUrl } from "@/lib/search/image-url"
 
 export const dynamic = "force-dynamic"
 
@@ -78,21 +80,15 @@ export async function GET(request: NextRequest) {
     const adminAuth = await requireAdmin(request)
     if (!adminAuth.ok) return adminAuth.response
 
-    const db = getDb()
     const startTime = Date.now()
 
-    // 1. Fetch ALL products from Firestore (server-side, fast)
-    const snapshot = await db.collection("products").get()
-    const products = snapshot.docs.map(doc => {
-      const d = doc.data()
-      return {
-        id: doc.id,
-        name: d.name || "",
-        price: d.price || 0,
-        brand: d.brand || undefined,
-        thumbnail: d.thumbnailUrl || d.imageUrls?.[0] || undefined,
-      }
-    })
+    const products = (generatedIndex as CompactSearchIndexEntry[]).map((entry) => ({
+      id: entry[0],
+      name: entry[1] || "",
+      price: entry[3] || 0,
+      brand: entry[6] || undefined,
+      thumbnail: expandImageUrl(entry[5] || entry[4]) || undefined,
+    }))
 
     console.log(`📦 ${products.length} productos cargados en ${Date.now() - startTime}ms`)
 

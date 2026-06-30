@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/auth-client"
-import { getProductsPaginated, searchProducts, deleteProductById, type Product } from "@/lib/firebase/products"
+import { getProductsPaginated, deleteProductById, type Product } from "@/lib/firebase/products"
 import { type DocumentSnapshot } from "firebase/firestore"
 import Link from "next/link"
 import ImageGenerator from "@/components/ImageGenerator"
@@ -159,6 +159,65 @@ function sortByRelevance(products: Product[], query: string): Product[] {
   })
 }
 
+function parseDateValue(value: unknown): Date | null {
+  if (!value) return null
+  if (value instanceof Date) return value
+  const date = new Date(value as string)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function normalizeSearchProduct(product: any): Product {
+  return {
+    id: product.id,
+    name: product.name || "",
+    slug: product.slug || product.id,
+    price: Number(product.price) || 0,
+    description: product.description || "",
+    description_es: product.description_es || "",
+    imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : [],
+    thumbnailUrl: product.thumbnailUrl,
+    galleryThumbnailUrls: product.galleryThumbnailUrls,
+    brand: product.brand || "",
+    line: product.line || "",
+    category: product.category || "figura",
+    createdAt: parseDateValue(product.createdAt),
+    releaseDate: parseDateValue(product.releaseDate),
+    heightCm: product.heightCm || undefined,
+    scale: product.scale || undefined,
+    views: Number(product.views) || 0,
+    lastViewedAt: parseDateValue(product.lastViewedAt),
+    stock: product.stock,
+    lowStockThreshold: product.lowStockThreshold,
+    discount: product.discount
+      ? {
+          ...product.discount,
+          startDate: parseDateValue(product.discount.startDate),
+          endDate: parseDateValue(product.discount.endDate),
+        }
+      : undefined,
+  }
+}
+
+async function searchAdminProducts(searchTerm: string): Promise<Product[]> {
+  const params = new URLSearchParams({
+    q: searchTerm.trim(),
+    page: "1",
+    limit: "40",
+  })
+  const response = await fetch(`/api/search?${params.toString()}`, {
+    cache: "force-cache",
+  })
+
+  if (!response.ok) {
+    throw new Error(`Admin search failed: ${response.status}`)
+  }
+
+  const payload = await response.json()
+  return Array.isArray(payload.products)
+    ? payload.products.map(normalizeSearchProduct)
+    : []
+}
+
 export default function ProductsPage() {
   const router = useRouter()
   const [user, loading] = useAuthState(auth)
@@ -218,7 +277,15 @@ export default function ProductsPage() {
 
     try {
       if (searchTerm.trim()) {
-        const results = await searchProducts(searchTerm)
+        if (searchTerm.trim().length < 2) {
+          setProducts([])
+          setHasMore(false)
+          hasMoreRef.current = false
+          cursorRef.current = null
+          return
+        }
+
+        const results = await searchAdminProducts(searchTerm)
         const filtered = strictSearchFilter(results, searchTerm)
         const sorted = sortByRelevance(filtered, searchTerm)
         setProducts(sorted)

@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/firebase/admin"
 import type {
   CatalogArtifacts,
+  CompactAdminOptions,
   CompactFeedEntry,
   CompactImageSitemapEntry,
   CompactSitemapEntry,
@@ -155,6 +156,12 @@ function createImageSitemapEntry(doc: FirebaseFirestore.QueryDocumentSnapshot): 
   return [slug, name, images]
 }
 
+function addOption(set: Set<string>, value: unknown) {
+  if (typeof value !== "string") return
+  const option = value.trim()
+  if (option) set.add(option)
+}
+
 export async function buildCatalogArtifacts(): Promise<CatalogArtifacts> {
   const snapshot = await getDb()
     .collection("products")
@@ -165,9 +172,15 @@ export async function buildCatalogArtifacts(): Promise<CatalogArtifacts> {
   const feed: CompactFeedEntry[] = []
   const sitemap: CompactSitemapEntry[] = []
   const imageSitemap: CompactImageSitemapEntry[] = []
+  const brands = new Set<string>()
+  const lines = new Set<string>()
 
   snapshot.docs.forEach((doc) => {
+    const data = doc.data()
+
     searchIndex.push(createIndexEntry(doc))
+    addOption(brands, data.brand)
+    addOption(lines, data.line)
 
     const feedEntry = createFeedEntry(doc)
     if (feedEntry) feed.push(feedEntry)
@@ -179,7 +192,12 @@ export async function buildCatalogArtifacts(): Promise<CatalogArtifacts> {
     if (imageEntry) imageSitemap.push(imageEntry)
   })
 
-  return { searchIndex, feed, sitemap, imageSitemap }
+  const adminOptions: CompactAdminOptions = {
+    brands: [...brands].sort((a, b) => a.localeCompare(b, "es")),
+    lines: [...lines].sort((a, b) => a.localeCompare(b, "es")),
+  }
+
+  return { searchIndex, feed, sitemap, imageSitemap, adminOptions }
 }
 
 export async function buildSearchIndex(): Promise<CompactSearchIndexEntry[]> {

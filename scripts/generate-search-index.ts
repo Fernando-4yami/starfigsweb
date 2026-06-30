@@ -27,10 +27,14 @@ async function main() {
       resolve(outputDir, "generated-image-sitemap.json"),
       JSON.stringify(artifacts.imageSitemap),
     ),
+    writeFile(
+      resolve(outputDir, "generated-admin-options.json"),
+      JSON.stringify(artifacts.adminOptions),
+    ),
   ])
 
   console.log(
-    `Generated catalog artifacts: ${artifacts.searchIndex.length} search entries, ${artifacts.feed.length} feed items.`,
+    `Generated catalog artifacts: ${artifacts.searchIndex.length} search entries, ${artifacts.feed.length} feed items, ${artifacts.adminOptions.brands.length} brands, ${artifacts.adminOptions.lines.length} lines.`,
   )
 }
 

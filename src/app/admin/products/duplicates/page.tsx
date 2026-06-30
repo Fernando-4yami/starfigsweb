@@ -4,7 +4,9 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/auth-client"
-import { getAllProductsForSync, deleteProductById, type Product } from "@/lib/firebase/products"
+import { deleteProductById, type Product } from "@/lib/firebase/products"
+import type { CompactSearchIndexEntry } from "@/lib/search/index-types"
+import { expandImageUrl } from "@/lib/search/image-url"
 import Link from "next/link"
 
 // ─── SIMILARITY (ESTRICTA: solo duplicados REALES) ────
@@ -66,6 +68,51 @@ function formatDate(d: Date | null | undefined): string {
 }
 
 // ─── PRE-COMPUTED ────────────────────────────────────
+
+function dateFromMs(value: number): Date | null {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function dateFromIso(value: string | null): Date | null {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function productFromSearchEntry(entry: CompactSearchIndexEntry): Product {
+  const imageUrl = expandImageUrl(entry[4])
+  const thumbnailUrl = expandImageUrl(entry[5])
+  const images = [imageUrl || thumbnailUrl].filter((value): value is string => Boolean(value))
+
+  return {
+    id: entry[0],
+    name: entry[1],
+    slug: entry[2],
+    price: entry[3],
+    imageUrls: images,
+    thumbnailUrl: thumbnailUrl || imageUrl || undefined,
+    brand: entry[6] || "",
+    line: entry[7] || "",
+    createdAt: dateFromMs(entry[8]),
+    releaseDate: dateFromIso(entry[9]),
+    heightCm: entry[10] || undefined,
+    scale: entry[11] || undefined,
+    views: entry[12] || 0,
+    category: "figura",
+  }
+}
+
+async function loadProductsFromGeneratedIndex(): Promise<Product[]> {
+  const response = await fetch("/api/search-index", { cache: "force-cache" })
+  if (!response.ok) {
+    throw new Error(`Search index request failed: ${response.status}`)
+  }
+
+  const entries = (await response.json()) as CompactSearchIndexEntry[]
+  return entries.map(productFromSearchEntry)
+}
 
 interface ProductData {
   normName: string
@@ -265,7 +312,7 @@ export default function DuplicatesPage() {
 
     try {
       const t0 = performance.now()
-      const products = await getAllProductsForSync(false)
+      const products = await loadProductsFromGeneratedIndex()
       if (cancelRef.current) return
       const t1 = performance.now()
 
@@ -295,11 +342,6 @@ export default function DuplicatesPage() {
       setPhase("done")
     }
   }, [])
-
-  useEffect(() => {
-    if (!user) return
-    scanAll()
-  }, [user])
 
   // ─── DELETE ──────────────────────────────────────
   const handleDelete = (id: string) => {
@@ -364,6 +406,23 @@ export default function DuplicatesPage() {
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-medium text-sm">← Volver</Link>
           </div>
         </div>
+
+        {phase === "idle" && (
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow mb-6 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Analisis de duplicados pausado
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              Para evitar lecturas innecesarias, esta pantalla ya no analiza automaticamente al abrir.
+            </p>
+            <button
+              onClick={scanAll}
+              className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-sm"
+            >
+              Analizar duplicados
+            </button>
+          </div>
+        )}
 
         {/* PROGRESS */}
         {(phase === "loading" || phase === "analyzing") && (

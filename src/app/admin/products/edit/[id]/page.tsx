@@ -5,13 +5,12 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/lib/firebase/auth-client"
-import { db, Timestamp } from "@/lib/firebase/firebase"
+import { Timestamp } from "@/lib/firebase/firebase"
 import { getProductById, type Product, updateProduct } from "@/lib/firebase/products"
 import { createLineIfNotExists } from "@/lib/firebase/lines"
 import { createManufacturerIfNotExists } from "@/lib/firebase/manufacturers"
 import { normalizeText } from "@/lib/utils"
-import { collection, getDocs } from "firebase/firestore"
-import { getAdminAuthHeaders } from "@/lib/api/admin-client"
+import { fetchAdminCatalogOptions } from "@/lib/api/admin-options-client"
 
 interface EditProductPageProps {
   params: { id: string }
@@ -262,19 +261,13 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   // Cargar opciones de fabricantes y líneas
   useEffect(() => {
     const fetchData = async () => {
-      if (!db) return
-      const snapshot = await getDocs(collection(db, "products"))
-      const brandSet = new Set<string>()
-      const lineSet = new Set<string>()
-
-      snapshot.forEach((doc) => {
-        const data = doc.data()
-        if (data.brand) brandSet.add(data.brand)
-        if (data.line) lineSet.add(data.line)
-      })
-
-      setBrands([...brandSet].sort())
-      setLines([...lineSet].sort())
+      try {
+        const options = await fetchAdminCatalogOptions()
+        setBrands(options.brands)
+        setLines(options.lines)
+      } catch (error) {
+        console.error("Error loading admin catalog options:", error)
+      }
     }
     fetchData()
   }, [])

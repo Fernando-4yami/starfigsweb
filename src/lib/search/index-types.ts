@@ -54,11 +54,17 @@ export type CompactImageSitemapEntry = [
   imageUrls: string[],
 ]
 
+export interface CompactAdminOptions {
+  brands: string[]
+  lines: string[]
+}
+
 export interface CatalogArtifacts {
   searchIndex: CompactSearchIndexEntry[]
   feed: CompactFeedEntry[]
   sitemap: CompactSitemapEntry[]
   imageSitemap: CompactImageSitemapEntry[]
+  adminOptions: CompactAdminOptions
 }
 
 export interface SearchIndexEntry {
