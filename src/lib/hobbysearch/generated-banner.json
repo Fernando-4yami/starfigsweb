@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "sourceId": "11414928",
+      "jan": "6942630830562",
+      "productName": "Honkai: Star Rail - Gift+ - Cyrene (Wonderful Holiday Ver.)",
+      "productSlug": "honkai-star-rail-gift-cyrene-wonderful-holiday-ver",
+      "imagePath": "/banners/hobbysearch/11414928.webp",
+      "width": 640,
+      "height": 320,
+      "matchMethod": "gtin"
+    },
+    {
+      "sourceId": "11391100",
+      "jan": "6973848370342",
+      "productName": "Azur Lane - Figura a Escala - Agir (Nightpool)",
+      "productSlug": "azur-lane-figura-a-escala-agir-nightpool",
+      "imagePath": "/banners/hobbysearch/11391100.webp",
+      "width": 640,
+      "height": 320,
+      "matchMethod": "gtin"
+    },
+    {
+      "sourceId": "11387224",
+      "jan": "4580678968810",
+      "productName": "Azur Lane - Figura a Escala - Cleopatra (Stars and Roses)",
+      "productSlug": "azur-lane-figura-a-escala-cleopatra-stars-and-roses",
+      "imagePath": "/banners/hobbysearch/11387224.webp",
+      "width": 640,
+      "height": 320,
+      "matchMethod": "gtin"
+    }
+  ]
+}
