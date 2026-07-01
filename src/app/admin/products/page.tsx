@@ -12,8 +12,9 @@ import ImageGeneratorBatch, { type ImageGeneratorBatchHandle } from "@/component
 import SocialPublisherModal from "@/components/SocialPublisherModal"
 import JSZip from "jszip"
 import { useState as useGlobalState } from "react"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, Tags } from "lucide-react"
 import { generateSocialTemplate } from "@/lib/social-template"
+import { addPrizeCategoryLines } from "@/lib/api/admin-category-rules"
 
 // ========== BATCH STORAGE ==========
 const BATCH_STORAGE_KEY = 'starfigs-batch-products'
@@ -526,6 +527,7 @@ export default function ProductsPage() {
 function BatchGeneratorModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [generatingAll, setGeneratingAll] = useState(false)
+  const [addingPrizeLines, setAddingPrizeLines] = useState(false)
   const [generatingVersion, setGeneratingVersion] = useState<1 | 2 | 3>(1)
   const { products: batchProds } = useBatchState()
   const batchRefs = useRef<Record<string, ImageGeneratorBatchHandle | null>>({})
@@ -576,6 +578,36 @@ function BatchGeneratorModal() {
     }
   }
 
+  const addBatchLinesToPrize = async () => {
+    const lines = [
+      ...new Set(
+        batchProds
+          .map((product) => product.line?.trim())
+          .filter((line): line is string => Boolean(line)),
+      ),
+    ]
+
+    if (lines.length === 0) {
+      alert("Los productos del lote no tienen lineas para agregar.")
+      return
+    }
+    if (!confirm(`Agregar ${lines.length} lineas a Figuras de Premio?`)) return
+
+    setAddingPrizeLines(true)
+    try {
+      const submittedLines = await addPrizeCategoryLines(lines)
+      alert(`${submittedLines.length} lineas agregadas a Figuras de Premio.`)
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "No se pudieron agregar las lineas.",
+      )
+    } finally {
+      setAddingPrizeLines(false)
+    }
+  }
+
   if (!isOpen && batchProds.length === 0) return null
   if (!isOpen) return (
     <button onClick={() => setIsOpen(true)} className="fixed bottom-6 right-6 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-full shadow-lg z-50 font-bold animate-bounce">
@@ -590,7 +622,7 @@ function BatchGeneratorModal() {
             <h2 className="text-xl font-bold">📦 Generador por Lotes</h2>
             <p className="text-sm opacity-90">{batchProds.length} productos seleccionados</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             {batchProds.length > 0 && (<>
               <div className="flex gap-2 items-center bg-white bg-opacity-20 rounded px-3">
                 <span className="text-sm font-medium">Versión:</span>
@@ -603,6 +635,16 @@ function BatchGeneratorModal() {
               </div>
               <button onClick={() => generateAll(generatingVersion)} disabled={generatingAll} className="px-4 py-2 bg-green-500 bg-opacity-90 rounded font-bold disabled:opacity-50">
                 {generatingAll ? "⏳ Generando..." : `⚡ Generar Todos`}
+              </button>
+              <button
+                type="button"
+                onClick={addBatchLinesToPrize}
+                disabled={addingPrizeLines}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-gray-950 rounded font-bold disabled:opacity-50"
+                title="Agregar las lineas del lote a Figuras de Premio"
+              >
+                <Tags className="h-4 w-4" />
+                {addingPrizeLines ? "Agregando..." : "Agregar a Premio"}
               </button>
               <button onClick={clearBatch} className="px-4 py-2 bg-white bg-opacity-20 rounded">🗑️ Limpiar</button>
             </>)}

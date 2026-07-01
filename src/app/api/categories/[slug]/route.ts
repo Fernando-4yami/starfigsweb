@@ -24,6 +24,23 @@ function matchesLine(product: PublicProduct, term: string) {
   )
 }
 
+async function loadStoredLineTerms(slug: string): Promise<string[]> {
+  if (slug !== "pricing") return []
+
+  const snapshot = await getDb()
+    .collection("categoryRules")
+    .doc(slug)
+    .get()
+  const lines = snapshot.data()?.lines
+
+  return Array.isArray(lines)
+    ? lines
+        .filter((line): line is string => typeof line === "string")
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : []
+}
+
 async function loadCategoryProducts(slug: string): Promise<PublicProduct[]> {
   const config = categoryConfigs[slug]
   if (!config) return []
@@ -32,7 +49,14 @@ async function loadCategoryProducts(slug: string): Promise<PublicProduct[]> {
   const productsById = new Map<string, PublicProduct>()
 
   if (config.searchType === "line") {
-    const terms = [...new Set(config.searchTerms.map((term) => term.trim()).filter(Boolean))]
+    const storedTerms = await loadStoredLineTerms(slug)
+    const terms = [
+      ...new Set(
+        [...config.searchTerms, ...storedTerms]
+          .map((term) => term.trim())
+          .filter(Boolean),
+      ),
+    ]
     const snapshots = await Promise.all(
       terms.map((term) =>
         collection
@@ -49,6 +73,26 @@ async function loadCategoryProducts(slug: string): Promise<PublicProduct[]> {
       snapshot.forEach((doc) => {
         const product = normalizePublicProduct(doc)
         if (matchesLine(product, term)) productsById.set(product.id, product)
+      })
+    })
+
+    const brandTerms = [
+      ...new Set((config.brandTerms || []).map((term) => term.trim()).filter(Boolean)),
+    ]
+    const brandSnapshots = await Promise.all(
+      brandTerms.map((brand) =>
+        collection
+          .where("brand", "==", brand)
+          .limit(1000)
+          .select(...PUBLIC_PRODUCT_FIELDS)
+          .get(),
+      ),
+    )
+
+    brandSnapshots.forEach((snapshot) => {
+      snapshot.forEach((doc) => {
+        const product = normalizePublicProduct(doc)
+        productsById.set(product.id, product)
       })
     })
   } else if (config.slug === "plush") {
@@ -101,8 +145,8 @@ async function loadCategoryProducts(slug: string): Promise<PublicProduct[]> {
 
 const getCachedCategoryProducts = unstable_cache(
   loadCategoryProducts,
-  ["category-products-v2"],
-  { revalidate: 21600 },
+  ["category-products-v3"],
+  { revalidate: 21600, tags: ["category-products"] },
 )
 
 function parseInteger(

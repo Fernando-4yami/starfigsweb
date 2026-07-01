@@ -3,6 +3,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react"
 import { toPng } from "html-to-image"
 import { updateProduct } from "@/lib/firebase/products"
+import { revalidateAdminProduct } from "@/lib/api/admin-revalidation"
 import { db } from "@/lib/firebase/firebase"
 import { doc, getDoc } from "firebase/firestore"
 
@@ -201,6 +202,11 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
     setSaveError(null)
     try {
       await updateProduct(productId, { name: newName })
+      try {
+        if (productSlug) await revalidateAdminProduct(productSlug)
+      } catch {
+        setSaveError("Guardado; la ficha publica puede tardar en refrescarse")
+      }
     } catch (e) {
       setSaveError("Error al guardar nombre")
     } finally {
@@ -217,6 +223,11 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
     setSaveError(null)
     try {
       await updateProduct(productId, { price: newPrice })
+      try {
+        if (productSlug) await revalidateAdminProduct(productSlug)
+      } catch {
+        setSaveError("Guardado; la ficha publica puede tardar en refrescarse")
+      }
     } catch (e) {
       setSaveError("Error al guardar precio")
     } finally {

@@ -53,6 +53,7 @@ export interface CategoryConfig {
     focus: string
   }
   searchTerms: string[]
+  brandTerms?: string[]
   searchType: "name" | "line" | "scale" | "custom"
   customFilter?: (product: Product) => boolean
   seriesList: string[]
