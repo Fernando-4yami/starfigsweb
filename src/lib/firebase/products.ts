@@ -861,9 +861,8 @@ export async function updateProduct(
       })
     }
 
-    if (data.name) {
-      data.slug = generateSlug(data.name)
-    }
+    // Product URLs stay stable when the display name changes.
+    // A slug must be changed explicitly so existing links keep working.
 
     const discountData = data.discount
       ? {
@@ -915,7 +914,7 @@ export async function updateProduct(
       ...updateData,
       name: updateData.name ?? existingData.name,
       price: updateData.price ?? existingData.price,
-      imageUrls: existingData.imageUrls,
+      imageUrls: updateData.imageUrls ?? existingData.imageUrls,
     }
 
     if (userProvidedHeightCm) {

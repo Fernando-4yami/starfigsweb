@@ -12,6 +12,7 @@ import { createManufacturerIfNotExists } from "@/lib/firebase/manufacturers"
 import { normalizeText } from "@/lib/utils"
 import { fetchAdminCatalogOptions } from "@/lib/api/admin-options-client"
 import { uploadAdminImage } from "@/lib/api/admin-image-upload"
+import { revalidateAdminProduct } from "@/lib/api/admin-revalidation"
 
 interface EditProductPageProps {
   params: { id: string }
@@ -536,8 +537,22 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
       await updateProduct(params.id, updateData)
 
+      let publicPageUpdated = true
+      try {
+        if (product?.slug) {
+          await revalidateAdminProduct(product.slug)
+        }
+      } catch (revalidationError) {
+        publicPageUpdated = false
+        console.warn("No se pudo revalidar la ficha publica:", revalidationError)
+      }
+
       setUploadProgress(100)
-      alert("✅ Producto actualizado correctamente")
+      alert(
+        publicPageUpdated
+          ? "Producto actualizado correctamente y visible en la web."
+          : "Producto actualizado. La ficha publica puede tardar en refrescarse.",
+      )
 
       setTimeout(() => {
         setUploadProgress(0)
