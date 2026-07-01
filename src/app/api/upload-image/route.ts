@@ -4,9 +4,18 @@ export const runtime = "nodejs"; // ← Asegura que use Node.js runtime
 export const maxDuration = 60; // ← ⏱️ Hasta 60s para evitar timeout con sharp
 
 import { type NextRequest, NextResponse } from "next/server"
-import sharp from "sharp"
 import { uploadProcessedImageBuffer } from "@/lib/firebase/upload-image-server"
 import { requireAdmin } from "@/lib/api/admin-auth"
+
+let sharpInstance: any = null
+
+async function getSharp() {
+  if (!sharpInstance) {
+    const module = await import("sharp")
+    sharpInstance = module.default || module
+  }
+  return sharpInstance
+}
 
 // 🎯 CONFIGURACIÓN OPTIMIZADA
 const IMAGE_CONFIG = {
@@ -38,6 +47,7 @@ async function optimizeImageSize(
   maxHeight: number,
   initialQuality = 75,
 ): Promise<Buffer> {
+  const sharp = await getSharp()
   let quality = initialQuality
   let attempts = 0
   const maxAttempts = 5
@@ -137,6 +147,7 @@ export async function POST(request: NextRequest) {
     let blurPlaceholder: string
     try {
       console.log("🌅 Generando blur placeholder...")
+      const sharp = await getSharp()
       const blurBuffer = await sharp(originalBuffer)
         .resize(20, 20, { fit: "inside" })
         .webp({ quality: 20 })

@@ -1,12 +1,22 @@
 export const dynamic = "force-dynamic";
 
 import { type NextRequest, NextResponse } from "next/server"
-import sharp from "sharp"
 import { uploadProcessedImageBuffer } from "@/lib/firebase/upload-image-server"
 import { requireAdmin } from "@/lib/api/admin-auth"
 
+let sharpInstance: any = null
+
+async function getSharp() {
+  if (!sharpInstance) {
+    const module = await import("sharp")
+    sharpInstance = module.default || module
+  }
+  return sharpInstance
+}
+
 // Función para generar blur placeholder
 async function generateBlurPlaceholder(buffer: Buffer): Promise<string> {
+  const sharp = await getSharp()
   const blurBuffer = await sharp(buffer).resize(20, 20, { fit: "inside" }).blur(1).webp({ quality: 20 }).toBuffer()
 
   return `data:image/webp;base64,${blurBuffer.toString("base64")}`
@@ -14,6 +24,7 @@ async function generateBlurPlaceholder(buffer: Buffer): Promise<string> {
 
 // Función para procesar una imagen individual
 async function processImage(file: File, isFirstImage: boolean) {
+  const sharp = await getSharp()
   const bytes = await file.arrayBuffer()
   const originalBuffer = Buffer.from(bytes)
 

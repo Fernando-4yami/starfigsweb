@@ -1,8 +1,16 @@
 // src/lib/firebase/upload-image-server.ts
 import { getStorage } from "./admin"
-import axios from "axios"
-import { v4 as uuidv4 } from "uuid"
-import sharp from "sharp"
+import { randomUUID } from "node:crypto"
+
+let sharpInstance: any = null
+
+async function getSharp() {
+  if (!sharpInstance) {
+    const module = await import("sharp")
+    sharpInstance = module.default || module
+  }
+  return sharpInstance
+}
 
 /**
  * ✅ GENERAR URL PÚBLICA SIN TOKEN
@@ -19,11 +27,15 @@ export async function uploadImageFromUrlAsWebP(imageUrl: string, folder = "produ
   const adminStorage = getStorage()
 
   try {
+    const [{ default: axios }, sharp] = await Promise.all([
+      import("axios"),
+      getSharp(),
+    ])
     const response = await axios.get(imageUrl, { responseType: "arraybuffer" })
     const originalBuffer = Buffer.from(response.data, "binary")
 
     const webpBuffer = await sharp(originalBuffer).webp({ quality: 80 }).toBuffer()
-    const filename = `${folder}/${uuidv4()}.webp`
+    const filename = `${folder}/${randomUUID()}.webp`
     
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
@@ -59,9 +71,10 @@ export async function uploadImageBufferAsWebP(
   const adminStorage = getStorage()
 
   try {
+    const sharp = await getSharp()
     console.log(`Processing ${originalFileName} for WebP conversion and upload.`)
     const webpBuffer = await sharp(imageBuffer).webp({ quality: 80 }).toBuffer()
-    const filename = `${folder}/${uuidv4()}.webp`
+    const filename = `${folder}/${randomUUID()}.webp`
     
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
@@ -97,7 +110,7 @@ export async function uploadProcessedImageBuffer(
 
   try {
     console.log(`📤 Uploading already processed: ${originalFileName}`)
-    const filename = `${folder}/${uuidv4()}.webp`
+    const filename = `${folder}/${randomUUID()}.webp`
     
     const bucket = adminStorage.bucket("starfigs-29d31")
     const file = bucket.file(filename)
