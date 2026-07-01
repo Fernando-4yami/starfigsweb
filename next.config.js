@@ -31,6 +31,16 @@ const nextConfig = {
   experimental: {
     serverActions: true, // ← CAMBIO: en Next.js 13 es booleano
     optimizePackageImports: ["lucide-react", "date-fns"],
+    outputFileTracingIncludes: {
+      "/api/upload-image": [
+        "./node_modules/@img/sharp-linux-x64/**/*",
+        "./node_modules/@img/sharp-libvips-linux-x64/**/*",
+      ],
+      "/api/batch-upload": [
+        "./node_modules/@img/sharp-linux-x64/**/*",
+        "./node_modules/@img/sharp-libvips-linux-x64/**/*",
+      ],
+    },
   },
 
   // 🔧 Headers de seguridad y performance
