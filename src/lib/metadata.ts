@@ -119,19 +119,11 @@ export function generateCategoryMetadata(
       description,
       url: `${baseUrl}/categorias/${categorySlug}`,
       siteName,
-      images: [
-        {
-          url: `${baseUrl}/og-default.png`,
-          width: 1200,
-          height: 630,
-          alt: `Starfigs Perú - ${categoryName}`,
-        },
-      ],
       locale: "es_PE",
       type: "website",
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title,
       description,
     },
@@ -154,19 +146,11 @@ export function generateLineMetadata(lineName: string, productCount: number): Me
       description,
       url: `${baseUrl}/lines/${slug}`,
       siteName,
-      images: [
-        {
-          url: `${baseUrl}/og-default.png`,
-          width: 1200,
-          height: 630,
-          alt: `Starfigs Perú - ${lineName}`,
-        },
-      ],
       locale: "es_PE",
       type: "website",
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title,
       description,
     },

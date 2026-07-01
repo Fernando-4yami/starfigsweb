@@ -106,10 +106,10 @@ export default function SobreNosotrosPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <Link
-              href="/catalogo"
+              href="/buscar"
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
             >
-              🛒 Ver catálogo
+              🔍 Buscar productos
             </Link>
             <a
               href="https://wa.me/51926951167"

@@ -13,7 +13,6 @@ const routesToPrefetch = [
   "/categorias/plush",
   "/categorias/scale",
   "/categorias/pricing",
-  "/catalogo",
 ]
 
 export default function RoutePrefetcher() {

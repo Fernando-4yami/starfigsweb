@@ -69,6 +69,20 @@ function getBrandLogo(brand?: string): string | null {
   return key ? brandLogos[key] : null
 }
 
+const CATALOG_PALETTE = {
+  canvas: "#F8F5FF",
+  titleGradient:
+    "linear-gradient(135deg, rgba(109,40,217,.9), rgba(219,39,119,.86))",
+  titleShadow:
+    "0 20px 45px rgba(109,40,217,.28), 0 0 40px rgba(219,39,119,.18)",
+  priceGradient:
+    "linear-gradient(135deg, rgba(109,40,217,.9), rgba(219,39,119,.86))",
+  priceShadow:
+    "0 12px 35px rgba(109,40,217,.28), 0 0 30px rgba(219,39,119,.18)",
+  priceText: "#FFFFFF",
+  detailText: "#FFFFFF",
+} as const
+
 /* ================= COPYPASTE TEMPLATE ================= */
 
 const generateProductTemplate = (name: string, price: number, slug?: string, id?: string): string => {
@@ -237,7 +251,7 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
         const dataUrl = await toPng(element, {
           pixelRatio: 0.3,
           cacheBust: false,
-          backgroundColor: "#EEF2FF",
+          backgroundColor: CATALOG_PALETTE.canvas,
         })
 
         setPreviews((prev) => ({ ...prev, [previewVersion]: dataUrl }))
@@ -290,7 +304,7 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
       const dataUrl = await toPng(element, {
         pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: "#EEF2FF",
+        backgroundColor: CATALOG_PALETTE.canvas,
       })
 
       const link = document.createElement("a")
@@ -332,7 +346,7 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
       const dataUrl = await toPng(element, {
         pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: "#EEF2FF",
+        backgroundColor: CATALOG_PALETTE.canvas,
       })
 
       return dataUrl
@@ -553,7 +567,7 @@ function PromoTemplate({
         height: 1080,
         position: "relative",
         overflow: "hidden",
-        background: "#FFF7ED",
+        background: CATALOG_PALETTE.canvas,
       }}
     >
       <img
@@ -582,19 +596,19 @@ function PromoTemplate({
         }}
       />
 
-      {/* PRECIO - VERDE NEÓN MODERNO */}
+      {/* Precio */}
       <div
         style={{
           position: "absolute",
           bottom: 16,
           right: 16,
           padding: "12px 28px",
-          background: "linear-gradient(135deg, #F97316, #DC2626)",
-          color: "#fff",
+          background: CATALOG_PALETTE.priceGradient,
+          color: CATALOG_PALETTE.priceText,
           fontSize: 42,
           fontWeight: 900,
           clipPath: "polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%, 4% 50%)",
-          boxShadow: "0 12px 35px rgba(234,88,12,.5), 0 0 30px rgba(234,88,12,.2)",
+          boxShadow: CATALOG_PALETTE.priceShadow,
           zIndex: 50,
           letterSpacing: "-0.5px",
         }}
@@ -602,7 +616,7 @@ function PromoTemplate({
         S/ {price}
       </div>
 
-      {/* TÍTULO Y DETALLES - MAGENTA/ROSA VIBRANTE */}
+      {/* Título y detalles */}
       <div
         style={{
           position: "absolute",
@@ -634,9 +648,9 @@ function PromoTemplate({
           <div
             style={{
               padding: "20px 32px 18px",
-              background: "linear-gradient(135deg, rgba(234,88,12,.9), rgba(249,115,22,.85))",
+              background: CATALOG_PALETTE.titleGradient,
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
-              boxShadow: "0 20px 45px rgba(234,88,12,.5), 0 0 40px rgba(234,88,12,.15)",
+              boxShadow: CATALOG_PALETTE.titleShadow,
               width: "max-content",
               maxWidth: "100%",
               minWidth: "100%",
@@ -664,7 +678,7 @@ function PromoTemplate({
                   marginTop: 8,
                   fontSize: 18,
                   fontWeight: 600,
-                  color: "#FFF1F2",
+                  color: CATALOG_PALETTE.detailText,
                   textShadow: "2px 2px 4px rgba(0,0,0,.3)",
                 }}
               >
@@ -705,7 +719,7 @@ function PromoTemplateTriple({
         height: 1080,
         position: "relative",
         overflow: "hidden",
-        background: "#FFF7ED",
+        background: CATALOG_PALETTE.canvas,
       }}
     >
       <div
@@ -800,19 +814,19 @@ function PromoTemplateTriple({
         }}
       />
 
-      {/* PRECIO - VERDE NEÓN MODERNO */}
+      {/* Precio */}
       <div
         style={{
           position: "absolute",
           bottom: 16,
           right: 16,
           padding: "12px 28px",
-          background: "linear-gradient(135deg, #F97316, #DC2626)",
-          color: "#fff",
+          background: CATALOG_PALETTE.priceGradient,
+          color: CATALOG_PALETTE.priceText,
           fontSize: 42,
           fontWeight: 900,
           clipPath: "polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%, 4% 50%)",
-          boxShadow: "0 12px 35px rgba(234,88,12,.5), 0 0 30px rgba(234,88,12,.2)",
+          boxShadow: CATALOG_PALETTE.priceShadow,
           zIndex: 50,
           letterSpacing: "-0.5px",
         }}
@@ -820,7 +834,7 @@ function PromoTemplateTriple({
         S/ {price}
       </div>
 
-      {/* TÍTULO Y DETALLES - MAGENTA/ROSA VIBRANTE */}
+      {/* Título y detalles */}
       <div
         style={{
           position: "absolute",
@@ -852,9 +866,9 @@ function PromoTemplateTriple({
           <div
             style={{
               padding: "20px 32px 18px",
-              background: "linear-gradient(135deg, rgba(234,88,12,.9), rgba(249,115,22,.85))",
+              background: CATALOG_PALETTE.titleGradient,
               clipPath: "polygon(0 0, 96% 0, 100% 18%, 100% 100%, 4% 100%, 0 82%)",
-              boxShadow: "0 20px 45px rgba(234,88,12,.5), 0 0 40px rgba(234,88,12,.15)",
+              boxShadow: CATALOG_PALETTE.titleShadow,
               width: "max-content",
               maxWidth: "100%",
               minWidth: "100%",
@@ -882,7 +896,7 @@ function PromoTemplateTriple({
                   marginTop: 8,
                   fontSize: 18,
                   fontWeight: 600,
-                  color: "#FFF1F2",
+                  color: CATALOG_PALETTE.detailText,
                   textShadow: "2px 2px 4px rgba(0,0,0,.3)",
                 }}
               >

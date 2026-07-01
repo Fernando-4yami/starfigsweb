@@ -74,6 +74,16 @@ const nextConfig = {
     ]
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/catalogo",
+        destination: "/buscar",
+        permanent: true,
+      },
+    ]
+  },
+
   compress: true,
   poweredByHeader: false,
 

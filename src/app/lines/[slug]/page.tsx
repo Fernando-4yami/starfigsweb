@@ -124,7 +124,7 @@ export default async function LinePage({ params }: Props) {
 
   const breadcrumbLd = generateBreadcrumbJsonLd([
     { name: "Inicio", url: "https://starfigsperu.com" },
-    { name: "Lineas", url: "https://starfigsperu.com/catalogo" },
+    { name: "Lineas", url: "https://starfigsperu.com" },
     { name: lineName },
   ])
 

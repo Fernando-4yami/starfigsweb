@@ -15,7 +15,7 @@ export const metadata: Metadata = generateCategoryMetadata(
 const jsonLd = generateCategoryJsonLd(config.name, config.slug, config.description)
 const breadcrumbLd = generateBreadcrumbJsonLd([
   { name: "Inicio", url: "https://starfigsperu.com" },
-  { name: "Categorías", url: "https://starfigsperu.com/catalogo" },
+  { name: "Categorías", url: "https://starfigsperu.com" },
   { name: config.name },
 ])
 

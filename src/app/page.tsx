@@ -45,7 +45,6 @@ export default async function Page() {
           <p>Más contenido:</p>
           <ul>
             <li><Link href="/blog">Blog de Figuras de Anime</Link></li>
-            <li><Link href="/catalogo">Catálogo Completo</Link></li>
           </ul>
         </nav>
       </section>

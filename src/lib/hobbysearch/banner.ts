@@ -6,6 +6,7 @@ export interface HobbySearchBannerItem {
   productName: string
   productSlug: string
   imagePath: string
+  imagePath2x?: string
   width: number
   height: number
   matchMethod: "gtin" | "title-fallback"
@@ -24,6 +25,8 @@ function isValidBannerItem(value: unknown): value is HobbySearchBannerItem {
       item.productSlug &&
       /^[a-z0-9-]+$/.test(item.productSlug) &&
       item.imagePath?.startsWith("/banners/hobbysearch/") &&
+      (!item.imagePath2x ||
+        item.imagePath2x.startsWith("/banners/hobbysearch/")) &&
       typeof item.width === "number" &&
       item.width > 0 &&
       typeof item.height === "number" &&

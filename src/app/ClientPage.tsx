@@ -6,6 +6,7 @@ import { getCurrentMonthDateRange, getNextMonthStartDate, getMonthName } from "@
 import ProductCard from "@/components/ProductCard"
 import RankingSection from "@/components/sections/ranking-section"
 import HowItWorks from "@/components/HowItWorks"
+import FacebookReviews from "@/components/FacebookReviews"
 import HobbySearchBanner from "@/components/HobbySearchBanner"
 
 const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: number }) => {
@@ -224,6 +225,7 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <HobbySearchBanner />
+
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {data.loading ? (
           <SectionSkeleton title="Nuevos Lanzamientos" itemCount={18} />
@@ -267,6 +269,8 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <HowItWorks />
       </div>
+
+      <FacebookReviews />
 
       {ctaSection}
     </main>

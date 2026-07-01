@@ -385,19 +385,48 @@ async function downloadImage(slide) {
     slide.sourceImageUrl,
   )
   const { default: sharp } = await import("sharp")
-  const optimizedBuffer = await sharp(buffer)
+  const image = sharp(buffer).rotate()
+  const metadata = await image.metadata()
+  const standardBuffer = await image
+    .clone()
     .resize({
       width: slide.width,
       height: slide.height,
       fit: "inside",
       withoutEnlargement: true,
     })
-    .webp({ quality: 82, effort: 4 })
+    .webp({ quality: 88, effort: 6, smartSubsample: true })
     .toBuffer()
 
+  const variants = [
+    {
+      buffer: standardBuffer,
+      fileName: `${slide.sourceId}.webp`,
+      density: 1,
+    },
+  ]
+
+  if ((metadata.width || 0) > slide.width) {
+    const highDensityBuffer = await image
+      .clone()
+      .resize({
+        width: Math.min(slide.width * 2, metadata.width),
+        height: Math.min(slide.height * 2, metadata.height || slide.height * 2),
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 84, effort: 6, smartSubsample: true })
+      .toBuffer()
+
+    variants.push({
+      buffer: highDensityBuffer,
+      fileName: `${slide.sourceId}-2x.webp`,
+      density: 2,
+    })
+  }
+
   return {
-    buffer: optimizedBuffer,
-    fileName: `${slide.sourceId}.webp`,
+    variants,
   }
 }
 
@@ -409,14 +438,28 @@ async function updateGeneratedFiles(itemsWithImages) {
   const generatedItems = []
 
   for (const { item, image } of itemsWithImages) {
-    expectedFiles.add(image.fileName)
-    await writeFile(path.join(OUTPUT_DIR, image.fileName), image.buffer)
+    for (const variant of image.variants) {
+      expectedFiles.add(variant.fileName)
+      await writeFile(path.join(OUTPUT_DIR, variant.fileName), variant.buffer)
+    }
+
+    const standardVariant = image.variants.find((variant) => variant.density === 1)
+    const highDensityVariant = image.variants.find((variant) => variant.density === 2)
+    if (!standardVariant) {
+      throw new Error(`Missing standard banner image for ${item.sourceId}`)
+    }
+
     generatedItems.push({
       sourceId: item.sourceId,
       jan: item.jan,
       productName: item.productName,
       productSlug: item.productSlug,
-      imagePath: `/banners/hobbysearch/${image.fileName}`,
+      imagePath: `/banners/hobbysearch/${standardVariant.fileName}`,
+      ...(highDensityVariant
+        ? {
+            imagePath2x: `/banners/hobbysearch/${highDensityVariant.fileName}`,
+          }
+        : {}),
       width: item.width,
       height: item.height,
       matchMethod: item.matchMethod,
