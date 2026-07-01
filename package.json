@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "prebuild": "tsx scripts/generate-search-index.ts",
+    "postbuild": "tsx scripts/include-sharp-runtime.ts",
     "predev": "tsx scripts/generate-search-index.ts",
     "update:hobbysearch-banner": "node scripts/update-hobbysearch-banner.mjs",
     "dev": "next dev",
