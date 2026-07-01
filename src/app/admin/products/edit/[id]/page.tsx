@@ -11,6 +11,7 @@ import { createLineIfNotExists } from "@/lib/firebase/lines"
 import { createManufacturerIfNotExists } from "@/lib/firebase/manufacturers"
 import { normalizeText } from "@/lib/utils"
 import { fetchAdminCatalogOptions } from "@/lib/api/admin-options-client"
+import { uploadAdminImage } from "@/lib/api/admin-image-upload"
 
 interface EditProductPageProps {
   params: { id: string }
@@ -20,6 +21,8 @@ interface EditProductPageProps {
 interface ImageItem {
   id: string
   url: string
+  galleryThumbnailUrl?: string
+  thumbnailUrl?: string
 }
 
 // Combobox component mejorado
@@ -320,6 +323,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       const imageItems: ImageItem[] = (prod.imageUrls || []).map((url, index) => ({
         id: `existing-${index}`,
         url,
+        galleryThumbnailUrl: prod.galleryThumbnailUrls?.[index],
       }))
       setProductImages(imageItems)
 
@@ -345,40 +349,34 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
     setUploadProgress(10)
     const fileArray = Array.from(files)
+    const shouldGenerateThumbnail = productImages.length === 0 && !thumbnailUrl
 
     try {
       const uploadPromises = fileArray.map(async (file, index) => {
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("isFirstImage", "false")
-
-        const response = await fetch("/api/upload-image", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ details: response.statusText }))
-          throw new Error(`Error al subir ${file.name}: ${errorData.details || errorData.error || response.statusText}`)
-        }
-
-        const result = await response.json()
+        const result = await uploadAdminImage(
+          file,
+          shouldGenerateThumbnail && index === 0,
+        )
         setUploadProgress(((index + 1) / fileArray.length) * 90)
 
         return {
           id: `new-${Date.now()}-${index}`,
           url: result.imageUrl,
+          galleryThumbnailUrl: result.galleryThumbnailUrl,
+          thumbnailUrl: result.thumbnailUrl,
         }
       })
 
       const newImages = await Promise.all(uploadPromises)
       setProductImages((prev) => [...prev, ...newImages])
+      const generatedThumbnail = newImages.find((image) => image.thumbnailUrl)?.thumbnailUrl
+      if (generatedThumbnail) setThumbnailUrl(generatedThumbnail)
       setUploadProgress(100)
 
       setTimeout(() => setUploadProgress(0), 1000)
     } catch (error) {
       console.error("Error subiendo imágenes:", error)
-      alert("Error subiendo algunas imágenes")
+      alert(error instanceof Error ? error.message : "Error subiendo algunas imágenes")
       setUploadProgress(0)
     }
 
@@ -393,21 +391,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     setUploadProgress(10)
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("isFirstImage", "true")
-
-      const response = await fetch("/api/upload-image", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ details: response.statusText }))
-        throw new Error(`Error al subir miniatura: ${errorData.details || errorData.error || response.statusText}`)
-      }
-
-      const result = await response.json()
+      const result = await uploadAdminImage(file, true)
       if (result.thumbnailUrl) {
         setThumbnailUrl(result.thumbnailUrl)
         setUploadProgress(100)
@@ -415,7 +399,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       }
     } catch (error) {
       console.error("Error subiendo miniatura:", error)
-      alert("Error subiendo miniatura")
+      alert(error instanceof Error ? error.message : "Error subiendo miniatura")
       setUploadProgress(0)
     }
 
@@ -456,6 +440,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         price: price ? Number.parseFloat(price) : 0,
         category: category || "figura",
         imageUrls: productImages.map((img) => img.url),
+        galleryThumbnailUrls: productImages.map(
+          (img) => img.galleryThumbnailUrl || img.url,
+        ),
       }
 
       // 🔥 PRESERVAR VISTAS EXISTENTES - CRÍTICO

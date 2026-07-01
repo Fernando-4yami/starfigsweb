@@ -70,6 +70,7 @@ export default function BatchUpload({ onUploadComplete, maxFiles = 10 }: BatchUp
 
       const response = await fetch("/api/batch-upload", {
         method: "POST",
+        headers: await getAdminAuthHeaders(),
         body: formData,
       })
 

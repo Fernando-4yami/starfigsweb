@@ -12,6 +12,7 @@ import { createLineIfNotExists } from "@/lib/firebase/lines"
 import { createManufacturerIfNotExists } from "@/lib/firebase/manufacturers"
 import { normalizeText } from "@/lib/utils"
 import { fetchAdminCatalogOptions } from "@/lib/api/admin-options-client"
+import { uploadAdminImage } from "@/lib/api/admin-image-upload"
 
 // Interfaz para un producto individual
 interface ProductForm {
@@ -462,21 +463,7 @@ export default function AddProductPage() {
     if (product.files.length > 0) {
       for (let i = 0; i < product.files.length; i++) {
         const file = product.files[i]
-        const formDataApi = new FormData()
-        formDataApi.append("file", file)
-        formDataApi.append("isFirstImage", (i === 0).toString())
-
-        const response = await fetch("/api/upload-image", {
-          method: "POST",
-          body: formDataApi,
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.details || `Error al subir ${file.name}: ${response.statusText}`)
-        }
-
-        const result = await response.json()
+        const result = await uploadAdminImage(file, i === 0)
         uploadedUrls.push(result.imageUrl)
         if (result.galleryThumbnailUrl) galleryThumbnailUrls.push(result.galleryThumbnailUrl)
         if (result.isFirstImage && result.thumbnailUrl) thumbnailUrl = result.thumbnailUrl
