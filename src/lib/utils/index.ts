@@ -29,23 +29,34 @@ export function normalizeForComparison(text: string): string {
 }
 
 // ✅ UTILIDADES DE FECHA CONSOLIDADAS
-export function getCurrentMonthDateRange() {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth()
+const PERU_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Lima",
+  year: "numeric",
+  month: "numeric",
+})
 
-  const start = new Date(year, month, 1, 0, 0, 0)
-  const end = new Date(year, month + 1, 0, 23, 59, 59)
+function getPeruYearAndMonth(referenceDate: Date) {
+  const parts = PERU_DATE_FORMATTER.formatToParts(referenceDate)
+  const year = Number(parts.find((part) => part.type === "year")?.value)
+  const month = Number(parts.find((part) => part.type === "month")?.value) - 1
 
-  return { start, end }
+  return { year, month }
 }
 
-export function getNextMonthStartDate() {
-  const now = new Date()
-  const year = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear()
-  const month = (now.getMonth() + 1) % 12
+export function getCurrentMonthDateRange(referenceDate = new Date()) {
+  const { year, month } = getPeruYearAndMonth(referenceDate)
 
-  return new Date(year, month, 1, 0, 0, 0)
+  // releaseDate se guarda como fecha calendario a medianoche UTC.
+  const start = new Date(Date.UTC(year, month, 1))
+  const end = new Date(Date.UTC(year, month + 1, 1) - 1)
+
+  return { start, end, year, monthIndex: month }
+}
+
+export function getNextMonthStartDate(referenceDate = new Date()) {
+  const { year, month } = getPeruYearAndMonth(referenceDate)
+
+  return new Date(Date.UTC(year, month + 1, 1))
 }
 
 export function getMonthName(monthIndex: number) {

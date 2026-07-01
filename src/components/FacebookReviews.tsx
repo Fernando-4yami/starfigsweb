@@ -85,7 +85,7 @@ export default function FacebookReviews() {
               id="facebook-reviews-title"
               className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-3xl"
             >
-              ¿Cómo nos califican nuestros clientes?
+              Experiencias de nuestros clientes
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">
               Las recomendaciones públicas compartidas en nuestra página de Facebook.

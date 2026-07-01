@@ -100,7 +100,7 @@ export default function HobbySearchBanner() {
     return (
       <section
         aria-label="Producto destacado"
-        className="mx-auto mb-14 max-w-[640px] px-4 pt-2"
+        className="mx-auto mb-8 max-w-[640px] px-4 pt-2"
       >
         <BannerImage item={hobbySearchBannerItems[0]} eager />
       </section>
@@ -113,7 +113,7 @@ export default function HobbySearchBanner() {
       hasTrack={false}
       options={carouselOptions}
       aria-label="Productos destacados"
-      className="hobbysearch-carousel mb-14 pt-2"
+      className="hobbysearch-carousel mb-8 pt-2"
     >
       <SplideTrack>
         {hobbySearchBannerItems.map((item, index) => (

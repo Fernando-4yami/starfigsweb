@@ -2,9 +2,8 @@ name: 🤖 Scraper Automático (Descripciones + GTIN)
 
 on:
   schedule:
-    # Corre cada 12 horas (3am y 3pm UTC = 10pm/10am Perú)
-    - cron: "0 3 */1 * *"
-    - cron: "0 15 */1 * *"
+    # 08:00 UTC = 03:00 en Perú (America/Lima)
+    - cron: "0 8 * * *"
   workflow_dispatch: # Permite ejecutar manualmente desde GitHub
 
 jobs:
