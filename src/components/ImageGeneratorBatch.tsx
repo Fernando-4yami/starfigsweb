@@ -8,7 +8,10 @@ import { db } from "@/lib/firebase/firebase"
 import { doc, getDoc } from "firebase/firestore"
 
 export interface ImageGeneratorBatchHandle {
-  generatePng: (version: 1 | 2 | 3) => Promise<string>
+  generatePng: (version: 1 | 2 | 3) => Promise<{
+    dataUrl: string
+    productName: string
+  }>
 }
 
 interface ImageGeneratorBatchProps {
@@ -20,6 +23,20 @@ interface ImageGeneratorBatchProps {
   onRemove: () => void
   productId?: string
   productSlug?: string
+}
+
+interface BatchVisualData {
+  name: string
+  price: number
+  brand: string | undefined
+  image: string
+  images: string[]
+}
+
+function waitForNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  })
 }
 
 /* ================= UTILIDADES ================= */
@@ -144,23 +161,40 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
   const [saveError, setSaveError] = useState<string | null>(null)
 
   // Fetch fresco desde Firestore sin caché
-  const fetchFreshData = async () => {
-    if (!productId) return
+  const fetchFreshData = async (): Promise<BatchVisualData | null> => {
+    if (!productId) return null
     setRefreshing(true)
     try {
       const docRef = doc(db, "products", productId)
       const docSnap = await getDoc(docRef)
       if (docSnap.exists()) {
         const data = docSnap.data()
-        const freshName = data.name ?? currentData.name
-        const freshPrice = data.price ?? currentData.price
-        setCurrentData((prev) => ({ ...prev, name: freshName, price: freshPrice }))
-        setTempName(freshName)
-        setTempPrice(String(freshPrice))
+        const hasFreshImages = Array.isArray(data.imageUrls)
+        const freshImages = hasFreshImages
+          ? data.imageUrls.filter((url: unknown): url is string => typeof url === "string")
+          : currentData.images
+        const freshData: BatchVisualData = {
+          name: typeof data.name === "string" ? data.name : currentData.name,
+          price: typeof data.price === "number" ? data.price : currentData.price,
+          brand: typeof data.brand === "string" ? data.brand : currentData.brand,
+          images: freshImages,
+          image:
+            freshImages[0] ||
+            (typeof data.thumbnailUrl === "string" && data.thumbnailUrl) ||
+            currentData.image ||
+            "/placeholder.png",
+        }
+
+        setCurrentData(freshData)
+        setTempName(freshData.name)
+        setTempPrice(String(freshData.price))
         setPreviews({})
+        return freshData
       }
+      return null
     } catch (e) {
       console.error("Error actualizando desde Firebase:", e)
+      return null
     } finally {
       setRefreshing(false)
     }
@@ -189,6 +223,10 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
   const [editingPrice, setEditingPrice] = useState(false)
   const [tempName, setTempName] = useState(productName)
   const [tempPrice, setTempPrice] = useState(String(productPrice))
+
+  useEffect(() => {
+    void fetchFreshData()
+  }, [productId])
 
   const { character, details } = extractCharacterName(currentData.name)
   const brandLogo = getBrandLogo(currentData.brand)
@@ -280,7 +318,8 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
     setGenerating(version)
 
     try {
-      await new Promise((r) => setTimeout(r, 100))
+      const freshData = await fetchFreshData()
+      await waitForNextPaint()
 
       const element = document.getElementById(`${componentId}-${version}`)
       if (!element) throw new Error("Template no encontrado")
@@ -320,7 +359,7 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
 
       const link = document.createElement("a")
       const versionName = version === 1 ? "single" : version === 2 ? "triple-123" : "triple-234"
-      link.download = `${productName.substring(0, 30)}-v${version}-${versionName}.png`
+      link.download = `${(freshData?.name || currentData.name).substring(0, 30)}-v${version}-${versionName}.png`
       link.href = dataUrl
       link.click()
     } catch (e) {
@@ -334,7 +373,10 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
   /* ================= GENERAR PNG PARA ZIP (desde el padre) ================= */
 
   useImperativeHandle(ref, () => ({
-    generatePng: async (version: 1 | 2 | 3): Promise<string> => {
+    generatePng: async (version: 1 | 2 | 3) => {
+      const freshData = await fetchFreshData()
+      await waitForNextPaint()
+
       const element = document.getElementById(`${componentId}-${version}`)
       if (!element) throw new Error("Template no encontrado")
 
@@ -360,7 +402,10 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
         backgroundColor: CATALOG_PALETTE.canvas,
       })
 
-      return dataUrl
+      return {
+        dataUrl,
+        productName: freshData?.name || currentData.name,
+      }
     },
   }))
 
@@ -509,7 +554,7 @@ const ImageGeneratorBatch = forwardRef<ImageGeneratorBatchHandle, ImageGenerator
           disabled={refreshing || saving}
           className="col-span-2 px-2 py-1 bg-amber-500 text-white rounded text-[11px] font-bold hover:bg-amber-600 disabled:opacity-50"
         >
-          {refreshing ? "🔄 Actualizando..." : "🔄 Actualizar precios"}
+          {refreshing ? "🔄 Actualizando..." : "🔄 Actualizar datos"}
         </button>
       </div>
 

@@ -547,8 +547,11 @@ function BatchGeneratorModal() {
       try {
         const handle = batchRefs.current[product.id]
         if (handle) {
-          const dataUrl = await handle.generatePng(version)
-          results.push({ name: product.name, dataUrl })
+          const generated = await handle.generatePng(version)
+          results.push({
+            name: generated.productName,
+            dataUrl: generated.dataUrl,
+          })
         }
       } catch (err) {
         console.error(`Error generando ${product.name}:`, err)
