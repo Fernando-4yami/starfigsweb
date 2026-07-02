@@ -32,7 +32,7 @@ export default function LinesClient({ lineName, products }: LinesClientProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-[1536px] px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-8">
           <Link href="/" className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -91,7 +91,7 @@ export default function LinesClient({ lineName, products }: LinesClientProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-7">
             {sortedProducts.map((product, index) => (
               <ProductCard key={product.id} product={product} priority={index < 2} />
             ))}

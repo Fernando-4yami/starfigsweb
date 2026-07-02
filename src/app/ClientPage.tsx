@@ -28,7 +28,7 @@ const SectionSkeleton = ({ title, itemCount = 6 }: { title: string; itemCount?: 
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-2 text-center">{title}</h2>
         <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto "></div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-6">{skeletonItems}</div>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-7">{skeletonItems}</div>
     </section>
   )
 }
@@ -72,7 +72,7 @@ const ProductSectionWithLoadMore = ({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-7">
             {productCards}
           </div>
 
@@ -306,7 +306,7 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <HobbySearchBanner />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="mx-auto max-w-[1536px] px-4 md:px-6">
         {data.loading ? (
           <SectionSkeleton title="Nuevos Lanzamientos" itemCount={18} />
         ) : (
@@ -342,7 +342,7 @@ export default function HomePage({ initialProducts = [] }: { initialProducts?: P
         )}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="mx-auto max-w-[1536px] px-4 md:px-6">
         <HowItWorks />
       </div>
 

@@ -13,14 +13,7 @@ interface SearchPageClientProps {
   initialPage: number
 }
 
-const getItemsPerPage = () => {
-  if (typeof window === "undefined") return 20
-  const width = window.innerWidth
-  if (width >= 1280) return 20
-  if (width >= 768) return 16
-  if (width >= 640) return 12
-  return 8
-}
+const ITEMS_PER_PAGE = 12
 
 export default function SearchPageClient({ initialQuery, initialPage }: SearchPageClientProps) {
   const router = useRouter()
@@ -32,26 +25,12 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
   const [loading, setLoading] = useState(Boolean(initialQuery.trim()))
   const [searchError, setSearchError] = useState(false)
   const [retryNonce, setRetryNonce] = useState(0)
-  const [itemsPerPage, setItemsPerPage] = useState(20)
-  const [viewportReady, setViewportReady] = useState(false)
   const [pageTransitioning, setPageTransitioning] = useState(false)
 
   const resultsRef = useRef<HTMLDivElement>(null)
   const requestIdRef = useRef(0)
 
   useEffect(() => {
-    const updateItemsPerPage = () => {
-      setItemsPerPage(getItemsPerPage())
-      setViewportReady(true)
-    }
-    updateItemsPerPage()
-    window.addEventListener("resize", updateItemsPerPage)
-    return () => window.removeEventListener("resize", updateItemsPerPage)
-  }, [])
-
-  useEffect(() => {
-    if (!viewportReady) return
-
     const controller = new AbortController()
     const requestId = ++requestIdRef.current
 
@@ -73,7 +52,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
         const params = new URLSearchParams({
           q: trimmedQuery,
           page: currentPage.toString(),
-          limit: itemsPerPage.toString(),
+          limit: ITEMS_PER_PAGE.toString(),
         })
         const response = await fetch(`/api/search?${params.toString()}`, {
           signal: controller.signal,
@@ -110,7 +89,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
 
     performSearch()
     return () => controller.abort()
-  }, [currentPage, itemsPerPage, query, retryNonce, router, viewportReady])
+  }, [currentPage, query, retryNonce, router])
 
   useEffect(() => {
     const urlQuery = searchParams.get("q") || ""
@@ -120,10 +99,10 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
     setCurrentPage(urlPage)
   }, [searchParams])
 
-  const totalPages = Math.ceil(totalProducts / itemsPerPage)
+  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE)
 
   const paginationInfo = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
     const endIndex = Math.min(startIndex + products.length, totalProducts)
     return {
       startIndex: totalProducts === 0 ? 0 : startIndex + 1,
@@ -132,7 +111,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
       currentPage,
       totalPages,
     }
-  }, [currentPage, itemsPerPage, products.length, totalPages, totalProducts])
+  }, [currentPage, products.length, totalPages, totalProducts])
 
   const handlePageChange = (newPage: number) => {
     setPageTransitioning(true)
@@ -159,7 +138,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-[1536px] px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
           <Link href="/" className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -272,7 +251,7 @@ export default function SearchPageClient({ initialQuery, initialPage }: SearchPa
               </div>
             </div>
 
-            <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 transition-opacity duration-200 ${
+            <div className={`mb-8 grid grid-cols-3 gap-2 transition-opacity duration-200 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6 ${
               pageTransitioning ? "opacity-0" : "opacity-100"
             }`}>
               {products.map((product, index) => (

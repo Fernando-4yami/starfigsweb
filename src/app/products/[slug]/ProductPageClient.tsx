@@ -22,7 +22,7 @@ const InfiniteRelatedProducts = dynamic(
     ssr: false,
     loading: () => (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3" />
@@ -114,7 +114,7 @@ function DeferredRelatedProducts({ product }: { product: SerializedProduct }) {
       {isVisible ? (
         <InfiniteRelatedProducts currentProduct={product} initialBatchSize={8} loadMoreBatchSize={8} />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6" aria-hidden="true">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="animate-pulse">
               <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3" />

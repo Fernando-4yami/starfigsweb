@@ -185,7 +185,7 @@ export default function StrictRelatedProducts({ currentProduct, maxProducts = 8 
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="bg-gray-200 aspect-square mb-3"></div>
@@ -206,7 +206,7 @@ export default function StrictRelatedProducts({ currentProduct, maxProducts = 8 
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
       {relatedProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

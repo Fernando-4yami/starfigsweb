@@ -299,7 +299,7 @@ export default function Navbar() {
           isNavbarVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1536px] px-4 md:px-6">
           {/* Fila 1: Logo + Buscador(desktop) + Botones */}
           <div className="flex items-center gap-3 h-12 md:h-14">
             {/* Logo */}

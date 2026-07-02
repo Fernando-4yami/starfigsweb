@@ -252,7 +252,7 @@ export default function LazyRelatedProducts({
   if (loading) {
     return (
       <div ref={sectionRef} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-gray-100 p-4 animate-pulse">
               <div className="aspect-square bg-gray-200 rounded-lg mb-4" />
@@ -280,7 +280,7 @@ export default function LazyRelatedProducts({
 
   return (
     <div ref={sectionRef} className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
         {productsToShow.map((product, index) => {
           const isLoaded = loadedProducts.has(index)
           return (

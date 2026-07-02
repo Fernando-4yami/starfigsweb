@@ -12,7 +12,7 @@ import { hobbySearchBannerItems } from "@/lib/hobbysearch/banner"
 
 const carouselOptions: Options = {
   type: "loop",
-  fixedWidth: 640,
+  fixedWidth: 560,
   focus: "center",
   gap: "3.2rem",
   perMove: 1,
@@ -100,7 +100,7 @@ export default function HobbySearchBanner() {
     return (
       <section
         aria-label="Producto destacado"
-        className="mx-auto mb-8 max-w-[640px] px-4 pt-2"
+        className="mx-auto mb-8 max-w-[560px] px-4 pt-2"
       >
         <BannerImage item={hobbySearchBannerItems[0]} eager />
       </section>
@@ -113,7 +113,7 @@ export default function HobbySearchBanner() {
       hasTrack={false}
       options={carouselOptions}
       aria-label="Productos destacados"
-      className="hobbysearch-carousel mb-8 pt-2"
+      className="hobbysearch-carousel mx-auto mb-8 max-w-[1536px] px-4 pt-2 md:px-6"
     >
       <SplideTrack>
         {hobbySearchBannerItems.map((item, index) => (
@@ -123,7 +123,7 @@ export default function HobbySearchBanner() {
         ))}
       </SplideTrack>
 
-      <div className="mx-auto mt-3 grid min-h-10 max-w-7xl grid-cols-[auto_minmax(2rem,1fr)_auto] items-center gap-3 px-4 md:px-6">
+      <div className="mx-auto mt-3 grid min-h-10 grid-cols-[auto_minmax(2rem,1fr)_auto] items-center gap-3">
         <div className="splide__arrows flex items-center gap-2">
           <button
             type="button"

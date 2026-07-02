@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     const page = parseInteger(request.nextUrl.searchParams.get("page"), 1, 1, 500)
-    const limit = parseInteger(request.nextUrl.searchParams.get("limit"), 20, 1, 40)
+    const limit = parseInteger(request.nextUrl.searchParams.get("limit"), 12, 1, 40)
     const result = await searchCatalog(query, page, limit, indexOrigin)
     return NextResponse.json(result, { headers: CACHE_HEADERS })
   } catch (error) {

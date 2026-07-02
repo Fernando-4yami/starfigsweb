@@ -36,7 +36,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto max-w-[1536px] px-4 py-8 sm:px-6 lg:px-8">
           <div className="animate-pulse">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
             <div className="flex gap-8">
@@ -44,7 +44,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
                 <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
-              <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+              <div className="grid flex-1 grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 xl:grid-cols-6">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
                     <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3"></div>
@@ -62,7 +62,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
 
   return (
     <div className={`min-h-screen ${config.colors.gradient} dark:bg-gray-900`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-[1536px] px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-8">
           <Link href="/" className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -151,7 +151,7 @@ export default function CategoryPage({ config }: CategoryPageProps) {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+                <div className="mb-8 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 xl:grid-cols-6">
                   {paginatedProducts.map((product, index) => (
                     <ProductCard key={product.id} product={product} priority={index < 2} />
                   ))}

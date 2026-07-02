@@ -50,6 +50,8 @@ function RankingSection({ products }: RankingSectionProps) {
     return "border-blue-400 dark:border-blue-500"
   }
 
+  const rankedProducts = products.slice(0, 10)
+
   return (
     <section className="mb-16">
       {/* Encabezado con icono */}
@@ -66,52 +68,55 @@ function RankingSection({ products }: RankingSectionProps) {
       <div className="relative">
         {/* Vista móvil - Mejorada */}
         <div className="md:hidden">
-          <div className="flex overflow-x-auto gap-4 pb-4 px-4 scroll-smooth scrollbar-hide touch-pan-x">
-            {products.map((product, i) => (
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+            {rankedProducts.map((product, i) => (
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
                 prefetch={false}
-                className="relative flex-shrink-0 cursor-pointer group"
+                className="group relative min-w-0 cursor-pointer"
                 title={product.name}
               >
                 {/* Card container */}
-                <div className={`relative w-40 bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden
-                              border-2 ${getMedalBorder(i)} group-hover:scale-105`}>
+                <div className={`relative overflow-hidden border bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800 ${getMedalBorder(i)}`}>
                   
                   {/* Número de ranking con diseño mejorado */}
-                  <div className="absolute top-2 left-2 z-20">
-                    <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getMedalColor(i)} 
-                                  flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-900`}>
-                      <span className="text-white font-bold text-sm">#{i + 1}</span>
+                  <div className="absolute left-1 top-1 z-20">
+                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border border-white bg-gradient-to-br shadow ${getMedalColor(i)} dark:border-gray-900`}>
+                      <span className="text-[9px] font-bold text-white">#{i + 1}</span>
                     </div>
                   </div>
 
                   {/* Top 3 badge */}
                   {i < 3 && (
-                    <div className="absolute top-2 right-2 z-20">
-                      <Star className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-lg" />
+                    <div className="absolute right-1 top-1 z-20">
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400 drop-shadow" />
                     </div>
                   )}
 
                   {/* Imagen con aspect ratio fijo */}
-                  <div className="w-full h-40 bg-white dark:bg-gray-900 p-2">
-                    <div className="relative w-full h-full">
+                  <div
+                    className="w-full bg-white p-1 dark:bg-gray-900"
+                    style={{ aspectRatio: "1 / 1" }}
+                  >
+                    <div className="relative h-full w-full">
                       <Image
                         src={product.thumbnailUrl || product.imageUrls?.[0] || "/placeholder.svg"}
                         alt={product.name}
                         fill
                         className="object-contain"
                         loading="lazy"
-                        sizes="160px"
+                        sizes="20vw"
                       />
                     </div>
                   </div>
 
                   {/* Nombre del producto */}
-                  <div className="p-3 bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-900/50">
-                    <p className="text-center text-gray-900 dark:text-gray-100 font-semibold text-xs 
-                                leading-tight line-clamp-2 min-h-[32px]">
+                  <div className="bg-gradient-to-b from-transparent to-gray-50 p-1 dark:to-gray-900/50">
+                    <p
+                      className="line-clamp-2 min-h-[24px] text-center text-[9px] font-medium leading-3 text-gray-900 dark:text-gray-100"
+                      style={{ overflowWrap: "anywhere" }}
+                    >
                       {product.name}
                     </p>
                   </div>
@@ -123,7 +128,7 @@ function RankingSection({ products }: RankingSectionProps) {
 
         {/* Vista desktop - Mejorada */}
         <div className="hidden md:grid md:grid-cols-5 lg:grid-cols-10 gap-4 justify-items-center">
-          {products.map((product, i) => (
+          {rankedProducts.map((product, i) => (
             <Link
               key={product.id}
               href={`/products/${product.slug}`}
@@ -177,16 +182,6 @@ function RankingSection({ products }: RankingSectionProps) {
         </div>
       </div>
 
-      {/* Estilos para ocultar scrollbar */}
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </section>
   )
 }

@@ -60,21 +60,21 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         <div className="relative w-full h-0 pb-[100%] bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {isOldRelease && (
             <span
-              className="absolute top-2 left-2 bg-gray-800/80 dark:bg-gray-900/80 text-white text-xs font-bold px-2 py-1 shadow-md z-10">
+              className="absolute left-1.5 top-1.5 z-10 bg-gray-800/80 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-md dark:bg-gray-900/80 sm:left-2 sm:top-2 sm:px-2 sm:py-1 sm:text-xs">
               Agotado
             </span>
           )}
 
           {showReleaseTag && (
             <span
-              className={`absolute bottom-2 left-2 ${tagColorClass} text-white text-xs font-semibold px-2 py-1 shadow-md z-10`}
+              className={`absolute bottom-1.5 left-1.5 z-10 ${tagColorClass} px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-md sm:bottom-2 sm:left-2 sm:px-2 sm:py-1 sm:text-xs`}
             >
               {releaseMonthYear}
             </span>
           )}
 
           {hasDiscount && (
-            <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 shadow-md z-10">
+            <span className="absolute right-1.5 top-1.5 z-10 bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-md sm:right-2 sm:top-2 sm:px-2 sm:py-1 sm:text-xs">
               -{discountPercentage}%
             </span>
           )}
@@ -85,31 +85,31 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             fill
             priority={priority}
             className="object-contain transition-transform duration-300 bg-white dark:bg-gray-800"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, (max-width: 1536px) 17vw, 210px"
           />
         </div>
 
         {/* Info */}
-        <div className="p-4 flex flex-col gap-1">
-          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+        <div className="flex min-h-[82px] flex-col gap-0.5 p-2 sm:min-h-[108px] sm:gap-1 sm:p-4">
+          <h3 className="line-clamp-2 break-words text-xs font-semibold text-gray-800 transition-colors group-hover:text-amber-600 dark:text-gray-100 dark:group-hover:text-amber-400 sm:text-sm">
             {product.name}
           </h3>
 
           {product.heightCm && (
-            <span className="text-xs text-gray-700 dark:text-gray-300">
+            <span className="text-[10px] text-gray-700 dark:text-gray-300 sm:text-xs">
               Altura: <strong>{product.heightCm} cm</strong>
             </span>
           )}
 
           {product.price > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="mt-auto flex flex-col items-start gap-0 sm:flex-row sm:items-center sm:gap-2">
               {hasDiscount ? (
                 <>
-                  <span className="text-gray-500 dark:text-gray-400 line-through text-sm">S/. {product.price.toFixed(2)}</span>
-                  <span className="text-red-600 dark:text-red-400 font-bold text-base">S/. {finalPrice.toFixed(2)}</span>
+                  <span className="text-[10px] text-gray-500 line-through dark:text-gray-400 sm:text-sm">S/. {product.price.toFixed(2)}</span>
+                  <span className="text-xs font-bold text-red-600 dark:text-red-400 sm:text-base">S/. {finalPrice.toFixed(2)}</span>
                 </>
               ) : (
-                <span className="text-orange-600 dark:text-orange-400 font-bold text-base">S/. {product.price.toFixed(2)}</span>
+                <span className="text-xs font-bold text-orange-600 dark:text-orange-400 sm:text-base">S/. {product.price.toFixed(2)}</span>
               )}
             </div>
           )}

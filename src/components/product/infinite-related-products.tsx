@@ -309,7 +309,7 @@ export default function InfiniteRelatedProducts({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: initialBatchSize }).map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="bg-gray-200 dark:bg-gray-700 aspect-square mb-3"></div>
@@ -334,7 +334,7 @@ export default function InfiniteRelatedProducts({
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6">
         {displayedProducts.map((product, index) => (
           <div
             key={product.id}
